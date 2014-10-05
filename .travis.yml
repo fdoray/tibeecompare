@@ -1,0 +1,55 @@
+language: cpp
+
+compiler:
+  - gcc
+
+env:
+  - BUILD_MODE=debug
+  - BUILD_MODE=release
+
+services:
+  - mongodb
+
+before_install:
+  # support C++11
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+  # latest Boost
+  - sudo add-apt-repository -y ppa:boost-latest/ppa
+
+  # stuff needed by tigerbeetle
+  - sudo add-apt-repository -y ppa:chris-lea/zeromq
+  - sudo add-apt-repository -y ppa:simon-marchi/myppa
+
+  # update everything now
+  - sudo apt-get update -qq
+
+install:
+  # stuff needed by Babeltrace
+  - sudo apt-get install -qq libtool
+  - sudo apt-get install -qq autoconf
+  - sudo apt-get install -qq libglib2.0-dev
+  - sudo apt-get install -qq bison
+  - sudo apt-get install -qq flex
+  - sudo apt-get install -qq uuid-dev
+  - sudo apt-get install -qq libpopt-dev
+
+  # stuff needed by tigerbeetle
+  - sudo apt-get install --force-yes -qq g++-4.8
+  - sudo apt-get install -qq pkg-config
+  - sudo apt-get install -qq libcppunit-dev
+  - sudo apt-get install -qq boost1.55
+  - sudo apt-get install -qq libzmq3-dev
+  - sudo apt-get install -qq libyajl-dev
+
+  # mongodb cxx driver
+  - git clone https://github.com/mongodb/mongo-cxx-driver.git
+  - cd mongo-cxx-driver
+  - sudo scons --prefix=/usr/local install
+  - cd ..
+
+script:
+  - export CXX=g++-4.8
+  - ./bootstrap.sh
+  - source ./setenv.sh
+  - scons mode=$BUILD_MODE
