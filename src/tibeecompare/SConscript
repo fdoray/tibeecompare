@@ -1,0 +1,28 @@
+
+import os.path
+
+
+Import(['env',])
+
+target = 'tibeecompare'
+
+libs = [
+    'boost_program_options',
+    'boost_filesystem',
+    'boost_system',
+    'tigerbeetle',
+]
+
+sources = [
+    'main.cpp',
+    'TibeeCompare.cpp',
+]
+
+app_env = env.Clone()
+
+app_env.Append(LIBS=libs)
+app_env.ParseConfig('pkg-config --cflags glib-2.0')
+
+app = app_env.Program(target=target, source=sources)
+
+Return('app')

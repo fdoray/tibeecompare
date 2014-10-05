@@ -1,0 +1,3 @@
+[submodule "contrib/tigerbeetle"]
+	path = contrib/tigerbeetle
+	url = https://github.com/fdoray/tigerbeetle.git
