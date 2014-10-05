@@ -15,6 +15,7 @@ if build_mode not in ['debug', 'release']:
 
 # C++ flags and defines
 ccflags = [
+    '-pthread',
     '-std=c++11',
     '-Wall',
     '-pedantic-errors',
@@ -48,6 +49,27 @@ if 'TIGERBEETLE_CPPPATH' in os.environ:
 
 if 'TIGERBEETLE_LIBPATH' in os.environ:
     root_env.Append(LIBPATH=[os.environ['TIGERBEETLE_LIBPATH']])
+
+if 'LIBDELOREAN_CPPPATH' in os.environ:
+    root_env.Append(CPPPATH=[os.environ['LIBDELOREAN_CPPPATH']])
+
+if 'LIBDELOREAN_LIBPATH' in os.environ:
+    root_env.Append(LIBPATH=[os.environ['LIBDELOREAN_LIBPATH']])
+
+if 'BABELTRACE_CPPPATH' in os.environ:
+    root_env.Append(CPPPATH=[os.environ['BABELTRACE_CPPPATH']])
+
+if 'BABELTRACE_LIBPATH' in os.environ:
+    root_env.Append(LIBPATH=[os.environ['BABELTRACE_LIBPATH']])
+
+if 'BABELTRACE_CTF_LIBPATH' in os.environ:
+    root_env.Append(LIBPATH=[os.environ['BABELTRACE_CTF_LIBPATH']])
+
+if 'LEVELDB_INCLUDEPATH' in os.environ:
+    root_env.Append(CPPPATH=[os.environ['LEVELDB_INCLUDEPATH']])
+
+if 'LEVELDB_LIBPATH' in os.environ:
+    root_env.Append(LIBPATH=[os.environ['LEVELDB_LIBPATH']])
 
 if 'LD_LIBRARY_PATH' in os.environ:
     root_env['ENV']['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH']

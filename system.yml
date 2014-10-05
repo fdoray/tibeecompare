@@ -1,0 +1,11 @@
+blocks:
+  - trace
+  - execution-builder
+  - linux-status-metrics
+  - linux-perf-cpu-metrics
+  - current-state
+  - system-builder:
+      exec: apt-get
+  - linux-sched-state
+  - critical
+  - execution-db

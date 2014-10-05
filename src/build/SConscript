@@ -2,20 +2,29 @@
 import os.path
 
 
-Import(['env',])
+Import(['env', 'tibeecomparelib'])
 
-target = 'tibeecompare'
+target = 'tibeebuild'
 
 libs = [
+    tibeecomparelib,
+    'delorean',
+    'mongoclient',
+    'tigerbeetle',
     'boost_program_options',
     'boost_filesystem',
+    'boost_thread',
     'boost_system',
-    'tigerbeetle',
+    'boost_regex',
+    'yaml-cpp',
+    'leveldb',
 ]
 
 sources = [
+    'BlockLoader.cpp',
+    'Configuration.cpp',
     'main.cpp',
-    'TibeeCompare.cpp',
+    'TibeeBuild.cpp',
 ]
 
 app_env = env.Clone()

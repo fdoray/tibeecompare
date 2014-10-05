@@ -15,28 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEECOMPARE_EX_INVALIDARGUMENT_HPP
-#define _TIBEECOMPARE_EX_INVALIDARGUMENT_HPP
+#ifndef _TIBEE_BUILD_BLOCKLOADER_HPP
+#define _TIBEE_BUILD_BLOCKLOADER_HPP
 
+#include <memory>
 #include <string>
-#include <stdexcept>
 
-namespace tibeecompare
+#include "block/BlockInterface.hpp"
+
+namespace tibee
 {
-namespace ex
+namespace build
 {
 
-class InvalidArgument :
-    public std::runtime_error
-{
-public:
-    InvalidArgument(const std::string& err) :
-        std::runtime_error {err}
-    {
-    }
-};
+block::BlockInterface::UP LoadBlock(const std::string& name);
 
-}
-}
+}  // namespace build
+}  // namespace tibee
 
-#endif // _TIBEECOMPARE_EX_INVALIDARGUMENT_HPP
+#endif // _TIBEE_BUILD_BLOCKLOADER_HPP

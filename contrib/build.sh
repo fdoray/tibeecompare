@@ -15,3 +15,8 @@ pushd tigerbeetle
 source setenv.sh
 scons
 popd
+
+# build leveldb
+pushd leveldb
+make
+popd

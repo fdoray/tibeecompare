@@ -1,3 +1,6 @@
 [submodule "contrib/tigerbeetle"]
 	path = contrib/tigerbeetle
 	url = https://github.com/fdoray/tigerbeetle.git
+[submodule "contrib/leveldb"]
+	path = contrib/leveldb
+	url = https://github.com/google/leveldb.git

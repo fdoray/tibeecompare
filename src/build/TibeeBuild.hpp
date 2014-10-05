@@ -15,26 +15,51 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEECOMPARE_ARGUMENTS_HPP
-#define _TIBEECOMPARE_ARGUMENTS_HPP
+#ifndef _TIBEE_BUILD_TIBEEBUILD_HPP
+#define _TIBEE_BUILD_TIBEEBUILD_HPP
 
-#include <vector>
+#include <boost/filesystem/path.hpp>
 #include <string>
+#include <vector>
 
-namespace tibeecompare
+#include "build/Arguments.hpp"
+
+namespace tibee
+{
+namespace build
 {
 
 /**
- * Program arguments.
+ * Tibee Build.
  *
  * @author Francois Doray
  */
-struct Arguments
+class TibeeBuild
 {
-    std::vector<std::string> traces;
-    bool verbose;
+public:
+    /**
+     * Instanciates a TibeeBuild program.
+     *
+     * @param args Program arguments
+     */
+    TibeeBuild(const Arguments& args);
+
+    /**
+     * Runs the builder.
+     *
+     * @returns True if everything went fine
+     */
+    bool run();
+
+private:
+    void validateSaveArguments(const Arguments& args);
+
+    boost::filesystem::path _configuration;
+    std::vector<boost::filesystem::path> _traces;
+    bool _verbose;
 };
 
-}  // namespace tibeecompare
+}  // namespace build
+}  // namespace tibee
 
-#endif // _TIBEECOMPARE_ARGUMENTS_HPP
+#endif // _TIBEE_BUILD_TIBEEBUILD_HPP

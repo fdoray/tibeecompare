@@ -7,7 +7,32 @@ env = root_env.Clone()
 
 env.Append(CPPPATH=['#/src'])
 
-tibeecompare = SConscript(os.path.join('tibeecompare', 'SConscript'),
-                          exports=['env'])
+# Generate a static library.
+base = SConscript(os.path.join('base', 'SConscript'), exports=['env'])
+execution = SConscript(os.path.join('execution', 'SConscript'), exports=['env'])
+mq = SConscript(os.path.join('mq', 'SConscript'), exports=['env'])
+quark = SConscript(os.path.join('quark', 'SConscript'), exports=['env'])
 
-Return(['tibeecompare',])
+subs = [
+    ('base', base),
+    ('execution', execution),
+    ('mq', mq),
+    ('quark', quark),
+]
+
+sources = []
+for directory, files in subs:
+    sources += [os.path.join(directory, f) for f in files]
+
+lib_env = env.Clone()
+lib_env.ParseConfig('pkg-config --cflags glib-2.0')
+
+tibeecomparelib = lib_env.StaticLibrary(target='tibeecomparelib', source=sources)
+
+# Generate the executables.
+build = SConscript(os.path.join('build', 'SConscript'),
+                   exports=['env', 'tibeecomparelib'])
+test = SConscript(os.path.join('test', 'SConscript'),
+                  exports=['env', 'tibeecomparelib'])
+
+Return(['build',])

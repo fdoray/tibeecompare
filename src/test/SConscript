@@ -1,0 +1,52 @@
+import os
+
+Import('env', 'tibeecomparelib')
+
+target = 'unittests'
+
+app_env = env.Clone()
+
+sources_unittests = [
+    'execution/StackItem_Unittest.cpp',
+    'quark/DiskQuarkDatabase_Unittest.cpp',
+]
+
+sources_contrib = [
+    'gmock/gtest/src/gtest-all.cc',
+    'gmock/src/gmock-all.cc',
+    'gmock/src/gmock_main.cc',
+]
+
+subs = [
+    ('..', sources_unittests),
+    ('../../contrib/tigerbeetle/contrib', sources_contrib),
+]
+
+sources = []
+for directory, files in subs:
+    sources += [os.path.join(directory, f) for f in files]
+
+libs = [
+    tibeecomparelib,
+    'mongoclient',
+    'tigerbeetle',
+    'boost_program_options',
+    'boost_filesystem',
+    'boost_thread',
+    'boost_system',
+    'boost_regex',
+    'leveldb',
+]
+
+app_env.Prepend(LIBS=libs)
+app_env.Append(LIBS=['pthread'])
+app_env.Append(CPPFLAGS=['-pthread'])
+app_env.Append(CPPPATH=['#/contrib/tigerbeetle/contrib/gmock/include',
+                        '#/contrib/tigerbeetle/contrib/gmock',
+                        '#/contrib/tigerbeetle/contrib/gmock/gtest/include',
+                        '#/contrib/tigerbeetle/contrib/gmock/gtest'])
+app_env.ParseConfig('pkg-config --cflags glib-2.0')
+
+app = app_env.Program(target=target, source=sources)
+
+Return(['app'])

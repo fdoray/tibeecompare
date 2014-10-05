@@ -11,11 +11,19 @@ services:
   - mongodb
 
 before_install:
+  # R
+  - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
+  - chmod 755 ./travis-tool.sh
+  - ./travis-tool.sh bootstrap
+
   # support C++11
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 
   # latest Boost
   - sudo add-apt-repository -y ppa:boost-latest/ppa
+
+  # latest 0MQ
+  - sudo add-apt-repository -y ppa:chris-lea/zeromq
 
   # stuff needed by tigerbeetle
   - sudo add-apt-repository -y ppa:chris-lea/zeromq
@@ -25,6 +33,9 @@ before_install:
   - sudo apt-get update -qq
 
 install:
+  # R
+  - ./travis-tool.sh install_r Rcpp RInside
+
   # stuff needed by Babeltrace
   - sudo apt-get install -qq libtool
   - sudo apt-get install -qq autoconf
@@ -39,17 +50,32 @@ install:
   - sudo apt-get install -qq pkg-config
   - sudo apt-get install -qq libcppunit-dev
   - sudo apt-get install -qq boost1.55
+  - sudo apt-get install -qq libboost1.55-dev
   - sudo apt-get install -qq libzmq3-dev
-  - sudo apt-get install -qq libyajl-dev
+
+  # yaml-cpp
+  - wget http://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz
+  - tar -xf yaml-cpp-0.5.1.tar.gz
+  - cd yaml-cpp-0.5.1
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - sudo make install
+  - cd ../..
 
   # mongodb cxx driver
   - git clone https://github.com/mongodb/mongo-cxx-driver.git
   - cd mongo-cxx-driver
-  - sudo scons --prefix=/usr/local install
+  - sudo scons --prefix=/usr/local install --cxx=g++-4.8 --cc=gcc --c++11=on
   - cd ..
+
+  # create a history directory for the tests
+  - mkdir history
 
 script:
   - export CXX=g++-4.8
   - ./bootstrap.sh
   - source ./setenv.sh
   - scons mode=$BUILD_MODE
+  - ./src/test/unittests

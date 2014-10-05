@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <boost/program_options.hpp>
 #include <base/print.hpp>
+#include <iostream>
+#include <mongo/client/dbclient.h>
 
 #include "Arguments.hpp"
-#include "TibeeCompare.hpp"
-#include "ex/InvalidArgument.hpp"
-
+#include "TibeeBuild.hpp"
+#include "build/ex/InvalidArgument.hpp"
 
 using tibee::base::tberror;
 using tibee::base::tbendl;
@@ -39,7 +39,7 @@ namespace
  *
  * @returns    0 to continue, 1 if there's a command line error
  */
-int parseOptions(int argc, char* argv[], tibeecompare::Arguments& args)
+int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
 {
     namespace bpo = boost::program_options;
 
@@ -47,6 +47,7 @@ int parseOptions(int argc, char* argv[], tibeecompare::Arguments& args)
 
     desc.add_options()
         ("help,h", "help")
+        ("configuration,c", bpo::value<std::string>())
         ("trace,t", bpo::value<std::vector<std::string>>())
         ("verbose,v", bpo::bool_switch()->default_value(false))
     ;
@@ -69,9 +70,10 @@ int parseOptions(int argc, char* argv[], tibeecompare::Arguments& args)
             std::endl <<
             "options:" << std::endl <<
             std::endl <<
-            "  -h, --help                  print this help message" << std::endl <<
-            "  -a                          path of the trace" << std::endl <<
-            "  -v, --verbose               verbose" << std::endl;
+            "  -h, --help          print this help message" << std::endl <<
+            "  -c, --configuration configuration file" << std::endl <<
+            "  -t, --trace         path(s) of the trace(s)" << std::endl <<
+            "  -v, --verbose       verbose" << std::endl;
 
         return -1;
     }
@@ -82,6 +84,13 @@ int parseOptions(int argc, char* argv[], tibeecompare::Arguments& args)
         tberror() << "command line error: " << ex.what() << tbendl();
         return 1;
     }
+
+    // configuration
+    if (vm["configuration"].empty()) {
+        tberror() << "no configuration file specified" << tbendl();
+        return 1;
+    }
+    args.configuration = vm["configuration"].as<std::string>();
 
     // trace
     if (vm["trace"].empty()) {
@@ -100,7 +109,7 @@ int parseOptions(int argc, char* argv[], tibeecompare::Arguments& args)
 
 int main(int argc, char* argv[])
 {
-    tibeecompare::Arguments args;
+    tibee::build::Arguments args;
 
     int ret = parseOptions(argc, argv, args);
 
@@ -110,12 +119,15 @@ int main(int argc, char* argv[])
         return ret;
     }
 
-    // create a TibeeCompare instance and run it.
+    // initialize mongodb
+    mongo::client::initialize();
+
+    // create a TibeeBuild instance and run it.
     try {
-        std::unique_ptr<tibeecompare::TibeeCompare> tibeeCompare {
-            new tibeecompare::TibeeCompare {args}};
-        return tibeeCompare->run() ? 0 : 1;
-    } catch (const tibeecompare::ex::InvalidArgument& ex) {
+        std::unique_ptr<tibee::build::TibeeBuild> tibeeBuild {
+            new tibee::build::TibeeBuild {args}};
+        return tibeeBuild->run() ? 0 : 1;
+    } catch (const tibee::build::ex::InvalidArgument& ex) {
         tberror() << "invalid argument: " << ex.what() << tbendl();
     } catch (const std::exception& ex) {
         tberror() << "unknown error: " << ex.what() << tbendl();
