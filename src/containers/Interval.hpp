@@ -30,12 +30,12 @@ class Interval
 {
 public:
     // Default constructor. Constructs the interval [0, 0].
-    Interval();
+    Interval() : _low(0), _high(0) {}
 
     // Constructs the interval [|low|, |high|].
     // @param low the lower bound of the interval.
     // @param high the higher bound of the interval.
-    Interval(uint64_t low, uint64_t high);
+    Interval(uint64_t low, uint64_t high) : _low(low), _high(high) {}
 
     // @returns the lower bound of the interval.
     uint64_t low() const { return _low; }

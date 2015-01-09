@@ -9,14 +9,12 @@ env.Append(CPPPATH=['#/src'])
 
 # Generate a static library.
 base = SConscript(os.path.join('base', 'SConscript'), exports=['env'])
-containers = SConscript(os.path.join('containers', 'SConscript'), exports=['env'])
 execution = SConscript(os.path.join('execution', 'SConscript'), exports=['env'])
 mq = SConscript(os.path.join('mq', 'SConscript'), exports=['env'])
 quark = SConscript(os.path.join('quark', 'SConscript'), exports=['env'])
 
 subs = [
     ('base', base),
-    ('containers', containers),
     ('execution', execution),
     ('mq', mq),
     ('quark', quark),
