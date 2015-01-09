@@ -25,6 +25,7 @@ namespace execution
 {
 
 StackItem::StackItem()
+    : _depth(0), _start(0), _end(0)
 {
 }
 
@@ -64,6 +65,16 @@ bool StackItem::GetStringProperty(quark::Quark key, std::string* value) const
 void StackItem::SetStringProperty(quark::Quark key, std::string value)
 {
     _stringProperties[key] = value;
+}
+
+bool StackItem::operator==(const StackItem& other) const
+{
+    return _name == other._name &&
+        _depth == other._depth &&
+        _start == other._start &&
+        _end == other._end &&
+        _numericProperties == other._numericProperties &&
+        _stringProperties == other._stringProperties;
 }
 
 }  // namespace execution

@@ -18,6 +18,7 @@
 #ifndef _TIBEE_EXECUTION_STACKITEM_HPP
 #define _TIBEE_EXECUTION_STACKITEM_HPP
 
+#include <memory>
 #include <unordered_map>
 
 #include "base/BasicTypes.hpp"
@@ -31,12 +32,26 @@ namespace execution
 class StackItem
 {
 public:
+    typedef std::unique_ptr<StackItem> UP;
+
     StackItem();
     ~StackItem();
 
     // Name.
     const std::string& name() const { return _name; }
     void set_name(const std::string& name) { _name = name; }
+
+    // Depth.
+    size_t depth() const { return _depth; }
+    void set_depth(size_t depth) { _depth = depth; }
+
+    // Start time.
+    timestamp_t start() const { return _start; }
+    void set_start(timestamp_t start) { _start = start; }
+
+    // End time.
+    timestamp_t end() const { return _end; }
+    void set_end(timestamp_t end) { _end = end; }
 
     // Numeric properties.
     bool GetNumericProperty(quark::Quark key, uint64_t* value) const;
@@ -46,9 +61,20 @@ public:
     bool GetStringProperty(quark::Quark key, std::string* value) const;
     void SetStringProperty(quark::Quark key, std::string value);
 
+    bool operator==(const StackItem& other) const;
+
 private:
     // Name.
     std::string _name;
+
+    // Depth.
+    size_t _depth;
+
+    // Start time.
+    timestamp_t _start;
+
+    // End time.
+    timestamp_t _end;
 
     // Numeric properties.
     typedef std::unordered_map<quark::Quark, uint64_t> NumericProperties;

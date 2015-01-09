@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include "base/BasicTypes.hpp"
 #include "execution/StackItem.hpp"
 #include "quark/StringQuarkDatabase.hpp"
 
@@ -30,6 +31,9 @@ namespace execution
 TEST(Execution, StackItem)
 {
     const char kName[] = "dummy";
+    const size_t kDepth = 4;
+    const timestamp_t kStart = 10000;
+    const timestamp_t kEnd = 20000;
     const char kNumericPropertyKey[] = "numeric";
     const uint64_t kNumericPropertyValue = 42;
     const char kStringPropertyKey[] = "str";
@@ -41,6 +45,18 @@ TEST(Execution, StackItem)
     EXPECT_EQ("", item.name());
     item.set_name(kName);
     EXPECT_EQ(kName, item.name());
+
+    EXPECT_EQ(0u, item.depth());
+    item.set_depth(kDepth);
+    EXPECT_EQ(kDepth, item.depth());
+
+    EXPECT_EQ(0u, item.start());
+    item.set_start(kStart);
+    EXPECT_EQ(kStart, item.start());
+
+    EXPECT_EQ(0u, item.end());
+    item.set_end(kEnd);
+    EXPECT_EQ(kEnd, item.end());
 
     uint64_t numericValue = 0;
     auto numericQuark = quarks.StrQuark(kNumericPropertyKey);
@@ -57,5 +73,5 @@ TEST(Execution, StackItem)
     EXPECT_EQ(kStringPropertyValue, stringValue);
 }
 
-}  // namespace quark
+}  // namespace execution
 }  // namespace tibee

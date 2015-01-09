@@ -9,6 +9,7 @@ app_env = env.Clone()
 sources_unittests = [
     'containers/RedBlackIntervalTree_Unittest.cpp',
     'execution/StackItem_Unittest.cpp',
+    'execution/StacksBuilder_Unittest.cpp',
     'quark/DiskQuarkDatabase_Unittest.cpp',
 ]
 

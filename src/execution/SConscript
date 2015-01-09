@@ -5,6 +5,7 @@ Import(['env',])
 
 sources = [
     'StackItem.cpp',
+    'StacksBuilder.cpp',
 ]
 
 Return('sources')
