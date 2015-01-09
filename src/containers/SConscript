@@ -1,0 +1,10 @@
+
+import os.path
+
+Import(['env',])
+
+sources = [
+    'Interval.cpp',
+]
+
+Return('sources')
