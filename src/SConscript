@@ -36,6 +36,8 @@ tibeecomparelib = lib_env.StaticLibrary(target='tibeecomparelib', source=sources
 # Generate the executables.
 build = SConscript(os.path.join('build', 'SConscript'),
                    exports=['env', 'tibeecomparelib'])
+server = SConscript(os.path.join('server', 'SConscript'),
+                    exports=['env', 'tibeecomparelib'])
 test = SConscript(os.path.join('test', 'SConscript'),
                   exports=['env', 'tibeecomparelib'])
 

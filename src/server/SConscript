@@ -1,0 +1,37 @@
+
+import os.path
+
+
+Import(['env', 'tibeecomparelib'])
+
+target = 'tibeeserver'
+
+libs = [
+    tibeecomparelib,
+    'mongoclient',
+    'tigerbeetle',
+    'boost_program_options',
+    'boost_filesystem',
+    'boost_thread',
+    'boost_system',
+    'boost_regex',
+    'leveldb',
+]
+
+sources = [
+    'main.cpp',
+    'ResponseUtils.cpp',
+    'TibeeServer.cpp',
+    'handlers/HandleGetNodes.cpp',
+    'handlers/HandleGetProperties.cpp',
+]
+
+app_env = env.Clone()
+
+app_env.Append(LIBS=libs)
+app_env.ParseConfig('pkg-config --cflags glib-2.0')
+app_env.ParseConfig('pkg-config --cflags --libs libzmq')
+
+app = app_env.Program(target=target, source=sources)
+
+Return('app')
