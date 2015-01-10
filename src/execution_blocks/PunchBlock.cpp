@@ -83,6 +83,8 @@ void PunchBlock::onBegin(const trace::EventValue& event)
     auto tid = ThreadForEvent(event);
     if (!TidIsAnalyzed(tid))
         return;
+
+    Executions()->StartThreadExecution(tid, _name);
 }
 
 void PunchBlock::onEnd(const trace::EventValue& event)
@@ -90,6 +92,8 @@ void PunchBlock::onEnd(const trace::EventValue& event)
     auto tid = ThreadForEvent(event);
     if (!TidIsAnalyzed(tid))
         return;
+
+    Executions()->EndThreadExecution(tid);
 }
 
 bool PunchBlock::TidIsAnalyzed(uint32_t tid) const
