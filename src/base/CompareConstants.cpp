@@ -20,13 +20,16 @@
 namespace tibee
 {
 
+const char kStacksBuilderServiceName[] = "stacks-builder";
+
 // Block names.
 // - Trace
 const char kTraceBlockName[] = "trace";
 // - State
 const char kCurrentStateBlockName[] = "current-state";
-const char kStateHistoryBlockName[] = "state-history";
 const char kLinuxSchedStateBlockName[] = "linux-sched-state";
+// - Execution
+const char kExecutionBlockName[] = "execution";
 
 const char kInstructions[] = "instructions";
 const char kCacheReferences[] = "cache-references";

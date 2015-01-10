@@ -1,0 +1,10 @@
+
+import os.path
+
+Import(['env',])
+
+sources = [
+    'ExecutionBlock.cpp',
+]
+
+Return('sources')

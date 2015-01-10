@@ -46,6 +46,8 @@ public:
     void AddLink(thread_t sourceThread, thread_t targetThread);
     void SetThreadName(thread_t thread, const std::string& name);
 
+    void Terminate();
+
 private:
     // Current timestamp.
     timestamp_t _ts;

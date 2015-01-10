@@ -30,12 +30,17 @@ const uint64_t kHugeCost = -1;
 // Mongo.
 const size_t kOIDLength = 24;
 
+// Services.
+extern const char kStacksBuilderServiceName[];
+
 // Block names.
 // - Trace
 extern const char kTraceBlockName[];
 // - State
 extern const char kCurrentStateBlockName[];
 extern const char kLinuxSchedStateBlockName[];
+// - Execution
+extern const char kExecutionBlockName[];
 
 // Execution: performance counters.
 extern const char kInstructions[];

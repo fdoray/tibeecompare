@@ -18,6 +18,7 @@
 #include "build/BlockLoader.hpp"
 
 #include "base/CompareConstants.hpp"
+#include "execution_blocks/ExecutionBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
 #include "trace_blocks/TraceBlock.hpp"
@@ -31,7 +32,9 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
 {
     block::BlockInterface::UP block;
 
-    if (name == kTraceBlockName) {
+    if (name == kExecutionBlockName) {
+        block.reset(new execution_blocks::ExecutionBlock);
+    } else if (name == kTraceBlockName) {
         block.reset(new trace_blocks::TraceBlock);
     } else if (name == kCurrentStateBlockName) {
         block.reset(new state_blocks::CurrentStateBlock);

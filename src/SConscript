@@ -10,11 +10,13 @@ env.Append(CPPPATH=['#/src'])
 # Generate a static library.
 base = SConscript(os.path.join('base', 'SConscript'), exports=['env'])
 execution = SConscript(os.path.join('execution', 'SConscript'), exports=['env'])
+execution_blocks = SConscript(os.path.join('execution_blocks', 'SConscript'), exports=['env'])
 mq = SConscript(os.path.join('mq', 'SConscript'), exports=['env'])
 
 subs = [
     ('base', base),
     ('execution', execution),
+    ('execution_blocks', execution_blocks),
     ('mq', mq),
 ]
 

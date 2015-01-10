@@ -88,5 +88,28 @@ void StacksBuilder::SetThreadName(thread_t thread, const std::string& name)
     }
 }
 
+void StacksBuilder::Terminate()
+{
+    for (auto& stack : _stacks)
+    {
+        auto& history = _histories[stack.first];
+        if (history.get() == nullptr)
+            history.reset(new containers::RedBlackIntervalTree<StackItem>);
+
+
+        while (!stack.second.empty())
+        {
+            stack.second.top().set_end(_ts);
+
+            history->Insert(
+                containers::Interval(stack.second.top().start(),
+                                     stack.second.top().end()),
+                stack.second.top());
+
+            stack.second.pop();
+        }
+    }
+}
+
 }  // namespace execution
 }  // namespace tibee
