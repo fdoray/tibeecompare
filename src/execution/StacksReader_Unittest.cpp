@@ -17,10 +17,10 @@
  */
 #include "gtest/gtest.h"
 
-#include <set>
-#include <vector>
-
 #include "execution/StacksBuilder.hpp"
+#include "execution/StacksFromDisk.hpp"
+#include "execution/StacksReader.hpp"
+#include "execution/StacksWriter.hpp"
 
 namespace tibee
 {
@@ -49,7 +49,7 @@ void ThreadsCallback(std::set<Thread>* vec, const Thread& thread)
 
 }  // namespace
 
-TEST(StacksBuilder, StacksBuilder)
+TEST(Execution, StacksReader)
 {
 
 //        1234567890123456789012
@@ -106,10 +106,15 @@ TEST(StacksBuilder, StacksBuilder)
     builder.SetTimestamp(22);
     builder.PopStack(2);
 
+    // Write the stacks to a file.
+    WriteStacks(".stacks.test", builder);
+    StacksFromDisk stacks;
+    ReadStacks(".stacks.test", &stacks);
+
     // Check the result.
-    EXPECT_EQ(3u, builder.StackItemsCount(1));
-    EXPECT_EQ(2u, builder.StackItemsCount(2));
-    EXPECT_EQ(0u, builder.StackItemsCount(3));
+    EXPECT_EQ(3u, stacks.StackItemsCount(1));
+    EXPECT_EQ(2u, stacks.StackItemsCount(2));
+    EXPECT_EQ(0u, stacks.StackItemsCount(3));
 
     StackItem a;
     a.set_name("a");
@@ -145,21 +150,21 @@ TEST(StacksBuilder, StacksBuilder)
     std::vector<StackItem> actual;
 
     expected = {a, c, b};
-    builder.EnumerateStacks(
+    stacks.EnumerateStacks(
         1, containers::Interval(1, 21),
         std::bind(&StacksCallback, &actual, pl::_1));
     EXPECT_EQ(expected, actual);
     actual.clear();
 
     expected = {d, e};
-    builder.EnumerateStacks(
+    stacks.EnumerateStacks(
         2, containers::Interval(1, 21),
         std::bind(&StacksCallback, &actual, pl::_1));
     EXPECT_EQ(expected, actual);
     actual.clear();
 
     expected = {a, b};
-    builder.EnumerateStacks(
+    stacks.EnumerateStacks(
         1, containers::Interval(10, 17),
         std::bind(&StacksCallback, &actual, pl::_1));
     EXPECT_EQ(expected, actual);
@@ -173,14 +178,14 @@ TEST(StacksBuilder, StacksBuilder)
     Link linkThree(2, 17, 1, 17);
 
     expectedLinks = {linkOne, linkTwo, linkThree};
-    builder.EnumerateLinks(
+    stacks.EnumerateLinks(
         containers::Interval(1, 21),
         std::bind(&LinksCallback, &actualLinks, pl::_1));
     EXPECT_EQ(expectedLinks, actualLinks);
     actualLinks.clear();
 
     expectedLinks = {linkTwo, linkThree};
-    builder.EnumerateLinks(
+    stacks.EnumerateLinks(
         containers::Interval(14, 17),
         std::bind(&LinksCallback, &actualLinks, pl::_1));
     EXPECT_EQ(expectedLinks, actualLinks);
@@ -195,16 +200,7 @@ TEST(StacksBuilder, StacksBuilder)
     std::set<Thread> actualThreads;
 
     expectedThreads = {threadOne, threadTwo};
-    builder.EnumerateThreads(
-        std::bind(&ThreadsCallback, &actualThreads, pl::_1));
-    EXPECT_EQ(expectedThreads, actualThreads);
-    actualThreads.clear();
-
-    builder.SetThreadName(2, "two");
-    threadTwo.set_name("two");
-
-    expectedThreads = {threadOne, threadTwo};
-    builder.EnumerateThreads(
+    stacks.EnumerateThreads(
         std::bind(&ThreadsCallback, &actualThreads, pl::_1));
     EXPECT_EQ(expectedThreads, actualThreads);
     actualThreads.clear();

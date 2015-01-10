@@ -4,8 +4,12 @@ import os.path
 Import(['env',])
 
 sources = [
+    'AbstractStacks.cpp',
     'StackItem.cpp',
     'StacksBuilder.cpp',
+    'StacksFromDisk.cpp',
+    'StacksReader.cpp',
+    'StacksWriter.cpp',
 ]
 
 Return('sources')

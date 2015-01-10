@@ -11,13 +11,11 @@ env.Append(CPPPATH=['#/src'])
 base = SConscript(os.path.join('base', 'SConscript'), exports=['env'])
 execution = SConscript(os.path.join('execution', 'SConscript'), exports=['env'])
 mq = SConscript(os.path.join('mq', 'SConscript'), exports=['env'])
-quark = SConscript(os.path.join('quark', 'SConscript'), exports=['env'])
 
 subs = [
     ('base', base),
     ('execution', execution),
     ('mq', mq),
-    ('quark', quark),
 ]
 
 sources = []

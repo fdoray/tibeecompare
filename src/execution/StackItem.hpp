@@ -33,6 +33,8 @@ class StackItem
 {
 public:
     typedef std::unique_ptr<StackItem> UP;
+    typedef std::unordered_map<quark::Quark, uint64_t> NumericProperties;
+    typedef std::unordered_map<quark::Quark, std::string> StringProperties;
 
     StackItem();
     ~StackItem();
@@ -57,9 +59,29 @@ public:
     bool GetNumericProperty(quark::Quark key, uint64_t* value) const;
     void SetNumericProperty(quark::Quark key, uint64_t value);
 
+    NumericProperties::const_iterator NumericPropertiesBegin() const {
+        return _numericProperties.begin();
+    }
+    NumericProperties::const_iterator NumericPropertiesEnd() const {
+        return _numericProperties.end();
+    }
+    size_t NumericPropertiesCount() const {
+        return _numericProperties.size();
+    }
+
     // String properties.
     bool GetStringProperty(quark::Quark key, std::string* value) const;
     void SetStringProperty(quark::Quark key, std::string value);
+
+    StringProperties::const_iterator StringPropertiesBegin() const {
+        return _stringProperties.begin();
+    }
+    StringProperties::const_iterator StringPropertiesEnd() const {
+        return _stringProperties.end();
+    }
+    size_t StringPropertiesCount() const {
+        return _stringProperties.size();
+    }
 
     bool operator==(const StackItem& other) const;
 
@@ -77,11 +99,9 @@ private:
     timestamp_t _end;
 
     // Numeric properties.
-    typedef std::unordered_map<quark::Quark, uint64_t> NumericProperties;
     NumericProperties _numericProperties;
 
     // String properties.
-    typedef std::unordered_map<quark::Quark, std::string> StringProperties;
     StringProperties _stringProperties;
 };
 

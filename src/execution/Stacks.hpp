@@ -24,6 +24,7 @@
 #include "containers/Interval.hpp"
 #include "execution/Link.hpp"
 #include "execution/StackItem.hpp"
+#include "execution/Thread.hpp"
 
 namespace tibee
 {
@@ -35,15 +36,25 @@ class Stacks
 public:
     typedef std::function<void (const StackItem&)> EnumerateStacksCallback;
     typedef std::function<void (const Link&)> EnumerateLinksCallback;
+    typedef std::function<void (const Thread& thread)> EnumerateThreadsCallback;
+
+    // Returns the number of stack items for a thread.
+    virtual size_t StackItemsCount(thread_t thread) const = 0;
 
     // Enumerate stack items that intersect the specified interval.
     virtual void EnumerateStacks(thread_t thread,
                                  const containers::Interval& interval,
                                  const EnumerateStacksCallback& callback) const = 0;
 
+    // Returns the number of links.
+    virtual size_t LinksCount() const = 0;
+
     // Enumerate links that start and end whithin the specified interval.
     virtual void EnumerateLinks(const containers::Interval& interval,
                                 const EnumerateLinksCallback& callback) const = 0;
+
+    // Enumerate threads with their names.
+    virtual void EnumerateThreads(const EnumerateThreadsCallback& callback) const = 0;    
 };
 
 }  // namespace execution

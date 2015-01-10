@@ -37,6 +37,4 @@ src/test/unittests
 # Generated files.
 history
 log.txt
-test-db.tmp-nextquark
-test-db.tmp-quarktostr
-test-db.tmp-strtoquark
+.*

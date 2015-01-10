@@ -15,32 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "build/BlockLoader.hpp"
+#ifndef _TIBEE_EXECUTION_STACKSWRITER_HPP
+#define _TIBEE_EXECUTION_STACKSWRITER_HPP
 
-#include "base/CompareConstants.hpp"
-#include "state_blocks/CurrentStateBlock.hpp"
-#include "state_blocks/LinuxSchedStateBlock.hpp"
-#include "trace_blocks/TraceBlock.hpp"
+#include <string>
+
+#include "execution/Stacks.hpp"
 
 namespace tibee
 {
-namespace build
+namespace execution
 {
 
-block::BlockInterface::UP LoadBlock(const std::string& name)
-{
-    block::BlockInterface::UP block;
+bool WriteStacks(const std::string& filename,
+                 const Stacks& stacks);
 
-    if (name == kTraceBlockName) {
-        block.reset(new trace_blocks::TraceBlock);
-    } else if (name == kCurrentStateBlockName) {
-        block.reset(new state_blocks::CurrentStateBlock);
-    } else if (name == kLinuxSchedStateBlockName) {
-        block.reset(new state_blocks::LinuxSchedStateBlock);
-    }
-
-    return block;
-}
-
-}  // namespace build
+}  // namespace execution
 }  // namespace tibee
+
+#endif // _TIBEE_EXECUTION_STACKSWRITER_HPP

@@ -35,7 +35,6 @@ const size_t kOIDLength = 24;
 extern const char kTraceBlockName[];
 // - State
 extern const char kCurrentStateBlockName[];
-extern const char kStateHistoryBlockName[];
 extern const char kLinuxSchedStateBlockName[];
 
 // Execution: performance counters.

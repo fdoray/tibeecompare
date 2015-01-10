@@ -15,47 +15,29 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_EXECUTION_STACKSBUILDER_HPP
-#define _TIBEE_EXECUTION_STACKSBUILDER_HPP
+#ifndef _TIBEE_EXECUTION_STACKSFROMDISK_HPP
+#define _TIBEE_EXECUTION_STACKSFROMDISK_HPP
 
-#include <memory>
-#include <stack>
-#include <unordered_map>
-#include <vector>
-
-#include "base/BasicTypes.hpp"
 #include "execution/AbstractStacks.hpp"
-#include "execution/StackItem.hpp"
-#include "execution/Thread.hpp"
 
 namespace tibee
 {
 namespace execution
 {
 
-class StacksBuilder : public AbstractStacks
+class StacksFromDisk : public AbstractStacks
 {
 public:
-    StacksBuilder();
-    ~StacksBuilder();
+    StacksFromDisk();
+    ~StacksFromDisk();
 
-    // Construction of the stacks.
-    void SetTimestamp(timestamp_t ts) { _ts = ts; }
-    void PushStack(thread_t thread, const std::string& name);
-    void PopStack(thread_t thread);
-    void AddLink(thread_t sourceThread, thread_t targetThread);
-    void SetThreadName(thread_t thread, const std::string& name);
-
-private:
-    // Current timestamp.
-    timestamp_t _ts;
-
-    // Current stack, per thread.
-    typedef std::unordered_map<thread_t, std::stack<StackItem>> ThreadsStacks;
-    ThreadsStacks _stacks;
+    // Loading data from disk.
+    void AddThread(const Thread& thread);
+    void AddStackItem(thread_t thread, const StackItem& item);
+    void AddLink(const Link& link);
 };
 
 }  // namespace execution
 }  // namespace tibee
 
-#endif // _TIBEE_EXECUTION_STACKSBUILDER_HPP
+#endif // _TIBEE_EXECUTION_STACKSFROMDISK_HPP

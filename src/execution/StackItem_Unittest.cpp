@@ -20,8 +20,9 @@
 #include <string>
 
 #include "base/BasicTypes.hpp"
+#include "base/Constants.hpp"
 #include "execution/StackItem.hpp"
-#include "quark/StringQuarkDatabase.hpp"
+#include "quark/DiskQuarkDatabase.hpp"
 
 namespace tibee
 {
@@ -39,7 +40,7 @@ TEST(Execution, StackItem)
     const char kStringPropertyKey[] = "str";
     const char kStringPropertyValue[] = "forty-two";
 
-    quark::StringQuarkDatabase quarks;
+    quark::DiskQuarkDatabase quarks(kDiskQuarkDatabaseTestFile);
 
     StackItem item;
     EXPECT_EQ("", item.name());

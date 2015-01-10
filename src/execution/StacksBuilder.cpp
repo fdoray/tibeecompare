@@ -24,27 +24,6 @@ namespace tibee
 namespace execution
 {
 
-namespace
-{
-
-void EnumerateStacksCallbackWrapper(
-    const containers::RedBlackIntervalTree<StackItem>::ElementPair& pair,
-    const StacksBuilder::EnumerateStacksCallback& callback)
-{
-    callback(pair.second);
-}
-
-class LinksComparator
-{
-public:
-    bool operator() (const Link& link, timestamp_t ts) const
-    {
-        return link.sourceTs() < ts;
-    }
-};
-
-}
-
 StacksBuilder::StacksBuilder()
     : _ts(0)
 {
@@ -63,6 +42,11 @@ void StacksBuilder::PushStack(thread_t thread, const std::string& name)
     stackItem.set_depth(stack.size());
     stackItem.set_start(_ts);
     stack.push(stackItem);
+
+    // Make sure the thread entry exists.
+    auto look = _threads.find(thread);
+    if (look == _threads.end())
+        _threads[thread] = Thread(thread);
 }
 
 void StacksBuilder::PopStack(thread_t thread)
@@ -89,34 +73,18 @@ void StacksBuilder::AddLink(thread_t sourceThread, thread_t targetThread)
     _links.push_back(Link(sourceThread, _ts, targetThread, _ts));
 }
 
-void StacksBuilder::EnumerateStacks(thread_t thread,
-                                    const containers::Interval& interval,
-                                    const EnumerateStacksCallback& callback) const
+void StacksBuilder::SetThreadName(thread_t thread, const std::string& name)
 {
-    auto threadHistoryIt = _histories.find(thread);
-    if (threadHistoryIt == _histories.end())
-        return;
-
-    const auto& threadHistory = *threadHistoryIt->second;
-    threadHistory.EnumerateIntersection(
-        interval,
-        std::bind(&EnumerateStacksCallbackWrapper,
-                  std::placeholders::_1,
-                  callback));
-}
-
-void StacksBuilder::EnumerateLinks(const containers::Interval& interval,
-                                   const EnumerateLinksCallback& callback) const
-{
-    LinksComparator comparator;
-    auto it = std::lower_bound(_links.begin(), _links.end(), interval.low(), comparator);
-
-    for (; it != _links.end(); ++it)
+    auto look = _threads.find(thread);
+    if (look != _threads.end())
     {
-        if (it->sourceTs() > interval.high())
-            break;
-        if (it->targetTs() <= interval.high())
-            callback(*it);
+        look->second.set_name(name);
+    }
+    else
+    {
+        Thread threadDesc(thread);
+        threadDesc.set_name(name);
+        _threads[thread] = threadDesc;
     }
 }
 

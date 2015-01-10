@@ -15,47 +15,52 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_EXECUTION_STACKSBUILDER_HPP
-#define _TIBEE_EXECUTION_STACKSBUILDER_HPP
+#ifndef _TIBEE_EXECUTION_THREAD_HPP
+#define _TIBEE_EXECUTION_THREAD_HPP
 
-#include <memory>
-#include <stack>
-#include <unordered_map>
-#include <vector>
+#include <string>
 
 #include "base/BasicTypes.hpp"
-#include "execution/AbstractStacks.hpp"
-#include "execution/StackItem.hpp"
-#include "execution/Thread.hpp"
 
 namespace tibee
 {
 namespace execution
 {
 
-class StacksBuilder : public AbstractStacks
+class Thread
 {
 public:
-    StacksBuilder();
-    ~StacksBuilder();
+    Thread() : _thread(-1) {};
+    Thread(thread_t thread) : _thread(thread) {}
+    ~Thread() {};
 
-    // Construction of the stacks.
-    void SetTimestamp(timestamp_t ts) { _ts = ts; }
-    void PushStack(thread_t thread, const std::string& name);
-    void PopStack(thread_t thread);
-    void AddLink(thread_t sourceThread, thread_t targetThread);
-    void SetThreadName(thread_t thread, const std::string& name);
+    // Thread id.
+    thread_t thread() const { return _thread; }
+    void set_thread(thread_t thread) { _thread = thread; }
+
+    // Name.
+    const std::string& name() const { return _name; }
+    void set_name(const std::string& name) { _name = name; }
+
+    bool operator==(const Thread& other) const {
+        return _thread == other._thread &&
+            _name == other._name;
+    }
+
+    bool operator<(const Thread& other) const {
+        if (_thread < other._thread)
+            return true;
+        if (_thread > other._thread)
+            return false;
+        return _name < other._name;
+    }
 
 private:
-    // Current timestamp.
-    timestamp_t _ts;
-
-    // Current stack, per thread.
-    typedef std::unordered_map<thread_t, std::stack<StackItem>> ThreadsStacks;
-    ThreadsStacks _stacks;
+    thread_t _thread;
+    std::string _name;
 };
 
 }  // namespace execution
 }  // namespace tibee
 
-#endif // _TIBEE_EXECUTION_STACKSBUILDER_HPP
+#endif // _TIBEE_EXECUTION_THREAD_HPP
