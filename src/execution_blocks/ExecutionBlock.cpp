@@ -17,6 +17,11 @@
  */
 #include "execution_blocks/ExecutionBlock.hpp"
 
+#include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include "base/BindObject.hpp"
 #include "base/CompareConstants.hpp"
 #include "base/Constants.hpp"
@@ -33,6 +38,8 @@ using trace_blocks::TraceBlock;
 
 ExecutionBlock::ExecutionBlock()
 {
+    _traceId = boost::lexical_cast<std::string>(
+        boost::uuids::uuid(boost::uuids::random_generator()()));
 }
 
 ExecutionBlock::~ExecutionBlock()
@@ -64,7 +71,8 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
 {  
     _stacksBuilder.Terminate();
 
-    // Handle the completed executions...
+    // Handle the completed executions.
+    // TODO.
 }
 
 

@@ -18,6 +18,8 @@
 #ifndef _TIBEE_EXECUTIONBLOCKS_EXECUTIONBLOCK_HPP
 #define _TIBEE_EXECUTIONBLOCKS_EXECUTIONBLOCK_HPP
 
+#include <string>
+
 #include "execution/ExecutionsBuilder.hpp"
 #include "execution/StacksBuilder.hpp"
 #include "block/AbstractBlock.hpp"
@@ -45,6 +47,9 @@ private:
 
     // The executions builder.
     execution::ExecutionsBuilder _executionsBuilder;
+
+    // Trace identifier.
+    std::string _traceId;
 };
 
 }  // namespace execution_blocks
