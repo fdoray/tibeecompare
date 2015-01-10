@@ -5,6 +5,7 @@ Import(['env',])
 
 sources = [
     'AbstractStacks.cpp',
+    'ExecutionsBuilder.cpp',
     'StackItem.cpp',
     'StacksBuilder.cpp',
     'StacksFromDisk.cpp',
