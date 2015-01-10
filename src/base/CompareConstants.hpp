@@ -32,6 +32,7 @@ const size_t kOIDLength = 24;
 
 // Services.
 extern const char kStacksBuilderServiceName[];
+extern const char kCriticalGraphServiceName[];
 
 // Block names.
 // - Trace
@@ -41,6 +42,10 @@ extern const char kCurrentStateBlockName[];
 extern const char kLinuxSchedStateBlockName[];
 // - Execution
 extern const char kExecutionBlockName[];
+extern const char kPunchBlockName[];
+extern const char kSyscallOnlyBlockName[];
+// - Critical.
+extern const char kCriticalBlockName[];
 
 // Execution: performance counters.
 extern const char kInstructions[];

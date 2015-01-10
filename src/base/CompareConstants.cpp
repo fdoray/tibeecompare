@@ -21,6 +21,7 @@ namespace tibee
 {
 
 const char kStacksBuilderServiceName[] = "stacks-builder";
+const char kCriticalGraphServiceName[] = "critical-graph";
 
 // Block names.
 // - Trace
@@ -30,6 +31,10 @@ const char kCurrentStateBlockName[] = "current-state";
 const char kLinuxSchedStateBlockName[] = "linux-sched-state";
 // - Execution
 const char kExecutionBlockName[] = "execution";
+const char kPunchBlockName[] = "punch";
+const char kSyscallOnlyBlockName[] = "syscall-only";
+// - Critical.
+const char kCriticalBlockName[] = "critical";
 
 const char kInstructions[] = "instructions";
 const char kCacheReferences[] = "cache-references";

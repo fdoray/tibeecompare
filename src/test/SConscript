@@ -8,6 +8,8 @@ app_env = env.Clone()
 
 sources_unittests = [
     'containers/RedBlackIntervalTree_Unittest.cpp',
+    'critical/CriticalGraph_Unittest.cpp',
+    'critical/CriticalPath_Unittest.cpp',
     'execution/StackItem_Unittest.cpp',
     'execution/StacksBuilder_Unittest.cpp',
     'execution/StacksReader_Unittest.cpp',

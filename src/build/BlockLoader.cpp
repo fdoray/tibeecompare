@@ -18,7 +18,10 @@
 #include "build/BlockLoader.hpp"
 
 #include "base/CompareConstants.hpp"
+#include "critical_blocks/CriticalBlock.hpp"
 #include "execution_blocks/ExecutionBlock.hpp"
+#include "execution_blocks/PunchBlock.hpp"
+#include "execution_blocks/SyscallOnlyBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
 #include "trace_blocks/TraceBlock.hpp"
@@ -32,8 +35,14 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
 {
     block::BlockInterface::UP block;
 
-    if (name == kExecutionBlockName) {
+    if (name == kCriticalBlockName) {
+        block.reset(new critical_blocks::CriticalBlock);
+    } else if (name == kExecutionBlockName) {
         block.reset(new execution_blocks::ExecutionBlock);
+    } else if (name == kPunchBlockName) {
+        block.reset(new execution_blocks::PunchBlock);
+    } else if (name == kSyscallOnlyBlockName) {
+        block.reset(new execution_blocks::SyscallOnlyBlock);
     } else if (name == kTraceBlockName) {
         block.reset(new trace_blocks::TraceBlock);
     } else if (name == kCurrentStateBlockName) {
