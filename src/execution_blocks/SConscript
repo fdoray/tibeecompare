@@ -4,7 +4,9 @@ import os.path
 Import(['env',])
 
 sources = [
+    'AbstractExecutionBlock.cpp',
     'ExecutionBlock.cpp',
+    'SyscallOnlyBlock.cpp',
 ]
 
 Return('sources')
