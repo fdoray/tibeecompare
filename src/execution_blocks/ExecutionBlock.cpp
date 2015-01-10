@@ -17,6 +17,7 @@
  */
 #include "execution_blocks/ExecutionBlock.hpp"
 
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
@@ -26,12 +27,15 @@
 #include "base/CompareConstants.hpp"
 #include "base/Constants.hpp"
 #include "block/ServiceList.hpp"
+#include "execution/StacksWriter.hpp"
 #include "notification/NotificationCenter.hpp"
 #include "notification/Token.hpp"
 #include "trace_blocks/TraceBlock.hpp"
 
 namespace tibee {
 namespace execution_blocks {
+
+namespace bfs = boost::filesystem;
 
 using notification::Token;
 using trace_blocks::TraceBlock;
@@ -70,6 +74,12 @@ void ExecutionBlock::onTimestamp(const notification::Path& path, const value::Va
 void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* value)
 {  
     _stacksBuilder.Terminate();
+
+    bfs::path stacksFileName =
+        bfs::path(kHistoryDirectoryName) / (_traceId + kStacksFileName);
+
+    // Save the stacks.
+    WriteStacks(stacksFileName.string(), _stacksBuilder);
 
     // Handle the completed executions.
     // TODO.

@@ -30,6 +30,10 @@ const uint64_t kHugeCost = -1;
 // Mongo.
 const size_t kOIDLength = 24;
 
+// Directory that contains built files.
+extern const char kHistoryDirectoryName[];
+extern const char kStacksFileName[];
+
 // Services.
 extern const char kExecutionsBuilderServiceName[];
 extern const char kStacksBuilderServiceName[];
