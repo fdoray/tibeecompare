@@ -31,6 +31,7 @@ const uint64_t kHugeCost = -1;
 const size_t kOIDLength = 24;
 
 // Services.
+extern const char kExecutionsBuilderServiceName[];
 extern const char kStacksBuilderServiceName[];
 extern const char kCriticalGraphServiceName[];
 

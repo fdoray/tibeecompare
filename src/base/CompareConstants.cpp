@@ -20,6 +20,7 @@
 namespace tibee
 {
 
+const char kExecutionsBuilderServiceName[] = "executions-builder";
 const char kStacksBuilderServiceName[] = "stacks-builder";
 const char kCriticalGraphServiceName[] = "critical-graph";
 

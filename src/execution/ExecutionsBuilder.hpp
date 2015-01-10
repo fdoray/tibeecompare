@@ -54,7 +54,7 @@ public:
         return _completedExecutions.end();
     }
 
-protected:
+private:
     // Current timestamp.
     timestamp_t _ts;
 

@@ -19,6 +19,7 @@
 #define _TIBEE_EXECUTIONBLOCKS_ABSTRACTEXECUTIONBLOCK_HPP
 
 #include "block/AbstractBlock.hpp"
+#include "execution/ExecutionsBuilder.hpp"
 #include "execution/StacksBuilder.hpp"
 #include "state/CurrentState.hpp"
 
@@ -41,6 +42,9 @@ protected:
     // Current state.
     state::CurrentState* State() const { return _currentState; }
 
+    // Executions builder.
+    execution::ExecutionsBuilder* Executions() const { return _executionsBuilder; }
+
     // Stacks builder.
     execution::StacksBuilder* Stacks() const { return _stacksBuilder; }
 
@@ -50,6 +54,9 @@ protected:
 private:
     // Current state.
     state::CurrentState* _currentState;
+
+    // Executions builder.
+    execution::ExecutionsBuilder* _executionsBuilder;
 
     // Stacks builder.
     execution::StacksBuilder* _stacksBuilder;

@@ -76,7 +76,7 @@ public:
     void SetMetric(quark::Quark key, uint64_t value) {
         _metrics[key] = value;
     }
-    Metrics::const_iterator metric_begin() const {
+    Metrics::const_iterator metrics_begin() const {
         return _metrics.begin();
     }
     Metrics::const_iterator metrics_end() const {

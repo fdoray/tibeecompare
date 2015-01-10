@@ -18,6 +18,7 @@
 #ifndef _TIBEE_EXECUTIONBLOCKS_EXECUTIONBLOCK_HPP
 #define _TIBEE_EXECUTIONBLOCKS_EXECUTIONBLOCK_HPP
 
+#include "execution/ExecutionsBuilder.hpp"
 #include "execution/StacksBuilder.hpp"
 #include "block/AbstractBlock.hpp"
 #include "notification/NotificationSink.hpp"
@@ -41,6 +42,9 @@ private:
 
     // The stacks builder.
     execution::StacksBuilder _stacksBuilder;
+
+    // The executions builder.
+    execution::ExecutionsBuilder _executionsBuilder;
 };
 
 }  // namespace execution_blocks

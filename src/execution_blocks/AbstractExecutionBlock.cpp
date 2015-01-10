@@ -30,6 +30,9 @@ AbstractExecutionBlock::AbstractExecutionBlock()
 
 void AbstractExecutionBlock::LoadServices(const block::ServiceList& serviceList)
 {
+    serviceList.QueryService(kExecutionsBuilderServiceName,
+                             reinterpret_cast<void**>(&_executionsBuilder));
+
     serviceList.QueryService(kStacksBuilderServiceName,
                              reinterpret_cast<void**>(&_stacksBuilder));
     

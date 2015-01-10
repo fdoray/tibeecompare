@@ -41,6 +41,7 @@ ExecutionBlock::~ExecutionBlock()
 
 void ExecutionBlock::RegisterServices(block::ServiceList* serviceList)
 {
+    serviceList->AddService(kExecutionsBuilderServiceName, &_executionsBuilder);
     serviceList->AddService(kStacksBuilderServiceName, &_stacksBuilder);
 }
 
