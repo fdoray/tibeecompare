@@ -7,6 +7,7 @@ sources = [
     'AbstractStacks.cpp',
     'ExecutionsBuilder.cpp',
     'ExecutionsDb.cpp',
+    'GetExecutionStacks.cpp',
     'StackItem.cpp',
     'StacksBuilder.cpp',
     'StacksFromDisk.cpp',
