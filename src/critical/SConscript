@@ -5,6 +5,8 @@ Import('env')
 sources = [
     'CriticalEdge.cpp',
     'CriticalGraph.cpp',
+    'CriticalGraphReader.cpp',
+    'CriticalGraphWriter.cpp',
     'CriticalNode.cpp',
     'CriticalPath.cpp',
 ]

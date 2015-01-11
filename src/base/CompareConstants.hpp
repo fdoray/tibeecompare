@@ -33,6 +33,7 @@ const size_t kOIDLength = 24;
 // Directory that contains built files.
 extern const char kHistoryDirectoryName[];
 extern const char kStacksFileName[];
+extern const char kCriticalFileName[];
 
 // Services.
 extern const char kExecutionsBuilderServiceName[];

@@ -21,7 +21,8 @@ namespace tibee
 {
 
 const char kHistoryDirectoryName[] = "history";
-const char kStacksFileName[] = "stacks";
+const char kStacksFileName[] = "-stacks";
+const char kCriticalFileName[] = "-critical";
 
 const char kExecutionsBuilderServiceName[] = "executions-builder";
 const char kStacksBuilderServiceName[] = "stacks-builder";

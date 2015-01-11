@@ -20,6 +20,7 @@
 
 #include <string>
 
+#include "critical/CriticalGraph.hpp"
 #include "execution/ExecutionsBuilder.hpp"
 #include "execution/StacksBuilder.hpp"
 #include "block/AbstractBlock.hpp"
@@ -52,6 +53,9 @@ private:
 
     // The executions builder.
     execution::ExecutionsBuilder _executionsBuilder;
+
+    // Critical graph.
+    critical::CriticalGraph* _criticalGraph;
 
     // Trace identifier.
     std::string _traceId;

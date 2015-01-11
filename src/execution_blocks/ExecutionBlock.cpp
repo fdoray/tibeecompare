@@ -28,6 +28,7 @@
 #include "base/Constants.hpp"
 #include "base/print.hpp"
 #include "block/ServiceList.hpp"
+#include "critical/CriticalGraphWriter.hpp"
 #include "execution/ExecutionsDb.hpp"
 #include "execution/StacksWriter.hpp"
 #include "notification/NotificationCenter.hpp"
@@ -70,6 +71,8 @@ void ExecutionBlock::LoadServices(const block::ServiceList& serviceList)
 {
     serviceList.QueryService(kQuarksServiceName,
                              reinterpret_cast<void**>(&_quarks));
+    serviceList.QueryService(kCriticalGraphServiceName,
+                             reinterpret_cast<void**>(&_criticalGraph));
 }
 
 void ExecutionBlock::AddObservers(notification::NotificationCenter* notificationCenter)
@@ -93,10 +96,14 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
 {  
     _stacksBuilder.Terminate();
 
-    bfs::path stacksFileName =
-        bfs::path(kHistoryDirectoryName) / (_traceId + kStacksFileName);
+    // Write critical graph to disk.
+    bfs::path criticalFileName =
+        bfs::path(kHistoryDirectoryName) / (_traceId + kCriticalFileName);
+    critical::WriteCriticalGraph(criticalFileName.string(), *_criticalGraph);
 
     // Write stacks to disk.
+    bfs::path stacksFileName =
+        bfs::path(kHistoryDirectoryName) / (_traceId + kStacksFileName);
     WriteStacks(stacksFileName.string(), _stacksBuilder);
 
     // Write executions to database.
@@ -104,6 +111,8 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
     execution::ExecutionsDb executionsDb(_quarks);
     for (const auto& execution : _executionsBuilder)
     {
+        // TODO: Compute critical path for each execution.
+
         // Add duration metric.
         timestamp_t duration = execution->endTs() - execution->startTs();
         execution->SetMetric(Q_DURATION, duration);
