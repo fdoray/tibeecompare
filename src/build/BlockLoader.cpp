@@ -21,6 +21,7 @@
 #include "critical_blocks/CriticalBlock.hpp"
 #include "execution_blocks/ExecutionBlock.hpp"
 #include "execution_blocks/PunchBlock.hpp"
+#include "execution_blocks/SchedWakeupBlock.hpp"
 #include "execution_blocks/SyscallOnlyBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
@@ -41,6 +42,8 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
         block.reset(new execution_blocks::ExecutionBlock);
     } else if (name == kPunchBlockName) {
         block.reset(new execution_blocks::PunchBlock);
+    } else if (name == kSchedWakeupBlockName) {
+        block.reset(new execution_blocks::SchedWakeupBlock);
     } else if (name == kSyscallOnlyBlockName) {
         block.reset(new execution_blocks::SyscallOnlyBlock);
     } else if (name == kTraceBlockName) {

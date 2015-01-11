@@ -42,6 +42,9 @@ protected:
     // Current state.
     state::CurrentState* State() const { return _currentState; }
 
+    // Quarks.
+    quark::DiskQuarkDatabase* Quarks() const { return _quarks; }
+
     // Executions builder.
     execution::ExecutionsBuilder* Executions() const { return _executionsBuilder; }
 
@@ -57,6 +60,9 @@ protected:
 private:
     // Current state.
     state::CurrentState* _currentState;
+
+    // Quarks.
+    quark::DiskQuarkDatabase* _quarks;
 
     // Executions builder.
     execution::ExecutionsBuilder* _executionsBuilder;

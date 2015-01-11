@@ -38,11 +38,14 @@ class SyscallOnlyBlock : public execution_blocks::AbstractExecutionBlock
 public:
     SyscallOnlyBlock();
 
+    virtual void LoadServices(const block::ServiceList& serviceList) override;
     virtual void AddObservers(notification::NotificationCenter* notificationCenter) override;
 
 private:
     void onSyscall(uint32_t tid, const notification::Path& path, const value::Value* value);
     void onExitSyscall(const trace::EventValue& event);
+
+    quark::Quark Q_EMPTY_STRING;
 };
 
 }  // namespace execution_blocks

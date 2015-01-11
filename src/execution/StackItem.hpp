@@ -40,8 +40,8 @@ public:
     ~StackItem();
 
     // Name.
-    const std::string& name() const { return _name; }
-    void set_name(const std::string& name) { _name = name; }
+    const quark::Quark& name() const { return _name; }
+    void set_name(const quark::Quark& name) { _name = name; }
 
     // Depth.
     size_t depth() const { return _depth; }
@@ -55,39 +55,11 @@ public:
     timestamp_t end() const { return _end; }
     void set_end(timestamp_t end) { _end = end; }
 
-    // Numeric properties.
-    bool GetNumericProperty(quark::Quark key, uint64_t* value) const;
-    void SetNumericProperty(quark::Quark key, uint64_t value);
-
-    NumericProperties::const_iterator NumericPropertiesBegin() const {
-        return _numericProperties.begin();
-    }
-    NumericProperties::const_iterator NumericPropertiesEnd() const {
-        return _numericProperties.end();
-    }
-    size_t NumericPropertiesCount() const {
-        return _numericProperties.size();
-    }
-
-    // String properties.
-    bool GetStringProperty(quark::Quark key, std::string* value) const;
-    void SetStringProperty(quark::Quark key, std::string value);
-
-    StringProperties::const_iterator StringPropertiesBegin() const {
-        return _stringProperties.begin();
-    }
-    StringProperties::const_iterator StringPropertiesEnd() const {
-        return _stringProperties.end();
-    }
-    size_t StringPropertiesCount() const {
-        return _stringProperties.size();
-    }
-
     bool operator==(const StackItem& other) const;
 
 private:
     // Name.
-    std::string _name;
+    quark::Quark _name;
 
     // Depth.
     size_t _depth;
@@ -97,12 +69,6 @@ private:
 
     // End time.
     timestamp_t _end;
-
-    // Numeric properties.
-    NumericProperties _numericProperties;
-
-    // String properties.
-    StringProperties _stringProperties;
 };
 
 }  // namespace execution

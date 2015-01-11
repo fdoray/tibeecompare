@@ -36,12 +36,19 @@
 namespace tibee {
 namespace execution_blocks {
 
+namespace
+{
+
 namespace bfs = boost::filesystem;
 
 using base::tbinfo;
 using base::tberror;
 using base::tbendl;
 using notification::Token;
+
+const char kDurationMetricName[] = "duration";
+
+}  // namespace
 
 ExecutionBlock::ExecutionBlock()
 {
@@ -77,7 +84,9 @@ void ExecutionBlock::AddObservers(notification::NotificationCenter* notification
 
 void ExecutionBlock::onTimestamp(const notification::Path& path, const value::Value* value)
 {
-    _stacksBuilder.SetTimestamp(value->AsULong());
+    auto ts = value->AsULong();
+    _stacksBuilder.SetTimestamp(ts);
+    _executionsBuilder.SetTimestamp(ts);
 }
 
 void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* value)
@@ -91,9 +100,14 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
     WriteStacks(stacksFileName.string(), _stacksBuilder);
 
     // Write executions to database.
+    quark::Quark Q_DURATION = _quarks->StrQuark(kDurationMetricName);
     execution::ExecutionsDb executionsDb(_quarks);
     for (const auto& execution : _executionsBuilder)
     {
+        // Add duration metric.
+        timestamp_t duration = execution->endTs() - execution->startTs();
+        execution->SetMetric(Q_DURATION, duration);
+
         execution::ExecutionId executionId;
         if (executionsDb.InsertExecution(*execution, &executionId))
         {

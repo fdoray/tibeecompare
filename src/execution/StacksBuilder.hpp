@@ -41,7 +41,7 @@ public:
 
     // Construction of the stacks.
     void SetTimestamp(timestamp_t ts) { _ts = ts; }
-    void PushStack(thread_t thread, const std::string& name);
+    void PushStack(thread_t thread, const quark::Quark& name);
     void PopStack(thread_t thread);
     void AddLink(thread_t sourceThread, thread_t targetThread);
     void SetThreadName(thread_t thread, const std::string& name);

@@ -38,6 +38,9 @@ void AbstractExecutionBlock::LoadServices(const block::ServiceList& serviceList)
     
     serviceList.QueryService(kCurrentStateServiceName,
                              reinterpret_cast<void**>(&_currentState));
+
+    serviceList.QueryService(kQuarksServiceName,
+                             reinterpret_cast<void**>(&_quarks));
 }
 
 uint32_t AbstractExecutionBlock::CpuForEvent(const trace::EventValue& event) const

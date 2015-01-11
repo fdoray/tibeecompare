@@ -33,48 +33,12 @@ StackItem::~StackItem()
 {
 }
 
-bool StackItem::GetNumericProperty(quark::Quark key, uint64_t* value) const
-{
-    assert(value != nullptr);
-
-    auto it = _numericProperties.find(key);
-    if (it == _numericProperties.end())
-        return false;
-
-    *value = it->second;
-    return true;
-}
-
-void StackItem::SetNumericProperty(quark::Quark key, uint64_t value)
-{
-    _numericProperties[key] = value;
-}
-
-bool StackItem::GetStringProperty(quark::Quark key, std::string* value) const
-{
-    assert(value != nullptr);
-
-    auto it = _stringProperties.find(key);
-    if (it == _stringProperties.end())
-        return false;
-
-    *value = it->second;
-    return true;
-}
-
-void StackItem::SetStringProperty(quark::Quark key, std::string value)
-{
-    _stringProperties[key] = value;
-}
-
 bool StackItem::operator==(const StackItem& other) const
 {
     return _name == other._name &&
         _depth == other._depth &&
         _start == other._start &&
-        _end == other._end &&
-        _numericProperties == other._numericProperties &&
-        _stringProperties == other._stringProperties;
+        _end == other._end;
 }
 
 }  // namespace execution

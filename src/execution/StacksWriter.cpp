@@ -35,34 +35,10 @@ void WriteStackItem(std::ofstream& out,
                     const StackItem& item)
 {
     // Write info.
-    io::WriteStringToStream(out, item.name());
+    io::WriteStream(out, item.name());
     io::WriteStream(out, item.depth());
     io::WriteStream(out, item.start());
     io::WriteStream(out, item.end());
-
-    // Write numeric properties.
-    auto numeric_it = item.NumericPropertiesBegin();
-    auto numeric_end = item.NumericPropertiesEnd();
-
-    io::WriteStream(out, item.NumericPropertiesCount());
-
-    for (; numeric_it != numeric_end; ++numeric_it)
-    {
-        io::WriteStream(out, numeric_it->first);
-        io::WriteStream(out, numeric_it->second);
-    }
-
-    // Write string properties.
-    auto string_it = item.StringPropertiesBegin();
-    auto string_end = item.StringPropertiesEnd();
-
-    io::WriteStream(out, item.StringPropertiesCount());
-
-    for (; string_it != string_end; ++string_it)
-    {
-        io::WriteStream(out, string_it->first);
-        io::WriteStringToStream(out, string_it->second);
-    }
 }
 
 void WriteLink(std::ofstream& out,

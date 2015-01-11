@@ -48,6 +48,7 @@ extern const char kLinuxSchedStateBlockName[];
 // - Execution
 extern const char kExecutionBlockName[];
 extern const char kPunchBlockName[];
+extern const char kSchedWakeupBlockName[];
 extern const char kSyscallOnlyBlockName[];
 // - Critical.
 extern const char kCriticalBlockName[];

@@ -28,6 +28,13 @@ SyscallOnlyBlock::SyscallOnlyBlock()
 {
 }
 
+void SyscallOnlyBlock::LoadServices(const block::ServiceList& serviceList)
+{
+    AbstractExecutionBlock::LoadServices(serviceList);
+
+    Q_EMPTY_STRING = Quarks()->StrQuark("");
+}
+
 void SyscallOnlyBlock::AddObservers(notification::NotificationCenter* notificationCenter)
 {
     AddThreadStateObserver(notificationCenter, notification::Token(kStateSyscall),
@@ -42,7 +49,7 @@ void SyscallOnlyBlock::onSyscall(uint32_t tid, const notification::Path& path, c
     if (syscallValue != nullptr)
     {
         Stacks()->PopStack(tid);
-        Stacks()->PushStack(tid, syscallValue->AsString());
+        Stacks()->PushStack(tid, Quarks()->StrQuark(syscallValue->AsString()));
     }
 }
 
@@ -51,7 +58,7 @@ void SyscallOnlyBlock::onExitSyscall(const trace::EventValue& event)
     thread_t tid = ThreadForEvent(event);
 
     Stacks()->PopStack(tid);
-    Stacks()->PushStack(tid, "");
+    Stacks()->PushStack(tid, Q_EMPTY_STRING);
 }
 
 }  // namespace execution_blocks

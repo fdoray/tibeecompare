@@ -45,7 +45,7 @@ void ExecutionsBuilder::StartThreadExecution(thread_t thread, const std::string&
 void ExecutionsBuilder::EndThreadExecution(thread_t thread)
 {
     auto look = _currentExecutions.find(thread);
-    if (look == _currentExecutions.end())
+    if (look == _currentExecutions.end() || look->second.get() == nullptr)
         return;
 
     Execution::UP execution = std::move(look->second);

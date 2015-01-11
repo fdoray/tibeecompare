@@ -33,7 +33,7 @@ StacksBuilder::~StacksBuilder()
 {
 }
 
-void StacksBuilder::PushStack(thread_t thread, const std::string& name)
+void StacksBuilder::PushStack(thread_t thread, const quark::Quark& name)
 {
     auto& stack = _stacks[thread];
 

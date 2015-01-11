@@ -17,10 +17,12 @@
  */
 #include "gtest/gtest.h"
 
+#include "base/Constants.hpp"
 #include "execution/StacksBuilder.hpp"
 #include "execution/StacksFromDisk.hpp"
 #include "execution/StacksReader.hpp"
 #include "execution/StacksWriter.hpp"
+#include "quark/DiskQuarkDatabase.hpp"
 
 namespace tibee
 {
@@ -61,6 +63,7 @@ TEST(Execution, StacksReader)
 //               eee
 
     // Create stacks.
+    quark::DiskQuarkDatabase quarks(kDiskQuarkDatabaseTestFile);
     StacksBuilder builder;
 
     EXPECT_EQ(0u, builder.StackItemsCount(1));
@@ -70,26 +73,26 @@ TEST(Execution, StacksReader)
     builder.SetThreadName(1, "one");
 
     builder.SetTimestamp(1);
-    builder.PushStack(1, "a");
+    builder.PushStack(1, quarks.StrQuark("a"));
 
     builder.SetTimestamp(3);
-    builder.PushStack(1, "c");
+    builder.PushStack(1, quarks.StrQuark("c"));
 
     builder.SetTimestamp(5);
     builder.AddLink(1, 2);
-    builder.PushStack(2, "d");
+    builder.PushStack(2, quarks.StrQuark("d"));
 
     builder.SetTimestamp(6);
     builder.PopStack(1);
 
     builder.SetTimestamp(8);
-    builder.PushStack(2, "e");
+    builder.PushStack(2, quarks.StrQuark("e"));
 
     builder.SetTimestamp(11);
     builder.PopStack(2);
 
     builder.SetTimestamp(12);
-    builder.PushStack(1, "b");
+    builder.PushStack(1, quarks.StrQuark("b"));
 
     builder.SetTimestamp(14);
     builder.AddLink(2, 1);
@@ -117,31 +120,31 @@ TEST(Execution, StacksReader)
     EXPECT_EQ(0u, stacks.StackItemsCount(3));
 
     StackItem a;
-    a.set_name("a");
+    a.set_name(quarks.StrQuark("a"));
     a.set_depth(0);
     a.set_start(1);
     a.set_end(21);
 
     StackItem b;
-    b.set_name("b");
+    b.set_name(quarks.StrQuark("b"));
     b.set_depth(1);
     b.set_start(12);
     b.set_end(20);
 
     StackItem c;
-    c.set_name("c");
+    c.set_name(quarks.StrQuark("c"));
     c.set_depth(1);
     c.set_start(3);
     c.set_end(6);
 
     StackItem d;
-    d.set_name("d");
+    d.set_name(quarks.StrQuark("d"));
     d.set_depth(0);
     d.set_start(5);
     d.set_end(22);
 
     StackItem e;
-    e.set_name("e");
+    e.set_name(quarks.StrQuark("e"));
     e.set_depth(1);
     e.set_start(8);
     e.set_end(11);

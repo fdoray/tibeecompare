@@ -31,21 +31,17 @@ namespace execution
 
 TEST(Execution, StackItem)
 {
-    const char kName[] = "dummy";
+    const quark::Quark kNameQuark(42);
     const size_t kDepth = 4;
     const timestamp_t kStart = 10000;
     const timestamp_t kEnd = 20000;
-    const char kNumericPropertyKey[] = "numeric";
-    const uint64_t kNumericPropertyValue = 42;
-    const char kStringPropertyKey[] = "str";
-    const char kStringPropertyValue[] = "forty-two";
 
     quark::DiskQuarkDatabase quarks(kDiskQuarkDatabaseTestFile);
 
     StackItem item;
-    EXPECT_EQ("", item.name());
-    item.set_name(kName);
-    EXPECT_EQ(kName, item.name());
+    EXPECT_EQ(quark::Quark(), item.name());
+    item.set_name(kNameQuark);
+    EXPECT_EQ(kNameQuark, item.name());
 
     EXPECT_EQ(0u, item.depth());
     item.set_depth(kDepth);
@@ -58,20 +54,6 @@ TEST(Execution, StackItem)
     EXPECT_EQ(0u, item.end());
     item.set_end(kEnd);
     EXPECT_EQ(kEnd, item.end());
-
-    uint64_t numericValue = 0;
-    auto numericQuark = quarks.StrQuark(kNumericPropertyKey);
-    EXPECT_FALSE(item.GetNumericProperty(numericQuark, &numericValue));
-    item.SetNumericProperty(numericQuark, kNumericPropertyValue);
-    EXPECT_TRUE(item.GetNumericProperty(numericQuark, &numericValue));
-    EXPECT_EQ(kNumericPropertyValue, numericValue);
-
-    std::string stringValue;
-    auto stringQuark = quarks.StrQuark(kStringPropertyKey);
-    EXPECT_FALSE(item.GetStringProperty(stringQuark, &stringValue));
-    item.SetStringProperty(stringQuark, kStringPropertyValue);
-    EXPECT_TRUE(item.GetStringProperty(stringQuark, &stringValue));
-    EXPECT_EQ(kStringPropertyValue, stringValue);
 }
 
 }  // namespace execution

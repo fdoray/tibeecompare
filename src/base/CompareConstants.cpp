@@ -36,6 +36,7 @@ const char kLinuxSchedStateBlockName[] = "linux-sched-state";
 // - Execution
 const char kExecutionBlockName[] = "execution";
 const char kPunchBlockName[] = "punch";
+const char kSchedWakeupBlockName[] = "sched-wakeup";
 const char kSyscallOnlyBlockName[] = "syscall-only";
 // - Critical.
 const char kCriticalBlockName[] = "critical";

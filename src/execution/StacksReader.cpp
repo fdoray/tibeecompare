@@ -37,8 +37,8 @@ void ReadStackItem(std::ifstream& in,
     StackItem item;
 
     // Read info.
-    std::string name;
-    io::ReadStringFromStream(in, &name);
+    quark::Quark name;
+    io::ReadStream(in, &name);
     item.set_name(name);
 
     size_t depth = 0;
@@ -52,36 +52,6 @@ void ReadStackItem(std::ifstream& in,
     timestamp_t end = 0;
     io::ReadStream(in, &end);
     item.set_end(end);
-
-    // Read numeric properties.
-    size_t numNumericProperties = 0;
-    io::ReadStream(in, &numNumericProperties);
-
-    for (size_t i = 0; i < numNumericProperties; ++i)
-    {
-        quark::Quark propertyKey;
-        io::ReadStream(in, &propertyKey);
-
-        uint64_t propertyValue;
-        io::ReadStream(in, &propertyValue);
-
-        item.SetNumericProperty(propertyKey, propertyValue);
-    }
-
-    // Read string properties.
-    size_t numStringProperties = 0;
-    io::ReadStream(in, &numStringProperties);
-
-    for (size_t i = 0; i < numStringProperties; ++i)
-    {
-        quark::Quark propertyKey;
-        io::ReadStream(in, &propertyKey);
-
-        std::string propertyValue;
-        io::ReadStringFromStream(in, &propertyValue);
-
-        item.SetStringProperty(propertyKey, propertyValue);
-    }
 
     stacks->AddStackItem(thread, item);
 }
