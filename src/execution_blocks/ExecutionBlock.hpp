@@ -25,6 +25,7 @@
 #include "block/AbstractBlock.hpp"
 #include "notification/NotificationSink.hpp"
 #include "notification/Path.hpp"
+#include "quark/DiskQuarkDatabase.hpp"
 
 namespace tibee {
 namespace execution_blocks {
@@ -36,11 +37,15 @@ public:
     ~ExecutionBlock();
 
 private:
+    virtual void LoadServices(const block::ServiceList& serviceList) override;
     virtual void RegisterServices(block::ServiceList* serviceList) override;
     virtual void AddObservers(notification::NotificationCenter* notificationCenter) override;
 
     void onTimestamp(const notification::Path& path, const value::Value* value);
     void onEnd(const notification::Path& path, const value::Value* value);
+
+    // The quarks database.
+    quark::DiskQuarkDatabase* _quarks;
 
     // The stacks builder.
     execution::StacksBuilder _stacksBuilder;

@@ -47,10 +47,10 @@ public:
 
     // Traverse executions.
     size_t ExecutionsCount() const { return _completedExecutions.size(); }
-    CompletedExecutions::const_iterator executions_begin() const {
+    CompletedExecutions::const_iterator begin() const {
         return _completedExecutions.begin();
     }
-    CompletedExecutions::const_iterator executions_end() const {
+    CompletedExecutions::const_iterator end() const {
         return _completedExecutions.end();
     }
 

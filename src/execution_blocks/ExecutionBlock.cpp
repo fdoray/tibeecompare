@@ -26,19 +26,22 @@
 #include "base/BindObject.hpp"
 #include "base/CompareConstants.hpp"
 #include "base/Constants.hpp"
+#include "base/print.hpp"
 #include "block/ServiceList.hpp"
+#include "execution/ExecutionsDb.hpp"
 #include "execution/StacksWriter.hpp"
 #include "notification/NotificationCenter.hpp"
 #include "notification/Token.hpp"
-#include "trace_blocks/TraceBlock.hpp"
 
 namespace tibee {
 namespace execution_blocks {
 
 namespace bfs = boost::filesystem;
 
+using base::tbinfo;
+using base::tberror;
+using base::tbendl;
 using notification::Token;
-using trace_blocks::TraceBlock;
 
 ExecutionBlock::ExecutionBlock()
 {
@@ -54,6 +57,12 @@ void ExecutionBlock::RegisterServices(block::ServiceList* serviceList)
 {
     serviceList->AddService(kExecutionsBuilderServiceName, &_executionsBuilder);
     serviceList->AddService(kStacksBuilderServiceName, &_stacksBuilder);
+}
+
+void ExecutionBlock::LoadServices(const block::ServiceList& serviceList)
+{
+    serviceList.QueryService(kQuarksServiceName,
+                             reinterpret_cast<void**>(&_quarks));
 }
 
 void ExecutionBlock::AddObservers(notification::NotificationCenter* notificationCenter)
@@ -78,8 +87,25 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
     bfs::path stacksFileName =
         bfs::path(kHistoryDirectoryName) / (_traceId + kStacksFileName);
 
-    // Save the stacks.
+    // Write stacks to disk.
     WriteStacks(stacksFileName.string(), _stacksBuilder);
+
+    // Write executions to database.
+    execution::ExecutionsDb executionsDb(_quarks);
+    for (const auto& execution : _executionsBuilder)
+    {
+        execution::ExecutionId executionId;
+        if (executionsDb.InsertExecution(*execution, &executionId))
+        {
+            tbinfo() << "Execution " << executionId <<
+                        " with name " << execution->name() << tbendl();
+        }
+        else
+        {
+            tberror() << "Unable to insert execution with name " << execution->name() <<
+                         "in database." << tbendl();
+        }
+    }
 
     // Handle the completed executions.
     // TODO.
