@@ -48,6 +48,9 @@ protected:
     // Stacks builder.
     execution::StacksBuilder* Stacks() const { return _stacksBuilder; }
 
+    // CPU for an event.
+    uint32_t CpuForEvent(const trace::EventValue& event) const;
+
     // Thread for an event.
     thread_t ThreadForEvent(const trace::EventValue& event) const;
 

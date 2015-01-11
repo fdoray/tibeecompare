@@ -40,9 +40,14 @@ void AbstractExecutionBlock::LoadServices(const block::ServiceList& serviceList)
                              reinterpret_cast<void**>(&_currentState));
 }
 
+uint32_t AbstractExecutionBlock::CpuForEvent(const trace::EventValue& event) const
+{
+    return event.getStreamPacketContext()->GetField("cpu_id")->AsUInteger();
+}
+
 thread_t AbstractExecutionBlock::ThreadForEvent(const trace::EventValue& event) const
 {
-    auto cpu = event.getStreamPacketContext()->GetField("cpu_id")->AsUInteger();
+    auto cpu = CpuForEvent(event);
     auto thread = State()->CurrentThreadForCpu(cpu);
     return thread;
 }

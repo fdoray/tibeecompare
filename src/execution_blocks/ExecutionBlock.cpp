@@ -106,9 +106,6 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
                          "in database." << tbendl();
         }
     }
-
-    // Handle the completed executions.
-    // TODO.
 }
 
 
