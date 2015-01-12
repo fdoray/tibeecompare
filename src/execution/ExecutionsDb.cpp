@@ -90,9 +90,36 @@ bool ExecutionsDb::InsertExecution(const execution::Execution& execution,
     return true;
 }
 
-bool ReadExecution(const ExecutionId& executionId,
-                   execution::Execution* execution)
+bool ExecutionsDb::ReadExecution(const ExecutionId& executionId,
+                                 execution::Execution* execution)
 {
+    assert(execution != nullptr);
+
+    if (!Connect())
+        return false;
+
+    auto cursor = _connection.query(kExecutionsCollection, MONGO_QUERY(kIdField << executionId));
+    if (!cursor->more())
+        return false;
+
+    mongo::BSONObj obj = cursor->next();
+    execution->set_name(obj.getField(kNameField).String());
+    execution->set_trace(obj.getField(kTraceField).String());
+    execution->set_startTs(obj.getField(kStartTsField).Long());
+    execution->set_startThread(obj.getField(kStartThreadField).Int());
+    execution->set_endTs(obj.getField(kEndTsField).Long());
+    execution->set_endThread(obj.getField(kEndThreadField).Int());
+
+    auto metrics = obj.getField(kMetricsField).Obj();
+    for (auto it = metrics.begin(); it.more();)
+    {
+        mongo::BSONElement metric = it.next();
+        std::string metricName(metric.fieldName());
+        uint64_t metricValue = metric.Long();
+
+        execution->SetMetric(_quarks->StrQuark(metricName), metricValue);
+    }
+
     return true;
 }
 
