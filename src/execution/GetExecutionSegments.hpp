@@ -15,28 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_EXECUTION_GETEXECUTIONSTACKS_HPP
-#define _TIBEE_EXECUTION_GETEXECUTIONSTACKS_HPP
+#ifndef _TIBEE_EXECUTION_GETEXECUTIONSEGMENTS_HPP
+#define _TIBEE_EXECUTION_GETEXECUTIONSEGMENTS_HPP
 
 #include <vector>
 
 #include "execution/Execution.hpp"
+#include "execution/ExecutionSegment.hpp"
 #include "execution/Link.hpp"
 #include "execution/Stacks.hpp"
-#include "execution/StackSegment.hpp"
 
 namespace tibee
 {
 namespace execution
 {
 
-void GetExecutionStacks(
+void GetExecutionSegments(
     const Execution& execution,
     const Stacks& stacks,
     std::vector<Link>* links,
-    std::vector<StackSegment>* stackSegments);
+    std::vector<ExecutionSegment>* executionSegments);
 
 }  // namespace execution
 }  // namespace tibee
 
-#endif // _TIBEE_EXECUTION_GETEXECUTIONSTACKS_HPP
+#endif // _TIBEE_EXECUTION_GETEXECUTIONSEGMENTS_HPP
