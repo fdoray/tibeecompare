@@ -88,5 +88,246 @@ TEST(Execution, GetExecutionSegments)
     EXPECT_EQ(expectedExecutionSegmentsSet, executionSegmentsSet);
 }
 
+TEST(Execution, GetExecutionSegmentsWithUnrelated1)
+{
+//        0         1         2       
+//        01234567890123456789012
+//     1  **********************
+//            |    | |   |    |
+//     2      ********   ******
+//                        | |
+//     3       *****      ***
+//             |   |
+//     4   **************
+
+    // Create stacks.
+    quark::DiskQuarkDatabase quarks(kDiskQuarkDatabaseTestFile);
+    StacksBuilder builder;
+
+    builder.SetTimestamp(4);
+    builder.AddLink(1, 2);
+
+    builder.SetTimestamp(5);
+    builder.AddLink(4, 3);
+
+    builder.SetTimestamp(9);
+    builder.AddLink(2, 1);
+    builder.AddLink(3, 4);
+
+    builder.SetTimestamp(11);
+    builder.AddLink(2, 1);
+
+    builder.SetTimestamp(15);
+    builder.AddLink(1, 2);
+
+    builder.SetTimestamp(16);
+    builder.AddLink(2, 3);
+
+    builder.SetTimestamp(18);
+    builder.AddLink(3, 2);
+
+    builder.SetTimestamp(20);
+    builder.AddLink(2, 1);
+
+    // Get execution segments.
+    Execution execution;
+    execution.set_startTs(0);
+    execution.set_startThread(1);
+    execution.set_endTs(21);
+    execution.set_endThread(1);
+
+    std::vector<Link> links;
+    std::vector<ExecutionSegment> executionSegments;
+    GetExecutionSegments(execution, builder, &links, &executionSegments);
+
+    std::set<ExecutionSegment> executionSegmentsSet(
+        executionSegments.begin(), executionSegments.end());
+
+    ExecutionSegment a;
+    a.set_thread(1);
+    a.set_startTs(0);
+    a.set_endTs(21);
+
+    ExecutionSegment b;
+    b.set_thread(2);
+    b.set_startTs(4);
+    b.set_endTs(11);
+
+    ExecutionSegment c;
+    c.set_thread(2);
+    c.set_startTs(15);
+    c.set_endTs(20);
+
+    ExecutionSegment d;
+    d.set_thread(3);
+    d.set_startTs(16);
+    d.set_endTs(18);
+
+    std::set<ExecutionSegment> expectedExecutionSegmentsSet = {a, b, c, d};
+    EXPECT_EQ(expectedExecutionSegmentsSet, executionSegmentsSet);
+}
+
+TEST(Execution, GetExecutionSegmentsWithUnrelated2)
+{
+//        0         1         2         3
+//        012345678901234567890123456789012
+//     1  *********************************
+//            |    | |   |    |
+//     2      ********   ******
+//                        | |
+//     3       *****      ***     ******
+//             |   |              |    |
+//     4   ********************************
+
+    // Create stacks.
+    quark::DiskQuarkDatabase quarks(kDiskQuarkDatabaseTestFile);
+    StacksBuilder builder;
+
+    builder.SetTimestamp(4);
+    builder.AddLink(1, 2);
+
+    builder.SetTimestamp(5);
+    builder.AddLink(4, 3);
+
+    builder.SetTimestamp(9);
+    builder.AddLink(2, 1);
+    builder.AddLink(3, 4);
+
+    builder.SetTimestamp(11);
+    builder.AddLink(2, 1);
+
+    builder.SetTimestamp(15);
+    builder.AddLink(1, 2);
+
+    builder.SetTimestamp(16);
+    builder.AddLink(2, 3);
+
+    builder.SetTimestamp(18);
+    builder.AddLink(3, 2);
+
+    builder.SetTimestamp(20);
+    builder.AddLink(2, 1);
+
+    builder.SetTimestamp(24);
+    builder.AddLink(4, 3);
+
+    builder.SetTimestamp(29);
+    builder.AddLink(3, 4);
+
+    // Get execution segments.
+    Execution execution;
+    execution.set_startTs(0);
+    execution.set_startThread(1);
+    execution.set_endTs(32);
+    execution.set_endThread(1);
+
+    std::vector<Link> links;
+    std::vector<ExecutionSegment> executionSegments;
+    GetExecutionSegments(execution, builder, &links, &executionSegments);
+
+    std::set<ExecutionSegment> executionSegmentsSet(
+        executionSegments.begin(), executionSegments.end());
+
+    ExecutionSegment a;
+    a.set_thread(1);
+    a.set_startTs(0);
+    a.set_endTs(32);
+
+    ExecutionSegment b;
+    b.set_thread(2);
+    b.set_startTs(4);
+    b.set_endTs(11);
+
+    ExecutionSegment c;
+    c.set_thread(2);
+    c.set_startTs(15);
+    c.set_endTs(20);
+
+    ExecutionSegment d;
+    d.set_thread(3);
+    d.set_startTs(16);
+    d.set_endTs(18);
+
+    std::set<ExecutionSegment> expectedExecutionSegmentsSet = {a, b, c, d};
+    EXPECT_EQ(expectedExecutionSegmentsSet, executionSegmentsSet);
+}
+
+TEST(Execution, GetExecutionSegmentsWithSharedResource)
+{
+//        0         1         2
+//        012345678901234567890123
+//     1  ************************
+//            |    | |   |    |
+//     2      ********   ******
+//               |        | |
+//     3  ********        ***
+
+    // Create stacks.
+    quark::DiskQuarkDatabase quarks(kDiskQuarkDatabaseTestFile);
+    StacksBuilder builder;
+
+    builder.SetTimestamp(4);
+    builder.AddLink(1, 2);
+
+    builder.SetTimestamp(7);
+    builder.AddLink(3, 2);
+
+    builder.SetTimestamp(9);
+    builder.AddLink(2, 1);
+    builder.AddLink(3, 4);
+
+    builder.SetTimestamp(11);
+    builder.AddLink(2, 1);
+
+    builder.SetTimestamp(15);
+    builder.AddLink(1, 2);
+
+    builder.SetTimestamp(16);
+    builder.AddLink(2, 3);
+
+    builder.SetTimestamp(18);
+    builder.AddLink(3, 2);
+
+    builder.SetTimestamp(20);
+    builder.AddLink(2, 1);
+
+    // Get execution segments.
+    Execution execution;
+    execution.set_startTs(0);
+    execution.set_startThread(1);
+    execution.set_endTs(23);
+    execution.set_endThread(1);
+
+    std::vector<Link> links;
+    std::vector<ExecutionSegment> executionSegments;
+    GetExecutionSegments(execution, builder, &links, &executionSegments);
+
+    std::set<ExecutionSegment> executionSegmentsSet(
+        executionSegments.begin(), executionSegments.end());
+
+    ExecutionSegment a;
+    a.set_thread(1);
+    a.set_startTs(0);
+    a.set_endTs(23);
+
+    ExecutionSegment b;
+    b.set_thread(2);
+    b.set_startTs(4);
+    b.set_endTs(11);
+
+    ExecutionSegment c;
+    c.set_thread(2);
+    c.set_startTs(15);
+    c.set_endTs(20);
+
+    ExecutionSegment d;
+    d.set_thread(3);
+    d.set_startTs(16);
+    d.set_endTs(18);
+
+    std::set<ExecutionSegment> expectedExecutionSegmentsSet = {a, b, c, d};
+    EXPECT_EQ(expectedExecutionSegmentsSet, executionSegmentsSet);
+}
+
 }  // namespace execution
 }  // namespace tibee

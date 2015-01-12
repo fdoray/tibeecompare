@@ -17,6 +17,7 @@
  */
 #include "execution/GetExecutionSegments.hpp"
 
+#include <iostream>
 #include <queue>
 #include <unordered_map>
 
@@ -71,15 +72,15 @@ void CreateTimePointsInternal(
     auto& sourceThread = (*timePointsPerThread)[link.sourceThread()];
     auto& targetThread = (*timePointsPerThread)[link.targetThread()];
 
-    if (sourceThread.empty())
-        return;
-
     TimePoint::UP sourceTimePoint(new TimePoint(link.sourceThread(), link.sourceTs()));
-    TimePoint::UP targetTimePoint(new TimePoint(link.sourceThread(), link.sourceTs()));
+    TimePoint::UP targetTimePoint(new TimePoint(link.targetThread(), link.targetTs()));
 
-    auto* sourcePrevTimePoint = sourceThread.back().get();
-    sourcePrevTimePoint->hout = sourceTimePoint.get();
-    sourceTimePoint->hin = sourcePrevTimePoint;
+    if (!sourceThread.empty())
+    {
+        auto* sourcePrevTimePoint = sourceThread.back().get();
+        sourcePrevTimePoint->hout = sourceTimePoint.get();
+        sourceTimePoint->hin = sourcePrevTimePoint;
+    }
 
     if (!targetThread.empty())
     {
@@ -131,41 +132,64 @@ bool CreateTimePoints(
     return true;
 }
 
-void AssignLevels(TimePoint* start)
+void AssignLevels(TimePoint* start, TimePoint* end)
 {
     std::queue<TimePoint*> queue;
+    std::queue<TimePoint*> partialQueue;
     queue.push(start);
+
+    bool reachedEnd = false;
 
     while (!queue.empty())
     {
         TimePoint* point = queue.front();
         queue.pop();
 
-        uint32_t hlevel = kInvalidLevel;
-        uint32_t vlevel = kInvalidLevel;
-
-        if (point->hin != nullptr)
-            hlevel = point->hin->level;
-        if (point->vin != nullptr)
-            vlevel = point->vin->level;
-
-        if (hlevel == kInvalidLevel && vlevel == kInvalidLevel)
-            point->level = 0;
-        else if (hlevel == kInvalidLevel || vlevel < hlevel)
-            point->level = vlevel + 1;
-        else
-            point->level = hlevel;
-
-        if (point->hout != nullptr &&
-            (point->hout->vin == nullptr || point->hout->vin->level != kInvalidLevel))
+        if (point->level == kInvalidLevel)
         {
-            queue.push(point->hout);
+            uint32_t hlevel = kInvalidLevel;
+            uint32_t vlevel = kInvalidLevel;
+
+            if (point->hin != nullptr)
+                hlevel = point->hin->level;
+            if (point->vin != nullptr)
+                vlevel = point->vin->level;
+
+            if (hlevel == kInvalidLevel && vlevel == kInvalidLevel)
+                point->level = 0;
+            else if (hlevel == kInvalidLevel || vlevel < hlevel)
+                point->level = vlevel + 1;
+            else
+                point->level = hlevel;
+
+            if (point->hout != nullptr)
+            {
+                if (point->hout->vin == nullptr || point->hout->vin->level != kInvalidLevel)
+                {
+                    queue.push(point->hout);
+                }
+                else
+                {
+                    partialQueue.push(point->hout);
+                }
+            }
+
+            if (point->vout != nullptr)
+            {
+                queue.push(point->vout);
+            }
+
+            if (point == end)
+            {
+                reachedEnd = true;
+            }
         }
 
-        if (point->vout != nullptr &&
-            (point->vout->hin == nullptr || point->vout->hin->level != kInvalidLevel))
+        // Avoid being blocked before reaching the end...
+        if (!reachedEnd && queue.empty())
         {
-            queue.push(point->vout);
+            queue.push(partialQueue.front());
+            partialQueue.pop();
         }
     }
 }
@@ -187,11 +211,13 @@ void GetExecutionSegmentsInternal(
         {
             if (startTs == kInvalidTs)
             {
-                startTs = timePoint->ts;
+                if (timePoint->level != kInvalidLevel)
+                    startTs = timePoint->ts;
             }
-            else if ((timePoint->hout != nullptr &&
-                      timePoint->hout->vin != nullptr &&
-                      timePoint->hout->vin->level < timePoint->hout->level) ||
+            else if ((timePoint->hout != nullptr && (
+                      (timePoint->hout->vin != nullptr &&
+                       timePoint->hout->vin->level < timePoint->hout->level) ||
+                      timePoint->hout->level == kInvalidLevel)) ||
                      index == timePoints.size() - 1)
             {
                 ExecutionSegment executionSegment;
@@ -224,7 +250,7 @@ void GetExecutionSegments(
         return;
 
     // Assign levels to the nodes of the graph.
-    AssignLevels(start);
+    AssignLevels(start, end);
 
     // On each thread, find continuous segments without a
     // vertical-in link from a smaller level.
