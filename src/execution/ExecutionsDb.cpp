@@ -90,6 +90,12 @@ bool ExecutionsDb::InsertExecution(const execution::Execution& execution,
     return true;
 }
 
+bool ReadExecution(const ExecutionId& executionId,
+                   execution::Execution* execution)
+{
+    return true;
+}
+
 bool ExecutionsDb::UpdateAvailableMetrics(const execution::Execution& execution)
 {
     return true;

@@ -214,19 +214,31 @@ void GetExecutionSegmentsInternal(
                 if (timePoint->level != kInvalidLevel)
                     startTs = timePoint->ts;
             }
-            else if ((timePoint->hout != nullptr && (
+            else
+            {
+                if ((timePoint->hout != nullptr && (
                       (timePoint->hout->vin != nullptr &&
                        timePoint->hout->vin->level < timePoint->hout->level) ||
                       timePoint->hout->level == kInvalidLevel)) ||
                      index == timePoints.size() - 1)
-            {
-                ExecutionSegment executionSegment;
-                executionSegment.set_thread(thread);
-                executionSegment.set_startTs(startTs);
-                executionSegment.set_endTs(timePoint->ts);
-                executionSegments->push_back(executionSegment);
+                {
+                    ExecutionSegment executionSegment;
+                    executionSegment.set_thread(thread);
+                    executionSegment.set_startTs(startTs);
+                    executionSegment.set_endTs(timePoint->ts);
+                    executionSegments->push_back(executionSegment);
 
-                startTs = kInvalidTs;
+                    startTs = kInvalidTs;
+                }
+
+                if (timePoint->vout != nullptr)
+                {
+                    links->push_back(Link(
+                        timePoint->thread,
+                        timePoint->ts,
+                        timePoint->vout->thread,
+                        timePoint->vout->ts));
+                }
             }
 
             ++index;

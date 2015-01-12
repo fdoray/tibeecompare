@@ -84,8 +84,15 @@ TEST(Execution, GetExecutionSegments)
     c.set_endTs(20);
 
     std::set<ExecutionSegment> expectedExecutionSegmentsSet = {a, b, c};
+    std::set<Link> expectedLinks = {
+        Link(1, 4, 2, 4),
+        Link(2, 9, 1, 9),
+        Link(2, 11, 1, 11),
+        Link(1, 15, 2, 15),
+        Link(2, 20, 1, 20)};
 
     EXPECT_EQ(expectedExecutionSegmentsSet, executionSegmentsSet);
+    EXPECT_EQ(expectedLinks, std::set<Link>(links.begin(), links.end()));
 }
 
 TEST(Execution, GetExecutionSegmentsWithUnrelated1)
@@ -163,8 +170,18 @@ TEST(Execution, GetExecutionSegmentsWithUnrelated1)
     d.set_startTs(16);
     d.set_endTs(18);
 
+    std::set<Link> expectedLinks = {
+        Link(1, 4, 2, 4),
+        Link(2, 9, 1, 9),
+        Link(2, 11, 1, 11),
+        Link(1, 15, 2, 15),
+        Link(2, 20, 1, 20),
+        Link(2, 16, 3, 16),
+        Link(3, 18, 2, 18)};
+
     std::set<ExecutionSegment> expectedExecutionSegmentsSet = {a, b, c, d};
     EXPECT_EQ(expectedExecutionSegmentsSet, executionSegmentsSet);
+    EXPECT_EQ(expectedLinks, std::set<Link>(links.begin(), links.end()));
 }
 
 TEST(Execution, GetExecutionSegmentsWithUnrelated2)
@@ -248,8 +265,18 @@ TEST(Execution, GetExecutionSegmentsWithUnrelated2)
     d.set_startTs(16);
     d.set_endTs(18);
 
+    std::set<Link> expectedLinks = {
+        Link(1, 4, 2, 4),
+        Link(2, 9, 1, 9),
+        Link(2, 11, 1, 11),
+        Link(1, 15, 2, 15),
+        Link(2, 20, 1, 20),
+        Link(2, 16, 3, 16),
+        Link(3, 18, 2, 18)};
+
     std::set<ExecutionSegment> expectedExecutionSegmentsSet = {a, b, c, d};
     EXPECT_EQ(expectedExecutionSegmentsSet, executionSegmentsSet);
+    EXPECT_EQ(expectedLinks, std::set<Link>(links.begin(), links.end()));
 }
 
 TEST(Execution, GetExecutionSegmentsWithSharedResource)
@@ -325,8 +352,18 @@ TEST(Execution, GetExecutionSegmentsWithSharedResource)
     d.set_startTs(16);
     d.set_endTs(18);
 
+    std::set<Link> expectedLinks = {
+        Link(1, 4, 2, 4),
+        Link(2, 9, 1, 9),
+        Link(2, 11, 1, 11),
+        Link(1, 15, 2, 15),
+        Link(2, 20, 1, 20),
+        Link(2, 16, 3, 16),
+        Link(3, 18, 2, 18)};
+
     std::set<ExecutionSegment> expectedExecutionSegmentsSet = {a, b, c, d};
     EXPECT_EQ(expectedExecutionSegmentsSet, executionSegmentsSet);
+    EXPECT_EQ(expectedLinks, std::set<Link>(links.begin(), links.end()));
 }
 
 }  // namespace execution

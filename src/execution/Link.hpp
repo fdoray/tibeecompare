@@ -55,6 +55,22 @@ public:
             _targetTs == other._targetTs;
     }
 
+    bool operator<(const Link& other) const {
+        if (_sourceThread < other._sourceThread)
+            return true;
+        if (_sourceThread > other._sourceThread)
+            return false;
+        if (_sourceTs < other._sourceTs)
+            return true;
+        if (_sourceTs > other._sourceTs)
+            return false;
+        if (_targetThread < other._targetThread)
+            return true;
+        if (_targetThread > other._targetThread)
+            return false;
+        return _targetTs < other._targetTs;
+    }
+
 private:
     thread_t _sourceThread;
     timestamp_t _sourceTs;

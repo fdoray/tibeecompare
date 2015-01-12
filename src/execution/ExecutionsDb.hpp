@@ -40,6 +40,9 @@ public:
     bool InsertExecution(const execution::Execution& execution,
                          ExecutionId* executionId);
 
+    bool ReadExecution(const ExecutionId& executionId,
+                       execution::Execution* execution);
+
 private:
     bool UpdateAvailableMetrics(const execution::Execution& execution);
 
