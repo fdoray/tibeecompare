@@ -25,6 +25,7 @@
 
 #include "base/Inserter.hpp"
 #include "base/print.hpp"
+#include "execution/Vertex.hpp"
 
 namespace tibee
 {
@@ -33,33 +34,6 @@ namespace execution
 
 namespace
 {
-
-const timestamp_t kInvalidTs = -1;
-const uint32_t kInvalidLevel = -1;
-
-struct Vertex
-{
-    typedef std::unique_ptr<Vertex> UP;
-
-    Vertex(thread_t thread, timestamp_t ts)
-        : thread(thread), ts(ts),
-          hout(nullptr), hin(nullptr),
-          vout(nullptr), vin(nullptr),
-          level(kInvalidLevel) {}
-
-    thread_t thread;
-    timestamp_t ts;
-
-    Vertex* hout;
-    Vertex* hin;
-    Vertex* vout;
-    Vertex* vin;
-
-    uint32_t level;
-};
-
-typedef std::vector<std::unique_ptr<Vertex>> Vertices;
-typedef std::unordered_map<thread_t, Vertices> VerticesPerThread;
 
 void CreateVerticesInternal(
     const Link& link,
