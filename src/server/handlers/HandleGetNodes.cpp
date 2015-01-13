@@ -312,6 +312,19 @@ bool HandleGetNodes(mq::MessageDecoder* request,
             &segments[i]);
     }
 
+    // Write the response: thread names.
+    std::unordered_set<thread_t> tids;
+    for (const auto& segment : segments[executionIndex])
+        tids.insert(segment.thread());
+    
+    response->Write(static_cast<int32_t>(tids.size()));
+    for (thread_t tid : tids)
+    {
+        response->Write(static_cast<int32_t>(tid));
+        response->WriteString(
+            stacks[executions[executionIndex].trace()].GetThread(tid).name());
+    }
+
     // Collect node types.
     quark::QuarkDatabase<std::string> types;
     for (size_t i = 0; i < executionIds.size(); ++i)

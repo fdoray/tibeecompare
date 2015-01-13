@@ -55,6 +55,9 @@ public:
 
     // Enumerate threads with their names.
     virtual void EnumerateThreads(const EnumerateThreadsCallback& callback) const = 0;    
+
+    // Get information about a thread.
+    virtual const Thread& GetThread(thread_t thread) const = 0;
 };
 
 }  // namespace execution

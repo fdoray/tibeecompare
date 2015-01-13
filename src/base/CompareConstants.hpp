@@ -51,6 +51,7 @@ extern const char kExecutionBlockName[];
 extern const char kPunchBlockName[];
 extern const char kSchedWakeupBlockName[];
 extern const char kSyscallOnlyBlockName[];
+extern const char kThreadNameBlockName[];
 // - Critical.
 extern const char kCriticalBlockName[];
 

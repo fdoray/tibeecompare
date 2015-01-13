@@ -55,6 +55,11 @@ void SchedWakeupBlock::OnTTWU(const trace::EventValue& event)
     uint32_t source_tid = ThreadForEvent(event);
     uint32_t target_tid = event.getEventField("tid")->AsUInteger();
 
+    // Ignore kernel threads.
+    // TODO: Improve this.
+    if (target_tid < 250)
+        return;
+
     Stacks()->AddLink(source_tid, target_tid);
 }
 

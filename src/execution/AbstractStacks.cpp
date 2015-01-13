@@ -95,5 +95,10 @@ void AbstractStacks::EnumerateThreads(const EnumerateThreadsCallback& callback) 
     }
 }
 
+const Thread& AbstractStacks::GetThread(thread_t thread) const
+{
+    return _threads.find(thread)->second;
+}
+
 }  // namespace execution
 }  // namespace tibee

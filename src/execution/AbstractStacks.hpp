@@ -56,6 +56,8 @@ public:
 
     virtual void EnumerateThreads(const EnumerateThreadsCallback& callback) const override;
 
+    virtual const Thread& GetThread(thread_t thread) const override;
+
 protected:
     // Stack history, per thread.
     typedef std::unordered_map<

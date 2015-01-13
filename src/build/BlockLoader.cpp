@@ -23,6 +23,7 @@
 #include "execution_blocks/PunchBlock.hpp"
 #include "execution_blocks/SchedWakeupBlock.hpp"
 #include "execution_blocks/SyscallOnlyBlock.hpp"
+#include "execution_blocks/ThreadNameBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
 #include "trace_blocks/TraceBlock.hpp"
@@ -46,6 +47,8 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
         block.reset(new execution_blocks::SchedWakeupBlock);
     } else if (name == kSyscallOnlyBlockName) {
         block.reset(new execution_blocks::SyscallOnlyBlock);
+    } else if (name == kThreadNameBlockName) {
+        block.reset(new execution_blocks::ThreadNameBlock);
     } else if (name == kTraceBlockName) {
         block.reset(new trace_blocks::TraceBlock);
     } else if (name == kCurrentStateBlockName) {

@@ -9,6 +9,7 @@ sources = [
     'PunchBlock.cpp',
     'SchedWakeupBlock.cpp',
     'SyscallOnlyBlock.cpp',
+    'ThreadNameBlock.cpp',
 ]
 
 Return('sources')
