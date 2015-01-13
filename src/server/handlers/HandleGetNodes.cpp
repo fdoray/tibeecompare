@@ -177,7 +177,6 @@ void WriteLinks(
 {
     int32_t numLinks = links.size();
     response->Write(numLinks);
-    std::cout << "links = " << numLinks << std::endl;
 
     for (const auto& link : links)
     {
@@ -297,7 +296,7 @@ bool HandleGetNodes(mq::MessageDecoder* request,
 
         // Read the stacks of the trace from disk.
         auto look = stacks.find(executions[i].trace());
-        if (look != stacks.end())
+        if (look == stacks.end())
         {
             bfs::path stacksFileName =
                 bfs::path(kHistoryDirectoryName) / (executions[i].trace() + kStacksFileName);

@@ -19,6 +19,7 @@
 #define _TIBEE_BUILDERBLOCKS_SCHEDWAKEUPBLOCK_HPP
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include "base/BasicTypes.hpp"
 #include "execution_blocks/AbstractExecutionBlock.hpp"
@@ -48,13 +49,18 @@ private:
     void OnTTWU(const trace::EventValue& event);
     void OnInterruptEntry(const trace::EventValue& event);
     void OnInterruptExit(const trace::EventValue& event);
+    void OnExecName(uint32_t tid, const notification::Path& path, const value::Value* value);
+
+    // Settings to ignore some wake-up types.
+    bool _withIO;
+    bool _withFutex;
+
+    // Tids of excluded (kworker) threads.
+    std::unordered_set<thread_t> _excludedThreads;
 
     // Number of nested interrupts per CPU.
     typedef std::unordered_map<uint32_t, uint32_t> NestedInterrupts;
     NestedInterrupts _nestedInterrupts;
-
-    bool _withIO;
-    bool _withFutex;
 
     // Constant quarks.
     quark::Quark Q_LINUX;

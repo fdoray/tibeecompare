@@ -65,6 +65,8 @@ void SchedWakeupBlock::AddObservers(notification::NotificationCenter* notificati
     AddKernelObserver(notificationCenter, Token("irq_handler_exit"), base::BindObject(&SchedWakeupBlock::OnInterruptExit, this));
     AddKernelObserver(notificationCenter, Token("hrtimer_expire_entry"), base::BindObject(&SchedWakeupBlock::OnInterruptEntry, this));
     AddKernelObserver(notificationCenter, Token("hrtimer_expire_exit"), base::BindObject(&SchedWakeupBlock::OnInterruptExit, this));
+    AddThreadStateObserver(notificationCenter, notification::Token(kStateExecName),
+                           base::BindObject(&SchedWakeupBlock::OnExecName, this));
 }
 
 void SchedWakeupBlock::OnTTWU(const trace::EventValue& event)
@@ -79,8 +81,7 @@ void SchedWakeupBlock::OnTTWU(const trace::EventValue& event)
     uint32_t target_tid = event.getEventField("tid")->AsUInteger();
 
     // Ignore kernel threads.
-    // TODO: Improve this.
-    if (target_tid < 250)
+    if (_excludedThreads.find(target_tid) != _excludedThreads.end())
         return;
 
     // Handle excluded system calls.
@@ -113,6 +114,17 @@ void SchedWakeupBlock::OnInterruptExit(const trace::EventValue& event)
     auto look = _nestedInterrupts.find(cpu);
     if (look != _nestedInterrupts.end() && look->second != 0);
         --look->second;
+}
+
+void SchedWakeupBlock::OnExecName(uint32_t tid, const notification::Path& path, const value::Value* value)
+{
+    auto threadNameValue = value->GetField(kCurrentStateAttributeValueField);
+    if (threadNameValue != nullptr)
+    {
+        std::string threadName(threadNameValue->AsString());
+        if (threadName.substr(0, 7) == "kworker")
+            _excludedThreads.insert(tid);
+    }
 }
 
 }  // namespace execution_blocks

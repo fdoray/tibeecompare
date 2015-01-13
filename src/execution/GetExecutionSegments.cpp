@@ -19,8 +19,11 @@
 
 #include <iostream>
 #include <queue>
+#include <set>
 #include <unordered_map>
+#include <unordered_set>
 
+#include "base/Inserter.hpp"
 #include "base/print.hpp"
 
 namespace tibee
@@ -34,11 +37,11 @@ namespace
 const timestamp_t kInvalidTs = -1;
 const uint32_t kInvalidLevel = -1;
 
-struct TimePoint
+struct Vertex
 {
-    typedef std::unique_ptr<TimePoint> UP;
+    typedef std::unique_ptr<Vertex> UP;
 
-    TimePoint(thread_t thread, timestamp_t ts)
+    Vertex(thread_t thread, timestamp_t ts)
         : thread(thread), ts(ts),
           hout(nullptr), hin(nullptr),
           vout(nullptr), vin(nullptr),
@@ -47,20 +50,20 @@ struct TimePoint
     thread_t thread;
     timestamp_t ts;
 
-    TimePoint* hout;
-    TimePoint* hin;
-    TimePoint* vout;
-    TimePoint* vin;
+    Vertex* hout;
+    Vertex* hin;
+    Vertex* vout;
+    Vertex* vin;
 
     uint32_t level;
 };
 
-typedef std::vector<std::unique_ptr<TimePoint>> TimePoints;
-typedef std::unordered_map<thread_t, TimePoints> TimePointsPerThread;
+typedef std::vector<std::unique_ptr<Vertex>> Vertices;
+typedef std::unordered_map<thread_t, Vertices> VerticesPerThread;
 
-void CreateTimePointsInternal(
+void CreateVerticesInternal(
     const Link& link,
-    TimePointsPerThread* timePointsPerThread)
+    VerticesPerThread* verticesPerThread)
 {
     if (link.sourceThread() == link.targetThread())
     {
@@ -69,80 +72,80 @@ void CreateTimePointsInternal(
         return;
     }
 
-    auto& sourceThread = (*timePointsPerThread)[link.sourceThread()];
-    auto& targetThread = (*timePointsPerThread)[link.targetThread()];
+    auto& sourceThread = (*verticesPerThread)[link.sourceThread()];
+    auto& targetThread = (*verticesPerThread)[link.targetThread()];
 
-    TimePoint::UP sourceTimePoint(new TimePoint(link.sourceThread(), link.sourceTs()));
-    TimePoint::UP targetTimePoint(new TimePoint(link.targetThread(), link.targetTs()));
+    Vertex::UP sourceVertex(new Vertex(link.sourceThread(), link.sourceTs()));
+    Vertex::UP targetVertex(new Vertex(link.targetThread(), link.targetTs()));
 
     if (!sourceThread.empty())
     {
-        auto* sourcePrevTimePoint = sourceThread.back().get();
-        sourcePrevTimePoint->hout = sourceTimePoint.get();
-        sourceTimePoint->hin = sourcePrevTimePoint;
+        auto* sourcePrevVertex = sourceThread.back().get();
+        sourcePrevVertex->hout = sourceVertex.get();
+        sourceVertex->hin = sourcePrevVertex;
     }
 
     if (!targetThread.empty())
     {
-        auto* targetPrevTimePoint = targetThread.back().get();
-        targetPrevTimePoint->hout = targetTimePoint.get();
-        targetTimePoint->hin = targetPrevTimePoint;
+        auto* targetPrevVertex = targetThread.back().get();
+        targetPrevVertex->hout = targetVertex.get();
+        targetVertex->hin = targetPrevVertex;
     }
 
-    sourceTimePoint->vout = targetTimePoint.get();
-    targetTimePoint->vin = sourceTimePoint.get();
+    sourceVertex->vout = targetVertex.get();
+    targetVertex->vin = sourceVertex.get();
 
-    sourceThread.push_back(std::move(sourceTimePoint));
-    targetThread.push_back(std::move(targetTimePoint));
+    sourceThread.push_back(std::move(sourceVertex));
+    targetThread.push_back(std::move(targetVertex));
 }
 
-bool CreateTimePoints(
+bool CreateVertices(
     const Execution& execution,
     const Stacks& stacks,
-    TimePointsPerThread* timePointsPerThread,
-    TimePoint** start,
-    TimePoint** end)
+    VerticesPerThread* verticesPerThread,
+    Vertex** start,
+    Vertex** end)
 {
     namespace pl = std::placeholders;
 
     // Add initial time point.
-    TimePoint::UP startUP(new TimePoint(execution.startThread(), execution.startTs()));
+    Vertex::UP startUP(new Vertex(execution.startThread(), execution.startTs()));
     *start = startUP.get();
-    (*timePointsPerThread)[execution.startThread()].push_back(std::move(startUP));
+    (*verticesPerThread)[execution.startThread()].push_back(std::move(startUP));
 
     // Follow links to create time points.
     stacks.EnumerateLinks(
         containers::Interval(execution.startTs(), execution.endTs()),
-        std::bind(&CreateTimePointsInternal, pl::_1, timePointsPerThread));
+        std::bind(&CreateVerticesInternal, pl::_1, verticesPerThread));
 
     // Add final time point.
-    auto& prevThread = (*timePointsPerThread)[execution.endThread()];
+    auto& prevThread = (*verticesPerThread)[execution.endThread()];
     if (prevThread.empty())
     {
         base::tberror() << "No previous time point on thread " << execution.endThread() << "." << base::tbendl();
         return false;
     }
-    auto* prevTimePoint = prevThread.back().get();
-    TimePoint::UP endUP(new TimePoint(execution.endThread(), execution.endTs()));
+    auto* prevVertex = prevThread.back().get();
+    Vertex::UP endUP(new Vertex(execution.endThread(), execution.endTs()));
     *end = endUP.get();
-    prevTimePoint->hout = endUP.get();
-    endUP->hin = prevTimePoint;
-    (*timePointsPerThread)[execution.endThread()].push_back(std::move(endUP));
+    prevVertex->hout = endUP.get();
+    endUP->hin = prevVertex;
+    (*verticesPerThread)[execution.endThread()].push_back(std::move(endUP));
 
     return true;
 }
 
-void AssignLevels(TimePoint* start, TimePoint* end)
+void AssignLevels(Vertex* start, Vertex* end)
 {
-    std::queue<TimePoint*> queue;
-    std::queue<TimePoint*> partialQueue;
+    std::queue<Vertex*> queue;
+    std::queue<Vertex*> partialQueue;
     queue.push(start);
 
     bool reachedEnd = false;
 
     while (!queue.empty())
     {
-        TimePoint* point = queue.front();
+        Vertex* point = queue.front();
         queue.pop();
 
         if (point->level == kInvalidLevel)
@@ -195,49 +198,49 @@ void AssignLevels(TimePoint* start, TimePoint* end)
 }
 
 void GetExecutionSegmentsInternal(
-    const TimePointsPerThread& timePointsPerThread,
+    const VerticesPerThread& verticesPerThread,
     std::vector<Link>* links,
     ExecutionSegments* executionSegments)
 {
-    for (const auto& threadTimePoints : timePointsPerThread)
+    for (const auto& threadVertices : verticesPerThread)
     {
-        thread_t thread = threadTimePoints.first;
-        const auto& timePoints = threadTimePoints.second;
+        thread_t thread = threadVertices.first;
+        const auto& vertices = threadVertices.second;
 
         timestamp_t startTs = kInvalidTs;
         size_t index = 0;
 
-        for (const auto& timePoint : timePoints)
+        for (const auto& vertex : vertices)
         {
             if (startTs == kInvalidTs)
             {
-                if (timePoint->level != kInvalidLevel)
-                    startTs = timePoint->ts;
+                if (vertex->level != kInvalidLevel)
+                    startTs = vertex->ts;
             }
             else
             {
-                if ((timePoint->hout != nullptr && (
-                      (timePoint->hout->vin != nullptr &&
-                       timePoint->hout->vin->level < timePoint->hout->level) ||
-                      timePoint->hout->level == kInvalidLevel)) ||
-                     index == timePoints.size() - 1)
+                if ((vertex->hout != nullptr && (
+                      (vertex->hout->vin != nullptr &&
+                       vertex->hout->vin->level < vertex->hout->level) ||
+                      vertex->hout->level == kInvalidLevel)) ||
+                     index == vertices.size() - 1)
                 {
                     ExecutionSegment executionSegment;
                     executionSegment.set_thread(thread);
                     executionSegment.set_startTs(startTs);
-                    executionSegment.set_endTs(timePoint->ts);
+                    executionSegment.set_endTs(vertex->ts);
                     executionSegments->push_back(executionSegment);
 
                     startTs = kInvalidTs;
                 }
 
-                if (timePoint->vout != nullptr)
+                if (vertex->vout != nullptr)
                 {
                     links->push_back(Link(
-                        timePoint->thread,
-                        timePoint->ts,
-                        timePoint->vout->thread,
-                        timePoint->vout->ts));
+                        vertex->thread,
+                        vertex->ts,
+                        vertex->vout->thread,
+                        vertex->vout->ts));
                 }
             }
 
@@ -255,10 +258,10 @@ void GetExecutionSegments(
     ExecutionSegments* executionSegments)
 {
     // Create graph.
-    TimePointsPerThread timePointsPerThread;
-    TimePoint* start = nullptr;
-    TimePoint* end = nullptr;
-    if (!CreateTimePoints(execution, stacks, &timePointsPerThread, &start, &end))
+    VerticesPerThread verticesPerThread;
+    Vertex* start = nullptr;
+    Vertex* end = nullptr;
+    if (!CreateVertices(execution, stacks, &verticesPerThread, &start, &end))
         return;
 
     // Assign levels to the nodes of the graph.
@@ -266,7 +269,7 @@ void GetExecutionSegments(
 
     // On each thread, find continuous segments without a
     // vertical-in link from a smaller level.
-    GetExecutionSegmentsInternal(timePointsPerThread, links, executionSegments);
+    GetExecutionSegmentsInternal(verticesPerThread, links, executionSegments);
 }
 
 }  // namespace execution
