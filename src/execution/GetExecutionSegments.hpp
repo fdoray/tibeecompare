@@ -20,10 +20,9 @@
 
 #include <vector>
 
-#include "execution/Execution.hpp"
 #include "execution/ExecutionSegment.hpp"
 #include "execution/Link.hpp"
-#include "execution/Stacks.hpp"
+#include "execution/Vertex.hpp"
 
 namespace tibee
 {
@@ -33,8 +32,7 @@ namespace execution
 typedef std::vector<ExecutionSegment> ExecutionSegments;
 
 void GetExecutionSegments(
-    const Execution& execution,
-    const Stacks& stacks,
+    const VerticesPerThread& verticesPerThread,
     std::vector<Link>* links,
     ExecutionSegments* executionSegments);
 

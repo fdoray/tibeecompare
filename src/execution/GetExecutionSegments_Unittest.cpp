@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 
 #include "base/Constants.hpp"
+#include "execution/GenerateExecutionGraph.hpp"
 #include "execution/GetExecutionSegments.hpp"
 #include "execution/StacksBuilder.hpp"
 #include "quark/DiskQuarkDatabase.hpp"
@@ -61,9 +62,13 @@ TEST(Execution, GetExecutionSegments)
     execution.set_endTs(21);
     execution.set_endThread(1);
 
+    VerticesPerThread vertices;
+    Vertex* start = nullptr;
+    Vertex* end = nullptr;
+    GenerateExecutionGraph(execution, builder, &vertices, &start, &end);
     std::vector<Link> links;
     std::vector<ExecutionSegment> executionSegments;
-    GetExecutionSegments(execution, builder, &links, &executionSegments);
+    GetExecutionSegments(vertices, &links, &executionSegments);
 
     std::set<ExecutionSegment> executionSegmentsSet(
         executionSegments.begin(), executionSegments.end());
@@ -143,9 +148,13 @@ TEST(Execution, GetExecutionSegmentsWithUnrelated1)
     execution.set_endTs(21);
     execution.set_endThread(1);
 
+    VerticesPerThread vertices;
+    Vertex* start = nullptr;
+    Vertex* end = nullptr;
+    GenerateExecutionGraph(execution, builder, &vertices, &start, &end);
     std::vector<Link> links;
     std::vector<ExecutionSegment> executionSegments;
-    GetExecutionSegments(execution, builder, &links, &executionSegments);
+    GetExecutionSegments(vertices, &links, &executionSegments);
 
     std::set<ExecutionSegment> executionSegmentsSet(
         executionSegments.begin(), executionSegments.end());
@@ -238,9 +247,13 @@ TEST(Execution, GetExecutionSegmentsWithUnrelated2)
     execution.set_endTs(32);
     execution.set_endThread(1);
 
+    VerticesPerThread vertices;
+    Vertex* start = nullptr;
+    Vertex* end = nullptr;
+    GenerateExecutionGraph(execution, builder, &vertices, &start, &end);
     std::vector<Link> links;
     std::vector<ExecutionSegment> executionSegments;
-    GetExecutionSegments(execution, builder, &links, &executionSegments);
+    GetExecutionSegments(vertices, &links, &executionSegments);
 
     std::set<ExecutionSegment> executionSegmentsSet(
         executionSegments.begin(), executionSegments.end());
@@ -325,9 +338,13 @@ TEST(Execution, GetExecutionSegmentsWithSharedResource)
     execution.set_endTs(23);
     execution.set_endThread(1);
 
+    VerticesPerThread vertices;
+    Vertex* start = nullptr;
+    Vertex* end = nullptr;
+    GenerateExecutionGraph(execution, builder, &vertices, &start, &end);
     std::vector<Link> links;
     std::vector<ExecutionSegment> executionSegments;
-    GetExecutionSegments(execution, builder, &links, &executionSegments);
+    GetExecutionSegments(vertices, &links, &executionSegments);
 
     std::set<ExecutionSegment> executionSegmentsSet(
         executionSegments.begin(), executionSegments.end());

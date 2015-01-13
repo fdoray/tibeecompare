@@ -29,6 +29,7 @@
 #include "critical/CriticalGraphReader.hpp"
 #include "execution/Execution.hpp"
 #include "execution/ExecutionsDb.hpp"
+#include "execution/GenerateExecutionGraph.hpp"
 #include "execution/GetExecutionSegments.hpp"
 #include "execution/StacksFromDisk.hpp"
 #include "execution/StacksReader.hpp"
@@ -304,9 +305,17 @@ bool HandleGetNodes(mq::MessageDecoder* request,
         }
 
         // Extract execution segments.
-        GetExecutionSegments(
+        execution::VerticesPerThread vertices;
+        execution::Vertex* startVertex = nullptr;
+        execution::Vertex* endVertex = nullptr;
+        GenerateExecutionGraph(
             executions[i],
             stacks[executions[i].trace()],
+            &vertices,
+            &startVertex,
+            &endVertex);
+        GetExecutionSegments(
+            vertices,
             &links[i],
             &segments[i]);
     }
