@@ -117,6 +117,9 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
         timestamp_t duration = execution->endTs() - execution->startTs();
         execution->SetMetric(Q_DURATION, duration);
 
+        // Set trace id.
+        execution->set_trace(_traceId);
+
         execution::ExecutionId executionId;
         if (executionsDb.InsertExecution(*execution, &executionId))
         {

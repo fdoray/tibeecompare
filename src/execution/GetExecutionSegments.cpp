@@ -197,7 +197,7 @@ void AssignLevels(TimePoint* start, TimePoint* end)
 void GetExecutionSegmentsInternal(
     const TimePointsPerThread& timePointsPerThread,
     std::vector<Link>* links,
-    std::vector<ExecutionSegment>* executionSegments)
+    ExecutionSegments* executionSegments)
 {
     for (const auto& threadTimePoints : timePointsPerThread)
     {
@@ -252,7 +252,7 @@ void GetExecutionSegments(
     const Execution& execution,
     const Stacks& stacks,
     std::vector<Link>* links,
-    std::vector<ExecutionSegment>* executionSegments)
+    ExecutionSegments* executionSegments)
 {
     // Create graph.
     TimePointsPerThread timePointsPerThread;

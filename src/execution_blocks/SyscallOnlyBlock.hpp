@@ -44,6 +44,7 @@ public:
 private:
     void onSyscall(uint32_t tid, const notification::Path& path, const value::Value* value);
     void onExitSyscall(const trace::EventValue& event);
+    void onExecName(uint32_t tid, const notification::Path& path, const value::Value* value);
 
     quark::Quark Q_EMPTY_STRING;
 };

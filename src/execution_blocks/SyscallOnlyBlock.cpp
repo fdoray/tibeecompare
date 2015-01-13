@@ -41,6 +41,8 @@ void SyscallOnlyBlock::AddObservers(notification::NotificationCenter* notificati
                            base::BindObject(&SyscallOnlyBlock::onSyscall, this));
     AddKernelObserver(notificationCenter, notification::RegexToken("^syscall_exit_"),
                       base::BindObject(&SyscallOnlyBlock::onExitSyscall, this));
+    AddThreadStateObserver(notificationCenter, notification::Token(kStateExecName),
+                           base::BindObject(&SyscallOnlyBlock::onExecName, this));
 }
 
 void SyscallOnlyBlock::onSyscall(uint32_t tid, const notification::Path& path, const value::Value* value)
@@ -60,6 +62,13 @@ void SyscallOnlyBlock::onExitSyscall(const trace::EventValue& event)
     Stacks()->PopStack(tid);
     Stacks()->PushStack(tid, Q_EMPTY_STRING);
 }
+
+void SyscallOnlyBlock::onExecName(uint32_t tid, const notification::Path& path, const value::Value* value)
+{
+    if (!Stacks()->HasStackForThread(tid))
+        Stacks()->PushStack(tid, Q_EMPTY_STRING);
+}
+
 
 }  // namespace execution_blocks
 }  // namespace tibee

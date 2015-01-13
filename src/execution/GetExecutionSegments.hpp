@@ -30,11 +30,13 @@ namespace tibee
 namespace execution
 {
 
+typedef std::vector<ExecutionSegment> ExecutionSegments;
+
 void GetExecutionSegments(
     const Execution& execution,
     const Stacks& stacks,
     std::vector<Link>* links,
-    std::vector<ExecutionSegment>* executionSegments);
+    ExecutionSegments* executionSegments);
 
 }  // namespace execution
 }  // namespace tibee

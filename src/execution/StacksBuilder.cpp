@@ -61,9 +61,13 @@ void StacksBuilder::PopStack(thread_t thread)
     auto& history = _histories[thread];
     if (history.get() == nullptr)
         history.reset(new containers::RedBlackIntervalTree<StackItem>);
-    history->Insert(
-        containers::Interval(stack.top().start(), stack.top().end()),
-        stack.top());
+
+    if (stack.top().start() != stack.top().end())
+    {
+        history->Insert(
+            containers::Interval(stack.top().start(), stack.top().end()),
+            stack.top());
+    }
 
     stack.pop();
 }
@@ -86,6 +90,11 @@ void StacksBuilder::SetThreadName(thread_t thread, const std::string& name)
         threadDesc.set_name(name);
         _threads[thread] = threadDesc;
     }
+}
+
+bool StacksBuilder::HasStackForThread(thread_t thread) const
+{
+    return _threads.find(thread) != _threads.end();
 }
 
 void StacksBuilder::Terminate()
