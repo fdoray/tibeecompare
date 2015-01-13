@@ -122,8 +122,11 @@ void SchedWakeupBlock::OnExecName(uint32_t tid, const notification::Path& path, 
     if (threadNameValue != nullptr)
     {
         std::string threadName(threadNameValue->AsString());
-        if (threadName.substr(0, 7) == "kworker")
+        if (threadName.substr(0, 7) == "kworker" ||
+            threadName.substr(0, 5) == "rcuos")
+        {
             _excludedThreads.insert(tid);
+        }
     }
 }
 

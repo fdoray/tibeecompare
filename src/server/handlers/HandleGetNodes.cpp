@@ -17,6 +17,7 @@
  */
 #include "server/handlers/HandleGetNodes.hpp"
 
+#include <algorithm>
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <string>
@@ -351,6 +352,7 @@ bool HandleGetNodes(mq::MessageDecoder* request,
     // TODO
 
     // Write the response: stack items.
+    std::sort(segments[executionIndex].begin(), segments[executionIndex].end());
     WriteStackItems(
         segments[executionIndex], 
         stacks[executions[executionIndex].trace()],

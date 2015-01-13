@@ -47,15 +47,15 @@ public:
     }
 
     bool operator<(const ExecutionSegment& other) const {
-        if (_thread < other._thread)
-            return true;
-        if (_thread > other._thread)
-            return false;
         if (_startTs < other._startTs)
             return true;
         if (_startTs > other._startTs)
             return false;
-        return _endTs < other._endTs;
+        if (_endTs < other._endTs)
+            return true;
+        if (_endTs > other._endTs)
+            return false;
+        return _thread < other._thread;
     }
 
 private:
