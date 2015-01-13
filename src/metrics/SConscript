@@ -1,0 +1,9 @@
+import os.path
+
+Import(['env',])
+
+sources = [
+    'CriticalMetricsExtractor.cpp',
+]
+
+Return('sources')

@@ -30,7 +30,10 @@
 #include "block/ServiceList.hpp"
 #include "critical/CriticalGraphWriter.hpp"
 #include "execution/ExecutionsDb.hpp"
+#include "execution/GenerateExecutionGraph.hpp"
+#include "execution/GetExecutionSegments.hpp"
 #include "execution/StacksWriter.hpp"
+#include "metrics/CriticalMetricsExtractor.hpp"
 #include "notification/NotificationCenter.hpp"
 #include "notification/Token.hpp"
 
@@ -111,11 +114,35 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
     execution::ExecutionsDb executionsDb(_quarks);
     for (const auto& execution : _executionsBuilder)
     {
-        // TODO: Compute critical path for each execution.
+        // Generate an execution graph in order to get a list of
+        // threads related to the execution.
+        execution::VerticesPerThread vertices;
+        execution::Vertex* startVertex = nullptr;
+        execution::Vertex* endVertex = nullptr;
+        execution::GenerateExecutionGraph(*execution, _stacksBuilder, &vertices, &startVertex, &endVertex);
+        std::vector<execution::Link> links;
+        execution::ExecutionSegments executionSegments;
+        execution::GetExecutionSegments(vertices, &links, &executionSegments);
+
+        std::unordered_set<thread_t> tids;
+        for (const auto& segment : executionSegments)
+            tids.insert(segment.thread());
+
+        // Compute the critical path.
+        critical::CriticalPath criticalPath;
+        auto startCriticalNode = _criticalGraph->GetNodeIntersecting(execution->startTs(), execution->startThread());
+        auto endCriticalNode = _criticalGraph->GetNodeIntersecting(execution->endTs(), execution->endThread());
+        if (!_criticalGraph->ComputeCriticalPath(startCriticalNode, endCriticalNode, tids, &criticalPath))
+        {
+            tberror() << "Unable to compute critical path." << tbendl();
+        }
 
         // Add duration metric.
         timestamp_t duration = execution->endTs() - execution->startTs();
         execution->SetMetric(Q_DURATION, duration);
+
+        // Add critical metrics.
+        metrics::ExtractCriticalMetrics(criticalPath, execution->endTs(), _quarks, execution.get());
 
         // Set trace id.
         execution->set_trace(_traceId);

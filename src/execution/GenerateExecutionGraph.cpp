@@ -17,6 +17,7 @@
  */
 #include "execution/GenerateExecutionGraph.hpp"
 
+#include <iostream>
 #include <queue>
 
 #include "base/print.hpp"
@@ -35,8 +36,6 @@ void CreateVertices(
 {
     if (link.sourceThread() == link.targetThread())
     {
-        base::tberror() << "Cannot have a link with the same source and "
-                        << "target thread." << base::tbendl();
         return;
     }
 

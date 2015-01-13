@@ -41,6 +41,8 @@ const char kStartThreadField[] = "startthread";
 const char kEndTsField[] = "endts";
 const char kEndThreadField[] = "endthread";
 const char kMetricsField[] = "metrics";
+const char kMetricsCollection[] = "tibeecompare.metrics";
+const char kDot[] = ".";
 
 }  // namespace
 
@@ -87,6 +89,9 @@ bool ExecutionsDb::InsertExecution(const execution::Execution& execution,
     *executionId = bson_properties_obj.getField(kIdField).OID();
     _connection.insert(kExecutionsCollection, bson_properties_obj);
 
+    // Update available metrics.
+    UpdateAvailableMetrics(execution);
+
     return true;
 }
 
@@ -125,6 +130,23 @@ bool ExecutionsDb::ReadExecution(const ExecutionId& executionId,
 
 bool ExecutionsDb::UpdateAvailableMetrics(const execution::Execution& execution)
 {
+    const std::string metricsField(kMetricsField);
+
+    mongo::BSONObjBuilder valuesToSet;
+    valuesToSet.append(kNameField, execution.name());
+
+    for (auto it = execution.metrics_begin(); it != execution.metrics_end(); ++it)
+    {
+        std::string metricName = _quarks->String(it->first);
+        valuesToSet.append(metricsField + kDot + metricName, 1);
+    }
+
+    _connection.update(
+        kMetricsCollection,
+        BSON(kNameField << execution.name()),
+        BSON("$set" << valuesToSet.obj()),
+        true);
+
     return true;
 }
 
