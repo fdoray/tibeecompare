@@ -9,6 +9,9 @@ blocks:
       end: syscall_entry_shutdown
       type: kernel
   - syscall-only
-  - sched-wakeup
+  - thread-name
+  - sched-wakeup:
+      io: yes
+      futex: no
   - critical
   - execution

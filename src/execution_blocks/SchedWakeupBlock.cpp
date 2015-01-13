@@ -18,6 +18,7 @@
 #include "execution_blocks/SchedWakeupBlock.hpp"
 
 #include "base/BindObject.hpp"
+#include "base/Constants.hpp"
 #include "notification/Token.hpp"
 
 namespace tibee {
@@ -26,11 +27,33 @@ namespace execution_blocks {
 using notification::Token;
 
 SchedWakeupBlock::SchedWakeupBlock()
+    : _withIO(true), _withFutex(true)
 {
 }
 
 SchedWakeupBlock::~SchedWakeupBlock()
 {
+}
+
+void SchedWakeupBlock::Start(const value::Value* params)
+{
+    auto ioValue = params->GetField("io");
+    if (ioValue != nullptr && ioValue->AsString() == "no")
+        _withIO = false;
+
+    auto futexValue = params->GetField("futex");
+    if (futexValue != nullptr && futexValue->AsString() == "no")
+        _withFutex = false;
+}
+
+void SchedWakeupBlock::LoadServices(const block::ServiceList& serviceList)
+{
+    AbstractExecutionBlock::LoadServices(serviceList);
+
+    // Get constant quarks.
+    Q_LINUX = State()->Quark(kStateLinux);
+    Q_THREADS = State()->Quark(kStateThreads);
+    Q_SYSCALL = State()->Quark(kStateSyscall);
 }
 
 void SchedWakeupBlock::AddObservers(notification::NotificationCenter* notificationCenter)
@@ -59,6 +82,21 @@ void SchedWakeupBlock::OnTTWU(const trace::EventValue& event)
     // TODO: Improve this.
     if (target_tid < 250)
         return;
+
+    // Handle excluded system calls.
+    if (!_withIO || !_withFutex)
+    {
+        auto syscallValue = State()->GetAttributeValue(
+            {Q_LINUX, Q_THREADS, State()->IntQuark(source_tid), Q_SYSCALL});
+        if (syscallValue != nullptr)
+        {
+            auto syscall = syscallValue->AsString();
+            if (!_withFutex && syscall == "futex")
+                return;
+            if (!_withIO && (syscall == "read" || syscall == "write"))
+                return;
+        }
+    }
 
     Stacks()->AddLink(source_tid, target_tid);
 }

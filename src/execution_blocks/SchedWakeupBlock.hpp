@@ -23,6 +23,7 @@
 #include "base/BasicTypes.hpp"
 #include "execution_blocks/AbstractExecutionBlock.hpp"
 #include "notification/NotificationCenter.hpp"
+#include "quark/Quark.hpp"
 #include "trace/value/EventValue.hpp"
 
 namespace tibee {
@@ -39,6 +40,8 @@ public:
     SchedWakeupBlock();
     ~SchedWakeupBlock();
 
+    virtual void Start(const value::Value* params) override;
+    virtual void LoadServices(const block::ServiceList& serviceList) override;
     virtual void AddObservers(notification::NotificationCenter* notificationCenter) override;
 
 private:
@@ -49,6 +52,14 @@ private:
     // Number of nested interrupts per CPU.
     typedef std::unordered_map<uint32_t, uint32_t> NestedInterrupts;
     NestedInterrupts _nestedInterrupts;
+
+    bool _withIO;
+    bool _withFutex;
+
+    // Constant quarks.
+    quark::Quark Q_LINUX;
+    quark::Quark Q_THREADS;
+    quark::Quark Q_SYSCALL;
 };
 
 }  // namespace execution_blocks
