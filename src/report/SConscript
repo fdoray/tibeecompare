@@ -1,0 +1,35 @@
+
+import os.path
+
+
+Import(['env', 'tibeecomparelib'])
+
+target = 'tibeereport'
+
+libs = [
+    tibeecomparelib,
+    'delorean',
+    'mongoclient',
+    'tigerbeetle',
+    'boost_program_options',
+    'boost_filesystem',
+    'boost_thread',
+    'boost_system',
+    'boost_regex',
+    'yaml-cpp',
+    'leveldb',
+]
+
+sources = [
+    'main.cpp',
+    'TibeeReport.cpp',
+]
+
+app_env = env.Clone()
+
+app_env.Append(LIBS=libs)
+app_env.ParseConfig('pkg-config --cflags glib-2.0')
+
+app = app_env.Program(target=target, source=sources)
+
+Return('app')
