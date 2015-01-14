@@ -56,4 +56,18 @@ const char kFaults[] = "faults";
 const char kMajorFaults[] = "major-faults";
 const char kMinorFaults[] = "minor-faults";
 
+// Mongo.
+const char kMongoHost[] = "localhost:27017";
+const char kExecutionsCollection[] = "tibeecompare.executions";
+const char kIdField[] = "_id";
+const char kNameField[] = "desc";
+const char kTraceField[] = "trace";
+const char kStartTsField[] = "startts";
+const char kStartThreadField[] = "startthread";
+const char kEndTsField[] = "endts";
+const char kEndThreadField[] = "endthread";
+const char kMetricsField[] = "metrics";
+const char kMetricsCollection[] = "tibeecompare.metrics";
+const char kDot[] = ".";
+
 }

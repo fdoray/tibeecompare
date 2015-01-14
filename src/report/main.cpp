@@ -48,6 +48,7 @@ int parseOptions(int argc, char* argv[], tibee::report::Arguments& args)
     desc.add_options()
         ("help,h", "help")
         ("name,n", bpo::value<std::string>())
+        ("file,f", bpo::value<std::string>())
         ("verbose,v", bpo::bool_switch()->default_value(false))
     ;
 
@@ -71,6 +72,7 @@ int parseOptions(int argc, char* argv[], tibee::report::Arguments& args)
             std::endl <<
             "  -h, --help          print this help message" << std::endl <<
             "  -n, --name          name of the executions to report" << std::endl <<
+            "  -f, --file          output file name" << std::endl <<
             "  -v, --verbose       verbose" << std::endl;
 
         return -1;
@@ -89,6 +91,13 @@ int parseOptions(int argc, char* argv[], tibee::report::Arguments& args)
         return 1;
     }
     args.name = vm["name"].as<std::string>();
+
+    // file
+    if (vm["file"].empty()) {
+        tberror() << "no output file name specified" << tbendl();
+        return 1;
+    }
+    args.file = vm["file"].as<std::string>();
 
     // verbose
     args.verbose = vm["verbose"].as<bool>();

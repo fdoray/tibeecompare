@@ -35,6 +35,9 @@ struct Arguments
 {
     // Name of the executions to report.
     std::string name;
+
+    // Output file name.
+    std::string file;
     
     // Verbose.
     bool verbose;

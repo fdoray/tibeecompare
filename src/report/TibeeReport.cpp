@@ -17,18 +17,58 @@
  */
 #include "report/TibeeReport.hpp"
 
-#define THIS_MODULE "tibeereport"
+#include <fstream>
 
+#include "base/CompareConstants.hpp"
+#include "base/Constants.hpp"
 #include "base/print.hpp"
+#include "execution/ExecutionsDb.hpp"
+
+#define THIS_MODULE "tibeereport"
 
 namespace tibee
 {
 namespace report
 {
 
+namespace
+{
+
 using base::tbendl;
 using base::tberror;
 using base::tbmsg;
+
+void PrintHeader(
+    std::ofstream& out,
+    const std::vector<quark::Quark>& availableMetrics,
+    quark::DiskQuarkDatabase* quarks)
+{
+    for (size_t i = 0; i < availableMetrics.size(); ++i)
+    {
+        out << quarks->String(availableMetrics[i]);
+        if (i != availableMetrics.size() - 1)
+            out << ",";
+    }
+    out << std::endl;
+}
+
+void PrintExecution(
+    std::ofstream& out,
+    const std::vector<quark::Quark>& availableMetrics,
+    const execution::Execution& execution)
+{
+    for (size_t i = 0; i < availableMetrics.size(); ++i)
+    {
+        uint64_t value = 0;
+        execution.GetMetric(availableMetrics[i], &value);
+        out << value;
+        if (i != availableMetrics.size() - 1)
+            out << ",";
+    }
+    out << std::endl;   
+}
+
+}  // namespace
 
 TibeeReport::TibeeReport(const Arguments& args)
 {
@@ -45,6 +85,30 @@ bool TibeeReport::run()
 {
     if (_args.verbose)
         tbmsg(THIS_MODULE) << "starting" << tbendl();
+
+    // Open output file.
+    std::ofstream out(_args.file);
+
+    // Connect to database.
+    quark::DiskQuarkDatabase quarks(kDiskQuarkDatabaseFile);
+    execution::ExecutionsDb executionsDb(&quarks);
+
+    // Get available metrics.
+    std::vector<quark::Quark> availableMetrics;
+    if (!executionsDb.GetAvailableMetrics(_args.name, &availableMetrics))
+    {
+        tberror() << "Unable to get available metrics." << tbendl();
+        return false;
+    }
+
+    // Print header.
+    PrintHeader(out, availableMetrics, &quarks);
+
+    // Read and print executions.
+    executionsDb.EnumerateExecutions(
+        _args.name,
+        std::bind(&PrintExecution, std::ref(out), std::ref(availableMetrics),
+                  std::placeholders::_1));
 
     return true;
 }

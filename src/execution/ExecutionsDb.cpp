@@ -17,6 +17,7 @@
  */
 #include "execution/ExecutionsDb.hpp"
 
+#include "base/CompareConstants.hpp"
 #include "base/print.hpp"
 
 namespace tibee
@@ -24,27 +25,8 @@ namespace tibee
 namespace execution
 {
 
-namespace
-{
-
 using base::tberror;
 using base::tbendl;
-
-const char kMongoHost[] = "localhost:27017";
-
-const char kExecutionsCollection[] = "tibeecompare.executions";
-const char kIdField[] = "_id";
-const char kNameField[] = "desc";
-const char kTraceField[] = "trace";
-const char kStartTsField[] = "startts";
-const char kStartThreadField[] = "startthread";
-const char kEndTsField[] = "endts";
-const char kEndThreadField[] = "endthread";
-const char kMetricsField[] = "metrics";
-const char kMetricsCollection[] = "tibeecompare.metrics";
-const char kDot[] = ".";
-
-}  // namespace
 
 ExecutionsDb::ExecutionsDb(quark::DiskQuarkDatabase* quarks)
     : _connection(true),
@@ -123,6 +105,68 @@ bool ExecutionsDb::ReadExecution(const ExecutionId& executionId,
         uint64_t metricValue = metric.Long();
 
         execution->SetMetric(_quarks->StrQuark(metricName), metricValue);
+    }
+
+    return true;
+}
+
+bool ExecutionsDb::EnumerateExecutions(const std::string& name,
+                                       const EnumerateExecutionsCallback& callback)
+{
+    assert(execution != nullptr);
+
+    if (!Connect())
+        return false;
+
+    auto cursor = _connection.query(kExecutionsCollection, MONGO_QUERY(kNameField << name));
+
+    while (cursor->more())
+    {
+        execution::Execution execution;
+
+        mongo::BSONObj obj = cursor->next();
+        execution.set_name(obj.getField(kNameField).String());
+        execution.set_trace(obj.getField(kTraceField).String());
+        execution.set_startTs(obj.getField(kStartTsField).Long());
+        execution.set_startThread(obj.getField(kStartThreadField).Int());
+        execution.set_endTs(obj.getField(kEndTsField).Long());
+        execution.set_endThread(obj.getField(kEndThreadField).Int());
+
+        auto metrics = obj.getField(kMetricsField).Obj();
+        for (auto it = metrics.begin(); it.more();)
+        {
+            mongo::BSONElement metric = it.next();
+            std::string metricName(metric.fieldName());
+            uint64_t metricValue = metric.Long();
+
+            execution.SetMetric(_quarks->StrQuark(metricName), metricValue);
+        }
+
+        callback(execution);
+    }
+
+    return true;
+}
+
+bool ExecutionsDb::GetAvailableMetrics(const std::string& name,
+                                       std::vector<quark::Quark>* metrics)
+{
+    assert(metrics != nullptr);
+
+    if (!Connect())
+        return false;
+
+    auto cursor = _connection.query(kMetricsCollection, MONGO_QUERY(kNameField << name));
+    if (!cursor->more())
+        return false;
+
+    mongo::BSONObj obj = cursor->next();
+    auto dbMetrics = obj.getField(kMetricsField).Obj();
+    for (auto it = dbMetrics.begin(); it.more();)
+    {
+        mongo::BSONElement metric = it.next();
+        std::string metricName(metric.fieldName());
+        metrics->push_back(_quarks->StrQuark(metricName));
     }
 
     return true;

@@ -18,11 +18,15 @@
 #ifndef _TIBEE_EXECUTION_EXECUTIONSDB_HPP
 #define _TIBEE_EXECUTION_EXECUTIONSDB_HPP
 
+#include <functional>
 #include <mongo/client/dbclient.h>
 #include <mongo/client/dbclientinterface.h>
+#include <string>
+#include <vector>
 
 #include "execution/Execution.hpp"
 #include "quark/DiskQuarkDatabase.hpp"
+#include "quark/Quark.hpp"
 
 namespace tibee
 {
@@ -34,6 +38,9 @@ typedef mongo::OID ExecutionId;
 class ExecutionsDb
 {
 public:
+    typedef std::function<void (const execution::Execution&)>
+        EnumerateExecutionsCallback;
+
     ExecutionsDb(quark::DiskQuarkDatabase* quarks);
     ~ExecutionsDb();
 
@@ -42,6 +49,12 @@ public:
 
     bool ReadExecution(const ExecutionId& executionId,
                        execution::Execution* execution);
+
+    bool EnumerateExecutions(const std::string& name,
+                             const EnumerateExecutionsCallback& callback);
+
+    bool GetAvailableMetrics(const std::string& name,
+                             std::vector<quark::Quark>* metrics);
 
 private:
     bool UpdateAvailableMetrics(const execution::Execution& execution);

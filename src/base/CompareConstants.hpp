@@ -27,9 +27,6 @@ namespace tibee
 // A huge cost.
 const uint64_t kHugeCost = -1;
 
-// Mongo.
-const size_t kOIDLength = 24;
-
 // Directory that contains built files.
 extern const char kHistoryDirectoryName[];
 extern const char kStacksFileName[];
@@ -68,6 +65,22 @@ extern const char kPageFault[];
 extern const char kFaults[];
 extern const char kMajorFaults[];
 extern const char kMinorFaults[];
+
+// Mongo.
+const size_t kOIDLength = 24;
+
+extern const char kMongoHost[];
+extern const char kExecutionsCollection[];
+extern const char kIdField[];
+extern const char kNameField[];
+extern const char kTraceField[];
+extern const char kStartTsField[];
+extern const char kStartThreadField[];
+extern const char kEndTsField[];
+extern const char kEndThreadField[];
+extern const char kMetricsField[];
+extern const char kMetricsCollection[];
+extern const char kDot[];
 
 }  // namespace tibee
 
