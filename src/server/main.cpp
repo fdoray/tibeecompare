@@ -20,9 +20,9 @@
 #include <iostream>
 #include <mongo/client/dbclient.h>
 
+#include "base/ex/InvalidArgument.hpp"
 #include "server/Arguments.hpp"
 #include "server/TibeeServer.hpp"
-#include "server/ex/InvalidArgument.hpp"
 
 using tibee::base::tberror;
 using tibee::base::tbendl;
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
         std::unique_ptr<tibee::server::TibeeServer> tibeeServer {
             new tibee::server::TibeeServer {args}};
         return tibeeServer->run() ? 0 : 1;
-    } catch (const tibee::server::ex::InvalidArgument& ex) {
+    } catch (const tibee::base::ex::InvalidArgument& ex) {
         tberror() << "invalid argument: " << ex.what() << tbendl();
     } catch (const std::exception& ex) {
         tberror() << "unknown error: " << ex.what() << tbendl();

@@ -22,9 +22,9 @@
 
 #include "base/CompareConstants.hpp"
 #include "base/print.hpp"
+#include "base/ex/InvalidArgument.hpp"
 #include "block/BlockRunner.hpp"
 #include "build/Configuration.hpp"
-#include "build/ex/InvalidArgument.hpp"
 #include "value/MakeValue.hpp"
 #include "value/Value.hpp"
 
@@ -62,7 +62,7 @@ void TibeeBuild::validateSaveArguments(const Arguments& args)
 
             ss << "trace " << tracePath << " does not exist";
 
-            throw ex::InvalidArgument {ss.str()};
+            throw base::ex::InvalidArgument {ss.str()};
         }
 
         // append trace path

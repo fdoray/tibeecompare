@@ -15,15 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_SERVER_EX_INVALIDARGUMENT_HPP
-#define _TIBEE_SERVER_EX_INVALIDARGUMENT_HPP
+#ifndef _TIBEE_BASE_EX_INVALIDARGUMENT_HPP
+#define _TIBEE_BASE_EX_INVALIDARGUMENT_HPP
 
 #include <string>
 #include <stdexcept>
 
 namespace tibee
 {
-namespace server
+namespace base
 {
 namespace ex
 {
@@ -42,4 +42,4 @@ public:
 }
 }
 
-#endif // _TIBEE_SERVER_EX_INVALIDARGUMENT_HPP
+#endif  // _TIBEE_BASE_EX_INVALIDARGUMENT_HPP
