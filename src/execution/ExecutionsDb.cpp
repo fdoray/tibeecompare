@@ -90,6 +90,7 @@ bool ExecutionsDb::ReadExecution(const ExecutionId& executionId,
         return false;
 
     mongo::BSONObj obj = cursor->next();
+    execution->set_id(obj.getField(kIdField).String());
     execution->set_name(obj.getField(kNameField).String());
     execution->set_trace(obj.getField(kTraceField).String());
     execution->set_startTs(obj.getField(kStartTsField).Long());
@@ -123,6 +124,7 @@ bool ExecutionsDb::EnumerateExecutions(const std::string& name,
         execution::Execution execution;
 
         mongo::BSONObj obj = cursor->next();
+        execution.set_id(obj.getField(kIdField).String());
         execution.set_name(obj.getField(kNameField).String());
         execution.set_trace(obj.getField(kTraceField).String());
         execution.set_startTs(obj.getField(kStartTsField).Long());

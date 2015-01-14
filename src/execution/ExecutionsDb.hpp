@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "execution/Execution.hpp"
+#include "execution/ExecutionId.hpp"
 #include "quark/DiskQuarkDatabase.hpp"
 #include "quark/Quark.hpp"
 
@@ -32,8 +33,6 @@ namespace tibee
 {
 namespace execution
 {
-
-typedef mongo::OID ExecutionId;
 
 class ExecutionsDb
 {

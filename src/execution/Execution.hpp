@@ -41,6 +41,10 @@ public:
           _endTs(0), _endThread(-1) {}
     ~Execution() {}
 
+    // Identifier of the execution.
+    const std::string& id() const { return _id; }
+    void set_id(const std::string& id) { _id = id; }
+
     // Name of the execution.
     const std::string& name() const { return _name; }
     void set_name(const std::string& name) { _name = name; }
@@ -87,6 +91,9 @@ public:
     }
 
 private:
+    // Identifier of the execution.
+    std::string _id;
+
     // Name of the execution.
     std::string _name;
 
