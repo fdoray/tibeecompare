@@ -113,8 +113,6 @@ bool ExecutionsDb::ReadExecution(const ExecutionId& executionId,
 bool ExecutionsDb::EnumerateExecutions(const std::string& name,
                                        const EnumerateExecutionsCallback& callback)
 {
-    assert(execution != nullptr);
-
     if (!Connect())
         return false;
 
