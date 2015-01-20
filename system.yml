@@ -8,7 +8,7 @@ blocks:
       begin: syscall_exit_accept4
       end: syscall_entry_shutdown
       type: kernel
-  - syscall-only
+  - finstrument-symbols
   - thread-name
   - sched-wakeup:
       io: yes

@@ -1,0 +1,13 @@
+import os
+
+Import('env')
+
+sources = [
+    'SymbolLookup.cpp',
+]
+
+libs = ['bfd']
+
+env.Append(LIBS=libs)
+
+Return(['sources'])

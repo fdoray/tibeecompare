@@ -42,6 +42,8 @@ const char kSyscallOnlyBlockName[] = "syscall-only";
 const char kThreadNameBlockName[] = "thread-name";
 // - Critical.
 const char kCriticalBlockName[] = "critical";
+// - Symbols.
+const char kFinstrumentSymbolsBlockName[] = "finstrument-symbols";
 
 const char kInstructions[] = "instructions";
 const char kCacheReferences[] = "cache-references";

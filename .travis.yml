@@ -53,6 +53,9 @@ install:
   - sudo apt-get install -qq libboost1.55-dev
   - sudo apt-get install -qq libzmq3-dev
 
+  # bfd, for symbols
+  - sudo apt-get install -qq binutils-dev
+
   # yaml-cpp
   - wget http://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz
   - tar -xf yaml-cpp-0.5.1.tar.gz

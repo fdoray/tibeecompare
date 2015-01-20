@@ -50,6 +50,9 @@ uint32_t AbstractExecutionBlock::CpuForEvent(const trace::EventValue& event) con
 
 thread_t AbstractExecutionBlock::ThreadForEvent(const trace::EventValue& event) const
 {
+    auto thread_context_value = event.getStreamEventContext()->GetField("vtid");
+    if (thread_context_value != nullptr)
+        return thread_context_value->AsUInteger();
     auto cpu = CpuForEvent(event);
     auto thread = State()->CurrentThreadForCpu(cpu);
     return thread;

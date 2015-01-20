@@ -26,6 +26,7 @@
 #include "execution_blocks/ThreadNameBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
+#include "symbols_blocks/FinstrumentSymbolsBlock.hpp"
 #include "trace_blocks/TraceBlock.hpp"
 
 namespace tibee
@@ -55,6 +56,8 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
         block.reset(new state_blocks::CurrentStateBlock);
     } else if (name == kLinuxSchedStateBlockName) {
         block.reset(new state_blocks::LinuxSchedStateBlock);
+    } else if (name == kFinstrumentSymbolsBlockName) {
+        block.reset(new symbols_blocks::FinstrumentSymbolsBlock);
     }
 
     return block;

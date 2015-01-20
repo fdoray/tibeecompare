@@ -51,6 +51,8 @@ extern const char kSyscallOnlyBlockName[];
 extern const char kThreadNameBlockName[];
 // - Critical.
 extern const char kCriticalBlockName[];
+// - Symbols.
+extern const char kFinstrumentSymbolsBlockName[];
 
 // Execution: performance counters.
 extern const char kInstructions[];
