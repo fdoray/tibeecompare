@@ -19,10 +19,12 @@
 #define _TIBEE_EXECUTION_EXECUTION_HPP
 
 #include <memory>
+#include <set>
 #include <string>
 #include <unordered_map>
 
 #include "base/BasicTypes.hpp"
+#include "execution/ExecutionId.hpp"
 #include "quark/Quark.hpp"
 
 namespace tibee
@@ -37,13 +39,14 @@ public:
     typedef std::unordered_map<quark::Quark, uint64_t> Metrics;
 
     Execution() 
-        : _startTs(0), _startThread(-1),
+        : _needsToEnd(true),
+          _startTs(0), _startThread(-1),
           _endTs(0), _endThread(-1) {}
     ~Execution() {}
 
     // Identifier of the execution.
-    const std::string& id() const { return _id; }
-    void set_id(const std::string& id) { _id = id; }
+    const ExecutionId& id() const { return _id; }
+    void set_id(const ExecutionId& id) { _id = id; }
 
     // Name of the execution.
     const std::string& name() const { return _name; }
@@ -52,6 +55,14 @@ public:
     // Trace of the execution.
     const std::string& trace() const { return _trace; }
     void set_trace(const std::string& trace) { _trace = trace; }
+
+    // Indicates whether the execution needs to end.
+    bool needsToEnd() const { return _needsToEnd; }
+    void set_needsToEnd(bool needsToEnd) { _needsToEnd = needsToEnd; }
+
+    // Threads that belong to the execution.
+    const std::set<thread_t>& threads() const { return _threads; }
+    void AddThread(thread_t tid) { _threads.insert(tid); }
 
     // Start time of the execution.
     timestamp_t startTs() const { return _startTs; }
@@ -92,13 +103,19 @@ public:
 
 private:
     // Identifier of the execution.
-    std::string _id;
+    ExecutionId _id;
 
     // Name of the execution.
     std::string _name;
 
     // Trace of the execution.
     std::string _trace;
+
+    // Indicates whether the execution needs to end.
+    bool _needsToEnd;
+
+    // Threads that belong to the execution.
+    std::set<thread_t> _threads;
 
     // Start time of the execution.
     timestamp_t _startTs;

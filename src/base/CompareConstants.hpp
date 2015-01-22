@@ -45,6 +45,7 @@ extern const char kCurrentStateBlockName[];
 extern const char kLinuxSchedStateBlockName[];
 // - Execution
 extern const char kExecutionBlockName[];
+extern const char kProcessBlockName[];
 extern const char kPunchBlockName[];
 extern const char kSchedWakeupBlockName[];
 extern const char kSyscallOnlyBlockName[];
@@ -81,6 +82,7 @@ extern const char kStartThreadField[];
 extern const char kEndTsField[];
 extern const char kEndThreadField[];
 extern const char kMetricsField[];
+extern const char kThreadsField[];
 extern const char kMetricsCollection[];
 extern const char kDot[];
 

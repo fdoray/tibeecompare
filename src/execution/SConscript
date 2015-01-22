@@ -9,6 +9,7 @@ sources = [
     'ExecutionsDb.cpp',
     'GenerateExecutionGraph.cpp',
     'GetExecutionSegments.cpp',
+    'GetExecutionSegmentsFollow.cpp',
     'StackItem.cpp',
     'StacksBuilder.cpp',
     'StacksFromDisk.cpp',

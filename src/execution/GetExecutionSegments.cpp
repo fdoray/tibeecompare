@@ -17,63 +17,55 @@
  */
 #include "execution/GetExecutionSegments.hpp"
 
-#include "execution/Vertex.hpp"
+#include "execution/GenerateExecutionGraph.hpp"
+#include "execution/GetExecutionSegmentsFollow.hpp"
 
 namespace tibee
 {
 namespace execution
 {
 
-void GetExecutionSegments(
-    const VerticesPerThread& verticesPerThread,
+bool GetExecutionSegments(
+    const Execution& execution,
+    const Stacks& stacks,
     std::vector<Link>* links,
     ExecutionSegments* executionSegments)
 {
-    for (const auto& threadVertices : verticesPerThread)
+    if (execution.threads().size() == 1)
     {
-        thread_t thread = threadVertices.first;
-        const auto& vertices = threadVertices.second;
+        // Only one thread: we follow links.
 
-        timestamp_t startTs = kInvalidTs;
-        size_t index = 0;
+        VerticesPerThread vertices;
+        Vertex* startVertex = nullptr;
+        Vertex* endVertex = nullptr;
+        
+        if (!GenerateExecutionGraph(
+            execution,
+            stacks,
+            &vertices,
+            &startVertex,
+            &endVertex)) {
+            return false;
+        }
+        GetExecutionSegmentsFollow(
+            vertices,
+            links,
+            executionSegments);
+    }
+    else
+    {
+        // Many threads specified: use them.
 
-        for (const auto& vertex : vertices)
+        for (const auto& thread : execution.threads())
         {
-            if (startTs == kInvalidTs)
-            {
-                if (vertex->level != kInvalidLevel)
-                    startTs = vertex->ts;
-            }
-            else
-            {
-                if ((vertex->hout != nullptr && (
-                      (vertex->hout->vin != nullptr &&
-                       vertex->hout->vin->level < vertex->hout->level) ||
-                      vertex->hout->level == kInvalidLevel)) ||
-                     index == vertices.size() - 1)
-                {
-                    ExecutionSegment executionSegment;
-                    executionSegment.set_thread(thread);
-                    executionSegment.set_startTs(startTs);
-                    executionSegment.set_endTs(vertex->ts);
-                    executionSegments->push_back(executionSegment);
-
-                    startTs = kInvalidTs;
-                }
-
-                if (vertex->vout != nullptr)
-                {
-                    links->push_back(Link(
-                        vertex->thread,
-                        vertex->ts,
-                        vertex->vout->thread,
-                        vertex->vout->ts));
-                }
-            }
-
-            ++index;
+            ExecutionSegment executionSegment;
+            executionSegment.set_thread(thread);
+            executionSegment.set_startTs(execution.startTs());
+            executionSegment.set_endTs(execution.endTs());
+            executionSegments->push_back(executionSegment);
         }
     }
+    return true;
 }
 
 }  // namespace execution

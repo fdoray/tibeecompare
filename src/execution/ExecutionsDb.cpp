@@ -66,6 +66,12 @@ bool ExecutionsDb::InsertExecution(const execution::Execution& execution,
     }
     bson_properties.append(kMetricsField, bson_metrics.obj());
 
+    // Write threads.
+    mongo::BSONArrayBuilder bson_threads;
+    for (auto it = execution.threads().begin(); it != execution.threads().end(); ++it)
+        bson_threads.append(static_cast<int>(*it));
+    bson_properties.append(kThreadsField, bson_threads.arr());
+
     // Insert in database.
     auto bson_properties_obj = bson_properties.obj();
     *executionId = bson_properties_obj.getField(kIdField).OID();
@@ -90,7 +96,7 @@ bool ExecutionsDb::ReadExecution(const ExecutionId& executionId,
         return false;
 
     mongo::BSONObj obj = cursor->next();
-    execution->set_id(obj.getField(kIdField).String());
+    execution->set_id(obj.getField(kIdField).OID());
     execution->set_name(obj.getField(kNameField).String());
     execution->set_trace(obj.getField(kTraceField).String());
     execution->set_startTs(obj.getField(kStartTsField).Long());
@@ -108,6 +114,10 @@ bool ExecutionsDb::ReadExecution(const ExecutionId& executionId,
         execution->SetMetric(_quarks->StrQuark(metricName), metricValue);
     }
 
+    auto threads = obj.getField(kThreadsField).Array();
+    for (const auto& thread : threads)
+        execution->AddThread(static_cast<thread_t>(thread.Int()));
+
     return true;
 }
 
@@ -124,7 +134,7 @@ bool ExecutionsDb::EnumerateExecutions(const std::string& name,
         execution::Execution execution;
 
         mongo::BSONObj obj = cursor->next();
-        execution.set_id(obj.getField(kIdField).String());
+        execution.set_id(obj.getField(kIdField).OID());
         execution.set_name(obj.getField(kNameField).String());
         execution.set_trace(obj.getField(kTraceField).String());
         execution.set_startTs(obj.getField(kStartTsField).Long());

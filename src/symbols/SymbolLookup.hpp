@@ -21,6 +21,7 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <set>
 
 #include "symbols/Image.hpp"
 #include "symbols/Symbol.hpp"
@@ -42,7 +43,11 @@ class SymbolLookup {
                     uint64_t* offset);
 
  private:
+  // Symbol cache.
   SymbolCache cache_;
+
+  // Unknown symbols previously encountered.
+  std::set<std::pair<std::string, uint64_t>> unknown_symbols_;
 };
 
 }  // namespace symbols

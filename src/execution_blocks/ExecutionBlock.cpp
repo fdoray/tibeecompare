@@ -98,6 +98,7 @@ void ExecutionBlock::onTimestamp(const notification::Path& path, const value::Va
 void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* value)
 {  
     _stacksBuilder.Terminate();
+    _executionsBuilder.Terminate();
 
     // Write critical graph to disk.
     bfs::path criticalFileName =
@@ -116,13 +117,10 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
     {
         // Generate an execution graph in order to get a list of
         // threads related to the execution.
-        execution::VerticesPerThread vertices;
-        execution::Vertex* startVertex = nullptr;
-        execution::Vertex* endVertex = nullptr;
-        execution::GenerateExecutionGraph(*execution, _stacksBuilder, &vertices, &startVertex, &endVertex);
         std::vector<execution::Link> links;
         execution::ExecutionSegments executionSegments;
-        execution::GetExecutionSegments(vertices, &links, &executionSegments);
+        execution::GetExecutionSegments(
+            *execution, _stacksBuilder, &links, &executionSegments);
 
         std::unordered_set<thread_t> tids;
         for (const auto& segment : executionSegments)

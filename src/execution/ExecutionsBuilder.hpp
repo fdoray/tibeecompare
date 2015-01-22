@@ -42,8 +42,16 @@ public:
     void SetTrace(const std::string& trace) { _trace = trace; }
 
     // Create executions.
-    void StartThreadExecution(thread_t thread, const std::string& name);
+    void StartThreadExecution(thread_t thread,
+                              const std::string& name,
+                              bool needsToEnd);
     void EndThreadExecution(thread_t thread);
+
+    // Add threads to an execution.
+    void AddThreadToExecution(thread_t parent, thread_t child);
+
+    // Complete all executions that don't need to end.
+    void Terminate();
 
     // Traverse executions.
     size_t ExecutionsCount() const { return _completedExecutions.size(); }

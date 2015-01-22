@@ -36,6 +36,7 @@ const char kCurrentStateBlockName[] = "current-state";
 const char kLinuxSchedStateBlockName[] = "linux-sched-state";
 // - Execution
 const char kExecutionBlockName[] = "execution";
+const char kProcessBlockName[] = "process";
 const char kPunchBlockName[] = "punch";
 const char kSchedWakeupBlockName[] = "sched-wakeup";
 const char kSyscallOnlyBlockName[] = "syscall-only";
@@ -69,6 +70,7 @@ const char kStartThreadField[] = "startthread";
 const char kEndTsField[] = "endts";
 const char kEndThreadField[] = "endthread";
 const char kMetricsField[] = "metrics";
+const char kThreadsField[] = "threads";
 const char kMetricsCollection[] = "tibeecompare.metrics";
 const char kDot[] = ".";
 

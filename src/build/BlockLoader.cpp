@@ -20,6 +20,7 @@
 #include "base/CompareConstants.hpp"
 #include "critical_blocks/CriticalBlock.hpp"
 #include "execution_blocks/ExecutionBlock.hpp"
+#include "execution_blocks/ProcessBlock.hpp"
 #include "execution_blocks/PunchBlock.hpp"
 #include "execution_blocks/SchedWakeupBlock.hpp"
 #include "execution_blocks/SyscallOnlyBlock.hpp"
@@ -42,6 +43,8 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
         block.reset(new critical_blocks::CriticalBlock);
     } else if (name == kExecutionBlockName) {
         block.reset(new execution_blocks::ExecutionBlock);
+    } else if (name == kProcessBlockName) {
+        block.reset(new execution_blocks::ProcessBlock);
     } else if (name == kPunchBlockName) {
         block.reset(new execution_blocks::PunchBlock);
     } else if (name == kSchedWakeupBlockName) {

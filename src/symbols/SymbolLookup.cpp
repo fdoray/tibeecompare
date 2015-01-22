@@ -155,6 +155,7 @@ bool SymbolLookup::LookupSymbol(uint64_t address,
 
     if (address >= image.base_address() &&
         address < image.base_address() + image.size()) {
+
       // Load a symbol cache for the image.
       auto image_cache_it = cache_.find(image.path());
       if (image_cache_it == cache_.end()) {
@@ -168,12 +169,19 @@ bool SymbolLookup::LookupSymbol(uint64_t address,
 
       // Find the symbol in the cache.
       uint64_t relative_address = address - image.base_address();
-      auto image_cache = image_cache_it->second;
+      const auto& image_cache = image_cache_it->second;
+
       auto symbol_it = image_cache.upper_bound(relative_address);
 
       if (symbol_it == image_cache.begin()) {
-        std::cerr << "No symbol for offset " << relative_address
-                  << " in image " << image.path() << std::endl;
+        auto unknown_symbol_key = std::make_pair(image.path(), relative_address);
+        auto look_unknown = unknown_symbols_.find(unknown_symbol_key);
+        if (look_unknown == unknown_symbols_.end())
+        {
+          std::cerr << "No symbol for offset " << relative_address
+                    << " in image " << image.path() << std::endl;
+          unknown_symbols_.insert(unknown_symbol_key);
+        }
         return false;
       }
 

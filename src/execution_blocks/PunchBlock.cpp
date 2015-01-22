@@ -84,7 +84,7 @@ void PunchBlock::onBegin(const trace::EventValue& event)
     if (!TidIsAnalyzed(tid))
         return;
 
-    Executions()->StartThreadExecution(tid, _name);
+    Executions()->StartThreadExecution(tid, _name, true);
 }
 
 void PunchBlock::onEnd(const trace::EventValue& event)

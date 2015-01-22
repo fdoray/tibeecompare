@@ -31,13 +31,19 @@ ExecutionsBuilder::~ExecutionsBuilder()
 {
 }
 
-void ExecutionsBuilder::StartThreadExecution(thread_t thread, const std::string& name)
+void ExecutionsBuilder::StartThreadExecution(
+    thread_t thread,
+    const std::string& name,
+    bool needsToEnd)
 {
     Execution::UP execution(new Execution);
     execution->set_name(name);
     execution->set_trace(_trace);
+    execution->set_needsToEnd(needsToEnd);
     execution->set_startTs(_ts);
     execution->set_startThread(thread);
+
+    execution->AddThread(thread);
 
     _currentExecutions[thread] = std::move(execution);
 }
@@ -53,6 +59,29 @@ void ExecutionsBuilder::EndThreadExecution(thread_t thread)
     execution->set_endThread(thread);
 
     _completedExecutions.push_back(std::move(execution));
+}
+
+void ExecutionsBuilder::AddThreadToExecution(thread_t parent, thread_t child)
+{
+    auto look = _currentExecutions.find(parent);
+    if (look == _currentExecutions.end() || look->second.get() == nullptr)
+        return;
+
+    look->second->AddThread(child);
+}
+
+void ExecutionsBuilder::Terminate()
+{
+    for (auto& execution : _currentExecutions)
+    {
+        if (!execution.second->needsToEnd())
+        {
+            execution.second->set_endTs(_ts);
+            execution.second->set_endThread(execution.first);
+
+            _completedExecutions.push_back(std::move(execution.second));
+        }
+    }
 }
 
 }  // namespace execution

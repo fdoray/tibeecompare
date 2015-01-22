@@ -18,6 +18,8 @@
 #ifndef _TIBEE_EXECUTION_EXECUTIONSEGMENT_HPP
 #define _TIBEE_EXECUTION_EXECUTIONSEGMENT_HPP
 
+#include <vector>
+
 #include "base/BasicTypes.hpp"
 
 namespace tibee
@@ -68,6 +70,8 @@ private:
     // End timestamp.
     timestamp_t _endTs;
 };
+
+typedef std::vector<ExecutionSegment> ExecutionSegments;
 
 }  // namespace execution
 }  // namespace tibee

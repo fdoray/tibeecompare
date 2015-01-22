@@ -19,6 +19,7 @@
 
 #include "base/BindObject.hpp"
 #include "notification/Token.hpp"
+#include "trace/value/StructEventValue.hpp"
 
 namespace tibee {
 namespace symbols_blocks {
@@ -38,6 +39,10 @@ void FinstrumentSymbolsBlock::AddObservers(notification::NotificationCenter* not
     AddUstObserver(notificationCenter, notification::Token("lttng_ust_cyg_profile:func_entry"),
                    base::BindObject(&FinstrumentSymbolsBlock::OnFuncEntry, this));
     AddUstObserver(notificationCenter, notification::Token("lttng_ust_cyg_profile:func_exit"),
+                   base::BindObject(&FinstrumentSymbolsBlock::OnFuncExit, this));
+    AddUstObserver(notificationCenter, notification::Token("chrome:func_entry"),
+                   base::BindObject(&FinstrumentSymbolsBlock::OnFuncEntry, this));
+    AddUstObserver(notificationCenter, notification::Token("chrome:func_exit"),
                    base::BindObject(&FinstrumentSymbolsBlock::OnFuncExit, this));
 }
 
@@ -64,7 +69,7 @@ void FinstrumentSymbolsBlock::OnBaddr(const trace::EventValue& event)
 
 void FinstrumentSymbolsBlock::OnFuncEntry(const trace::EventValue& event)
 {
-    uint32_t tid = ThreadForEvent(event);
+    uint32_t tid = event.getStreamEventContext()->GetField("vtid")->AsUInteger();
     uint32_t pid = event.getStreamEventContext()->GetField("vpid")->AsUInteger();
     uint64_t addr = event.getEventField("addr")->AsULong();
 
@@ -78,7 +83,7 @@ void FinstrumentSymbolsBlock::OnFuncEntry(const trace::EventValue& event)
 
 void FinstrumentSymbolsBlock::OnFuncExit(const trace::EventValue& event)
 {
-    uint32_t tid = ThreadForEvent(event);
+    uint32_t tid = event.getStreamEventContext()->GetField("vtid")->AsUInteger();
     Stacks()->PopStack(tid);
 }
 
