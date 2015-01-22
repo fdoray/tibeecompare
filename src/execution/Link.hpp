@@ -18,6 +18,8 @@
 #ifndef _TIBEE_EXECUTION_LINK_HPP
 #define _TIBEE_EXECUTION_LINK_HPP
 
+#include <vector>
+
 #include "base/BasicTypes.hpp"
 
 namespace tibee
@@ -78,6 +80,8 @@ private:
     thread_t _targetThread;
     timestamp_t _targetTs;
 };
+
+typedef std::vector<Link> Links;
 
 }  // namespace execution
 }  // namespace tibee
