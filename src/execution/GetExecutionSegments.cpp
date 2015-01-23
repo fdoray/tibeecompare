@@ -31,9 +31,9 @@ bool GetExecutionSegments(
     std::vector<Link>* links,
     ExecutionSegments* executionSegments)
 {
-    if (execution.threads().size() == 1)
+    if (execution.threads().size() <= 1)
     {
-        // Only one thread: we follow links.
+        // Only one thread specified: we follow links to find more.
 
         VerticesPerThread vertices;
         Vertex* startVertex = nullptr;

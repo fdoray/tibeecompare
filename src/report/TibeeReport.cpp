@@ -38,11 +38,17 @@ using base::tbendl;
 using base::tberror;
 using base::tbmsg;
 
+const char kIdHeader[] = "id";
+
 void PrintHeader(
     std::ofstream& out,
     const std::vector<quark::Quark>& availableMetrics,
     quark::DiskQuarkDatabase* quarks)
 {
+    out << kIdHeader;
+    if (!availableMetrics.empty())
+        out << ",";
+
     for (size_t i = 0; i < availableMetrics.size(); ++i)
     {
         out << quarks->String(availableMetrics[i]);
@@ -57,6 +63,10 @@ void PrintExecution(
     const std::vector<quark::Quark>& availableMetrics,
     const execution::Execution& execution)
 {
+    out << execution.id();
+    if (!availableMetrics.empty())
+        out << ",";
+
     for (size_t i = 0; i < availableMetrics.size(); ++i)
     {
         uint64_t value = 0;
