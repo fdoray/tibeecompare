@@ -32,9 +32,17 @@ namespace
 
 void CreateVertices(
     const Link& link,
+    const std::unordered_set<thread_t>& excludedThreads,
+    thread_t initialThread,
     VerticesPerThread* verticesPerThread)
 {
     if (link.sourceThread() == link.targetThread())
+    {
+        return;
+    }
+
+    if (link.targetThread() != initialThread &&
+        excludedThreads.find(link.targetThread()) != excludedThreads.end())
     {
         return;
     }
@@ -67,37 +75,43 @@ void CreateVertices(
 }
 
 bool GenerateExecutionGraphInternal(
-    const Execution& execution,
+    const Segment& segment,
     const Stacks& stacks,
+    const std::unordered_set<thread_t>& excludedThreads,
     VerticesPerThread* verticesPerThread,
     Vertex** start,
     Vertex** end)
 {
     namespace pl = std::placeholders;
 
-    // Add initial time point.
-    Vertex::UP startUP(new Vertex(execution.startThread(), execution.startTs()));
+    // Add initial vertex.
+    Vertex::UP startUP(new Vertex(segment.thread(), segment.startTs()));
     *start = startUP.get();
-    (*verticesPerThread)[execution.startThread()].push_back(std::move(startUP));
+    (*verticesPerThread)[segment.thread()].push_back(std::move(startUP));
 
-    // Follow links to create time points.
+    // Follow links to create vertices.
     stacks.EnumerateLinks(
-        containers::Interval(execution.startTs(), execution.endTs()),
-        std::bind(&CreateVertices, pl::_1, verticesPerThread));
+        containers::Interval(segment.startTs(), segment.endTs()),
+        std::bind(&CreateVertices,
+                  pl::_1,
+                  std::ref(excludedThreads),
+                  segment.thread(),
+                  verticesPerThread));
 
-    // Add final time point.
-    auto& prevThread = (*verticesPerThread)[execution.endThread()];
+    // Add final vertex.
+    auto& prevThread = (*verticesPerThread)[segment.thread()];
     if (prevThread.empty())
     {
-        base::tberror() << "No previous time point on thread " << execution.endThread() << "." << base::tbendl();
+        base::tberror() << "No previous vertex on thread "
+                        << segment.thread() << "." << base::tbendl();
         return false;
     }
     auto* prevVertex = prevThread.back().get();
-    Vertex::UP endUP(new Vertex(execution.endThread(), execution.endTs()));
+    Vertex::UP endUP(new Vertex(segment.thread(), segment.endTs()));
     *end = endUP.get();
     prevVertex->hout = endUP.get();
     endUP->hin = prevVertex;
-    (*verticesPerThread)[execution.endThread()].push_back(std::move(endUP));
+    (*verticesPerThread)[segment.thread()].push_back(std::move(endUP));
 
     return true;
 }
@@ -167,14 +181,23 @@ void AssignLevels(Vertex* start, Vertex* end)
 }  // namespace
 
 bool GenerateExecutionGraph(
-    const Execution& execution,
+    const Segment& segment,
     const Stacks& stacks,
+    const std::unordered_set<thread_t>& excludedThreads,
     VerticesPerThread* verticesPerThread,
     Vertex** start,
     Vertex** end)
 {
-    if (!GenerateExecutionGraphInternal(execution, stacks, verticesPerThread, start, end))
+    if (!GenerateExecutionGraphInternal(
+        segment,
+        stacks,
+        excludedThreads,
+        verticesPerThread,
+        start,
+        end))
+    {
         return false;
+    }
 
     AssignLevels(*start, *end);
 

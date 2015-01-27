@@ -18,6 +18,7 @@
 #ifndef _TIBEE_BUILDERBLOCKS_PROCESSBLOCK_HPP
 #define _TIBEE_BUILDERBLOCKS_PROCESSBLOCK_HPP
 
+#include <unordered_map>
 #include <unordered_set>
 
 #include "execution_blocks/AbstractExecutionBlock.hpp"
@@ -46,13 +47,15 @@ private:
     void OnSchedProcessFork(const trace::EventValue& event);
     void OnSchedProcessExit(const trace::EventValue& event);
 
-    // Roots of executions.
-    typedef std::unordered_set<thread_t> ExecutionRoots;
+    /*
+    // Threads at the root of executions mapped to execution index.
+    typedef std::unordered_map<thread_t, size_t> ExecutionRoots;
     ExecutionRoots _executionRoots;
 
-    // Threads that are currently analyzed mapped to the root of the execution.
-    typedef std::unordered_map<thread_t, thread_t> AnalyzedThreads;
+    // Analyzed threads.
+    typedef std::unordered_set<thread_t> AnalyzedThreads;
     AnalyzedThreads _analyzedThreads;
+    */
 
     // Name of the analyzed process.
     std::string _processName;

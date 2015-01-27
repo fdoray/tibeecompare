@@ -31,6 +31,7 @@ const uint64_t kHugeCost = -1;
 extern const char kHistoryDirectoryName[];
 extern const char kStacksFileName[];
 extern const char kCriticalFileName[];
+extern const char kSegmentsFileName[];
 
 // Services.
 extern const char kExecutionsBuilderServiceName[];
@@ -82,7 +83,6 @@ extern const char kStartThreadField[];
 extern const char kEndTsField[];
 extern const char kEndThreadField[];
 extern const char kMetricsField[];
-extern const char kThreadsField[];
 extern const char kMetricsCollection[];
 extern const char kDot[];
 

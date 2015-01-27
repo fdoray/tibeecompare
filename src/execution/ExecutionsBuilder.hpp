@@ -32,7 +32,7 @@ namespace execution
 class ExecutionsBuilder
 {
 public:
-    typedef std::vector<Execution::UP> CompletedExecutions;
+    typedef std::vector<Execution::UP> Executions;
 
     ExecutionsBuilder();
     ~ExecutionsBuilder();
@@ -41,40 +41,60 @@ public:
     void SetTimestamp(timestamp_t ts) { _ts = ts; }
     void SetTrace(const std::string& trace) { _trace = trace; }
 
-    // Create executions.
-    void StartThreadExecution(thread_t thread,
-                              const std::string& name,
-                              bool needsToEnd);
-    void EndThreadExecution(thread_t thread);
+    // Create execution.
+    bool StartExecution(
+        thread_t thread,
+        const std::string& name,
+        bool needsToEnd);
 
-    // Add threads to an execution.
-    void AddThreadToExecution(thread_t parent, thread_t child);
+    // Start a segment.
+    // If a segment already exists on the thread, it is
+    // ended and a new segment is started.
+    void StartSegment(thread_t parent, thread_t child);
+
+    // End a segment.
+    void EndSegment(thread_t thread);
 
     // Complete all executions that don't need to end.
     void Terminate();
 
     // Traverse executions.
-    size_t ExecutionsCount() const { return _completedExecutions.size(); }
-    CompletedExecutions::iterator begin() {
-        return _completedExecutions.begin();
+    size_t ExecutionsCount() const {
+        return _executions.size();
     }
-    CompletedExecutions::iterator end() {
-        return _completedExecutions.end();
+    Executions::iterator begin() {
+        return _executions.begin();
+    }
+    Executions::iterator end() {
+        return _executions.end();
     }
 
 private:
+    typedef size_t ExecutionIndex;
+
     // Current timestamp.
     timestamp_t _ts;
 
     // Current trace.
     std::string _trace;
 
-    // Current executions.
-    typedef std::unordered_map<thread_t, Execution::UP> CurrentExecutions;
-    CurrentExecutions _currentExecutions;
+    // Executions.
+    Executions _executions;
 
-    // Completed executions.
-    CompletedExecutions _completedExecutions;
+    // Indicates which executions need to end.
+    std::vector<bool> _executionNeedsToEnd;
+
+    // A segment wrapper contains a segment and the
+    // index of the execution it belongs to.
+    struct SegmentWrapper
+    {
+        ExecutionIndex executionIndex;
+        Segment segment;
+    };
+
+    // Current segment per thread.
+    typedef std::unordered_map<thread_t, SegmentWrapper> SegmentPerThread;
+    SegmentPerThread _segments;
 };
 
 }  // namespace execution

@@ -17,16 +17,61 @@
  */
 #include "execution/ExecutionsDb.hpp"
 
+#include <boost/filesystem.hpp>
+
 #include "base/CompareConstants.hpp"
 #include "base/print.hpp"
+#include "io/ReadStream.hpp"
+#include "io/WriteStream.hpp"
 
 namespace tibee
 {
 namespace execution
 {
 
+namespace
+{
+
+namespace bfs = boost::filesystem;
+
 using base::tberror;
 using base::tbendl;
+
+void WriteSegments(const Execution& execution,
+                   const ExecutionId& executionId)
+{
+    std::ofstream segmentsFile;
+    bfs::path segmentsFilename =
+        bfs::path(kHistoryDirectoryName) /
+        (executionId.toString() + kSegmentsFileName);
+    segmentsFile.open(segmentsFilename.string(), std::ios::out | std::ios::binary);
+
+    io::WriteStream(segmentsFile, execution.segments().size());
+    for (const auto& segment : execution.segments())
+        io::WriteStream(segmentsFile, segment);
+}
+
+void ReadSegments(const ExecutionId& executionId,
+                  Execution* execution)
+{
+    std::ifstream segmentsFile;
+    bfs::path segmentsFilename =
+        bfs::path(kHistoryDirectoryName) /
+        (executionId.toString() + kSegmentsFileName);
+    segmentsFile.open(segmentsFilename.string(), std::ios::in | std::ios::binary);
+
+    size_t numSegments = 0;
+    io::ReadStream(segmentsFile, &numSegments);
+
+    for (size_t i = 0; i < numSegments; ++i)
+    {
+        Segment segment;
+        io::ReadStream(segmentsFile, &segment);
+        execution->AddSegment(segment);
+    }
+}
+
+}  // namespace
 
 ExecutionsDb::ExecutionsDb(quark::DiskQuarkDatabase* quarks)
     : _connection(true),
@@ -66,16 +111,13 @@ bool ExecutionsDb::InsertExecution(const execution::Execution& execution,
     }
     bson_properties.append(kMetricsField, bson_metrics.obj());
 
-    // Write threads.
-    mongo::BSONArrayBuilder bson_threads;
-    for (auto it = execution.threads().begin(); it != execution.threads().end(); ++it)
-        bson_threads.append(static_cast<int>(*it));
-    bson_properties.append(kThreadsField, bson_threads.arr());
-
     // Insert in database.
     auto bson_properties_obj = bson_properties.obj();
     *executionId = bson_properties_obj.getField(kIdField).OID();
     _connection.insert(kExecutionsCollection, bson_properties_obj);
+
+    // Write segments in a file.
+    WriteSegments(execution, *executionId);
 
     // Update available metrics.
     UpdateAvailableMetrics(execution);
@@ -91,7 +133,9 @@ bool ExecutionsDb::ReadExecution(const ExecutionId& executionId,
     if (!Connect())
         return false;
 
-    auto cursor = _connection.query(kExecutionsCollection, MONGO_QUERY(kIdField << executionId));
+    auto cursor = _connection.query(
+        kExecutionsCollection,
+        MONGO_QUERY(kIdField << executionId));
     if (!cursor->more())
         return false;
 
@@ -114,9 +158,8 @@ bool ExecutionsDb::ReadExecution(const ExecutionId& executionId,
         execution->SetMetric(_quarks->StrQuark(metricName), metricValue);
     }
 
-    auto threads = obj.getField(kThreadsField).Array();
-    for (const auto& thread : threads)
-        execution->AddThread(static_cast<thread_t>(thread.Int()));
+    // Read segments.
+    ReadSegments(execution->id(), execution);
 
     return true;
 }
@@ -127,7 +170,9 @@ bool ExecutionsDb::EnumerateExecutions(const std::string& name,
     if (!Connect())
         return false;
 
-    auto cursor = _connection.query(kExecutionsCollection, MONGO_QUERY(kNameField << name));
+    auto cursor = _connection.query(
+        kExecutionsCollection,
+        MONGO_QUERY(kNameField << name));
 
     while (cursor->more())
     {
@@ -151,6 +196,9 @@ bool ExecutionsDb::EnumerateExecutions(const std::string& name,
 
             execution.SetMetric(_quarks->StrQuark(metricName), metricValue);
         }
+
+        // Read segments.
+        ReadSegments(execution.id(), &execution);
 
         callback(execution);
     }

@@ -18,10 +18,11 @@
 #ifndef _TIBEE_EXECUTION_GETEXECUTIONSEGMENTS_HPP
 #define _TIBEE_EXECUTION_GETEXECUTIONSEGMENTS_HPP
 
+#include <unordered_set>
 #include <vector>
 
 #include "execution/Execution.hpp"
-#include "execution/ExecutionSegment.hpp"
+#include "execution/Segment.hpp"
 #include "execution/Stacks.hpp"
 
 namespace tibee
@@ -29,11 +30,11 @@ namespace tibee
 namespace execution
 {
 
-bool GetExecutionSegments(
-    const Execution& execution,
+bool GetSegments(
+    const Segment& segment,
     const Stacks& stacks,
-    std::vector<Link>* links,
-    ExecutionSegments* executionSegments);
+    const std::unordered_set<thread_t>& excludedThreads,
+    Segments* segments);
 
 }  // namespace execution
 }  // namespace tibee

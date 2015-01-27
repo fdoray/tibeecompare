@@ -82,8 +82,7 @@ void AbstractStacks::EnumerateLinks(const containers::Interval& interval,
     {
         if (it->sourceTs() > interval.high())
             break;
-        if (it->targetTs() <= interval.high())
-            callback(*it);
+        callback(*it);
     }
 }
 

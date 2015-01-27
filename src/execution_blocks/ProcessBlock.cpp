@@ -62,40 +62,54 @@ void ProcessBlock::AddObservers(notification::NotificationCenter* notificationCe
 
 void ProcessBlock::OnExecName(uint32_t tid, const notification::Path& path, const value::Value* value)
 {
+    /*
     auto threadNameValue = value->GetField(kCurrentStateAttributeValueField);
     if (threadNameValue != nullptr && threadNameValue->AsString() == _processName)
     {
         auto look = _analyzedThreads.find(tid);
         if (look == _analyzedThreads.end())
         {
-            Executions()->StartThreadExecution(tid, _processName, false);
-            _executionRoots.insert(tid);
-            _analyzedThreads[tid] = tid;
+            auto executionIndex =
+                Executions()->StartExecution(tid, _processName, false);
+            if (executionIndex != execution::kInvalidExecutionIndex)
+            {
+                _executionRoots[tid] = executionIndex;
+                _analyzedThreads.insert(tid);
+            }
         }
     }
+    */
 }
 
 void ProcessBlock::OnSchedProcessFork(const trace::EventValue& event)
 {
+    /*
     auto parent_tid = event.getEventField("parent_tid")->AsUInteger();
     auto child_tid = event.getEventField("child_tid")->AsUInteger();
 
     auto look = _analyzedThreads.find(parent_tid);
     if (look != _analyzedThreads.end())
     {
-        _analyzedThreads[child_tid] = look->second;
-        Executions()->AddThreadToExecution(look->second, child_tid);
+        _analyzedThreads.insert(child_tid);
+
+
+
+                // TODO
+        // Executions()->AddThreadToExecution(look->second, child_tid);
     }
+    */
 }
 
 void ProcessBlock::OnSchedProcessExit(const trace::EventValue& event)
 {
+    /*
     auto tid = ThreadForEvent(event);
     auto look = _executionRoots.find(tid);
     if (look != _executionRoots.end())
     {
-        Executions()->EndThreadExecution(tid);
+        Executions()->EndExecution(tid);
     }
+    */
 }
 
 }  // namespace execution_blocks

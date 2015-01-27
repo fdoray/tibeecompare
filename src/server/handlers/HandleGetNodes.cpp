@@ -30,7 +30,7 @@
 #include "critical/CriticalGraphReader.hpp"
 #include "execution/Execution.hpp"
 #include "execution/ExecutionsDb.hpp"
-#include "execution/GetExecutionSegments.hpp"
+#include "execution/GetSegments.hpp"
 #include "execution/StacksFromDisk.hpp"
 #include "execution/StacksReader.hpp"
 #include "quark/QuarkDatabase.hpp"
@@ -80,7 +80,7 @@ void CollectNodeTypesCallback(
 
 void CollectNodeTypes(
     const execution::Stacks& stacks,
-    const execution::ExecutionSegments& segments,
+    const execution::Segments& segments,
     quark::DiskQuarkDatabase* quarks,
     quark::QuarkDatabase<std::string>* types)
 {
@@ -108,7 +108,7 @@ void WriteNodeTypes(
 }
 
 void WriteThreadNames(
-    const execution::ExecutionSegments& segments,
+    const execution::Segments& segments,
     const execution::Stacks& stacks,
     mq::MessageEncoder* response)
 {
@@ -154,7 +154,7 @@ void WriteStackItemCallback(
 }
 
 void WriteSegments(
-    const execution::ExecutionSegments& segments,
+    const execution::Segments& segments,
     const execution::Stacks& stacks,
     quark::DiskQuarkDatabase* quarks,
     quark::QuarkDatabase<std::string>* types,
@@ -214,7 +214,7 @@ void WriteLinks(
 
 void WriteThreadStatus(
     const execution::Execution& execution,
-    const execution::ExecutionSegments& segments,
+    const execution::Segments& segments,
     mq::MessageEncoder* response)
 {
     // Collect tids for this execution.
@@ -277,6 +277,15 @@ void WriteThreadStatus(
     }
 }
 
+void CollectLinks(
+    thread_t thread,
+    const execution::Link& link,
+    execution::Links* links)
+{
+    if (link.sourceThread() == thread)
+        links->push_back(link);
+}
+
 }  // namespace
 
 bool HandleGetNodes(mq::MessageDecoder* request,
@@ -299,8 +308,6 @@ bool HandleGetNodes(mq::MessageDecoder* request,
     // Read the executions.
     std::vector<execution::Execution> executions(executionIds.size());
     std::unordered_map<std::string, execution::StacksFromDisk> stacks;
-    std::vector<execution::ExecutionSegments> segments(executionIds.size());
-    std::vector<execution::Links> links(executionIds.size());
 
     for (size_t executionIndex = 0;
          executionIndex < executionIds.size();
@@ -322,13 +329,6 @@ bool HandleGetNodes(mq::MessageDecoder* request,
                 stacksFileName.string(),
                 &stacks[executions[executionIndex].trace()]);
         }
-
-        // Get execution segments.
-        execution::GetExecutionSegments(
-            executions[executionIndex],
-            stacks[executions[executionIndex].trace()],
-            &links[executionIndex],
-            &segments[executionIndex]);
     }
 
     // Collect node types.
@@ -339,7 +339,7 @@ bool HandleGetNodes(mq::MessageDecoder* request,
     {
         CollectNodeTypes(
             stacks[executions[executionIndex].trace()],
-            segments[executionIndex],
+            executions[executionIndex].segments(),
             &quarks,
             &types);
     }
@@ -357,32 +357,46 @@ bool HandleGetNodes(mq::MessageDecoder* request,
          executionIndex < executionIds.size();
          ++executionIndex)
     {
+        auto& executionStacks = stacks[executions[executionIndex].trace()];
+
         // Write the response: thread names.
         WriteThreadNames(
-            segments[executionIndex],
-            stacks[executions[executionIndex].trace()],
+            executions[executionIndex].segments(),
+            executionStacks,
             response);
 
         // Match the graphs.
         // TODO
 
         // Write the response: segments.
-        std::sort(segments[executionIndex].begin(),
-                  segments[executionIndex].end());
+        execution::Segments sortedSegments(
+            executions[executionIndex].segments());
+        std::sort(sortedSegments.begin(),
+                  sortedSegments.end());
         WriteSegments(
-            segments[executionIndex], 
-            stacks[executions[executionIndex].trace()],
+            sortedSegments, 
+            executionStacks,
             &quarks,
             &types,
             response);
 
         // Write the response: links.
-        WriteLinks(links[executionIndex], response);
+        execution::Links links;
+        for (const auto& segment : sortedSegments)
+        {
+            executionStacks.EnumerateLinks(
+                containers::Interval(segment.startTs(), segment.endTs()),
+                std::bind(&CollectLinks,
+                          segment.thread(),
+                          std::placeholders::_1,
+                          &links));
+        }
+        WriteLinks(links, response);
 
         // Write the response: thread status.
         WriteThreadStatus(
             executions[executionIndex],
-            segments[executionIndex],
+            sortedSegments,
             response);
     }
 

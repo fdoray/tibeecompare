@@ -1,10 +1,17 @@
 blocks:
   - trace
-  - process:
-      name: run_chrome
+  - punch:
+      name: query
+      exec: apache2
+      begin: syscall_exit_accept4
+      end: syscall_entry_shutdown
+      type: kernel
   - current-state
+  - sched-wakeup:
+      io: yes
+      futex: no
   - linux-sched-state
-  - finstrument-symbols
+  - syscall-only
   - thread-name
   - critical
   - execution

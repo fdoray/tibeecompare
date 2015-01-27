@@ -23,6 +23,7 @@ namespace tibee
 const char kHistoryDirectoryName[] = "history";
 const char kStacksFileName[] = "-stacks";
 const char kCriticalFileName[] = "-critical";
+const char kSegmentsFileName[] = "-segments";
 
 const char kExecutionsBuilderServiceName[] = "executions-builder";
 const char kStacksBuilderServiceName[] = "stacks-builder";
@@ -70,7 +71,6 @@ const char kStartThreadField[] = "startthread";
 const char kEndTsField[] = "endts";
 const char kEndThreadField[] = "endthread";
 const char kMetricsField[] = "metrics";
-const char kThreadsField[] = "threads";
 const char kMetricsCollection[] = "tibeecompare.metrics";
 const char kDot[] = ".";
 

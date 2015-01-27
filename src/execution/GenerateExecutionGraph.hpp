@@ -18,7 +18,9 @@
 #ifndef _TIBEE_EXECUTION_GENERATEEXECUTIONGRAPH_HPP
 #define _TIBEE_EXECUTION_GENERATEEXECUTIONGRAPH_HPP
 
-#include "execution/Execution.hpp"
+#include <unordered_set>
+
+#include "execution/Segment.hpp"
 #include "execution/Stacks.hpp"
 #include "execution/Vertex.hpp"
 
@@ -28,8 +30,9 @@ namespace execution
 {
 
 bool GenerateExecutionGraph(
-    const Execution& execution,
+    const Segment& segment,
     const Stacks& stacks,
+    const std::unordered_set<thread_t>& excludedThreads,
     VerticesPerThread* verticesPerThread,
     Vertex** start,
     Vertex** end);

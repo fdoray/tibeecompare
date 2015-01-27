@@ -15,17 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "execution/GetExecutionSegmentsFollow.hpp"
+#include "execution/GetSegments.hpp"
+
+#include "execution/GenerateExecutionGraph.hpp"
 
 namespace tibee
 {
 namespace execution
 {
 
-void GetExecutionSegmentsFollow(
+namespace
+{
+
+void GetSegmentsInternal(
+    thread_t initialThread,
     const VerticesPerThread& verticesPerThread,
-    std::vector<Link>* links,
-    ExecutionSegments* executionSegments)
+    Segments* segments)
 {
     for (const auto& threadVertices : verticesPerThread)
     {
@@ -50,28 +55,50 @@ void GetExecutionSegmentsFollow(
                       vertex->hout->level == kInvalidLevel)) ||
                      index == vertices.size() - 1)
                 {
-                    ExecutionSegment executionSegment;
-                    executionSegment.set_thread(thread);
-                    executionSegment.set_startTs(startTs);
-                    executionSegment.set_endTs(vertex->ts);
-                    executionSegments->push_back(executionSegment);
-
+                    if (thread != initialThread)
+                    {
+                        Segment segment;
+                        segment.set_thread(thread);
+                        segment.set_startTs(startTs);
+                        segment.set_endTs(vertex->ts);
+                        segments->push_back(segment);
+                    }
                     startTs = kInvalidTs;
-                }
-
-                if (vertex->vout != nullptr)
-                {
-                    links->push_back(Link(
-                        vertex->thread,
-                        vertex->ts,
-                        vertex->vout->thread,
-                        vertex->vout->ts));
                 }
             }
 
             ++index;
         }
     }
+}
+
+}  // namespace
+
+bool GetSegments(
+    const Segment& segment,
+    const Stacks& stacks,
+    const std::unordered_set<thread_t>& excludedThreads,
+    Segments* segments)
+{
+    VerticesPerThread vertices;
+    Vertex* startVertex = nullptr;
+    Vertex* endVertex = nullptr;
+        
+    if (!GenerateExecutionGraph(
+        segment,
+        stacks,
+        excludedThreads,
+        &vertices,
+        &startVertex,
+        &endVertex))
+    {
+        return false;
+    }
+    GetSegmentsInternal(
+        segment.thread(),
+        vertices,
+        segments);
+    return true;
 }
 
 }  // namespace execution

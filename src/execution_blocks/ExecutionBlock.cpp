@@ -31,7 +31,7 @@
 #include "critical/CriticalGraphWriter.hpp"
 #include "execution/ExecutionsDb.hpp"
 #include "execution/GenerateExecutionGraph.hpp"
-#include "execution/GetExecutionSegments.hpp"
+#include "execution/GetSegments.hpp"
 #include "execution/StacksWriter.hpp"
 #include "metrics/CriticalMetricsExtractor.hpp"
 #include "notification/NotificationCenter.hpp"
@@ -115,22 +115,28 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
     execution::ExecutionsDb executionsDb(_quarks);
     for (const auto& execution : _executionsBuilder)
     {
-        // Generate an execution graph in order to get a list of
-        // threads related to the execution.
-        std::vector<execution::Link> links;
-        execution::ExecutionSegments executionSegments;
-        execution::GetExecutionSegments(
-            *execution, _stacksBuilder, &links, &executionSegments);
+        // Collect all threads involved in the execution.
+        std::unordered_set<thread_t> threads;
+        for (const auto& segment : execution->segments())
+            threads.insert(segment.thread());
 
-        std::unordered_set<thread_t> tids;
-        for (const auto& segment : executionSegments)
-            tids.insert(segment.thread());
+        // Try to find more threads involved in the execution.
+        execution::Segments extraSegments;
+        for (const auto& segment : execution->segments())
+        {
+            GetSegments(segment, _stacksBuilder, threads, &extraSegments);
+        }
+        for (const auto& segment : extraSegments)
+        {
+            execution->AddSegment(segment);
+            threads.insert(segment.thread());
+        }
 
         // Compute the critical path.
         critical::CriticalPath criticalPath;
         auto startCriticalNode = _criticalGraph->GetNodeIntersecting(execution->startTs(), execution->startThread());
         auto endCriticalNode = _criticalGraph->GetNodeIntersecting(execution->endTs(), execution->endThread());
-        if (!_criticalGraph->ComputeCriticalPath(startCriticalNode, endCriticalNode, tids, &criticalPath))
+        if (!_criticalGraph->ComputeCriticalPath(startCriticalNode, endCriticalNode, threads, &criticalPath))
         {
             tberror() << "Unable to compute critical path." << tbendl();
         }
@@ -140,7 +146,11 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
         execution->SetMetric(Q_DURATION, duration);
 
         // Add critical metrics.
-        metrics::ExtractCriticalMetrics(criticalPath, execution->endTs(), _quarks, execution.get());
+        metrics::ExtractCriticalMetrics(
+            criticalPath,
+            execution->endTs(),
+            _quarks,
+            execution.get());
 
         // Set trace id.
         execution->set_trace(_traceId);
@@ -148,17 +158,16 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
         execution::ExecutionId executionId;
         if (executionsDb.InsertExecution(*execution, &executionId))
         {
-            tbinfo() << "Execution " << executionId <<
-                        " with name " << execution->name() << tbendl();
+            tbinfo() << "Execution " << executionId
+                     << " with name " << execution->name() << tbendl();
         }
         else
         {
-            tberror() << "Unable to insert execution with name " << execution->name() <<
-                         "in database." << tbendl();
+            tberror() << "Unable to insert execution with name "
+                      << execution->name() << "in database." << tbendl();
         }
     }
 }
-
 
 }  // namespace execution_blocks
 }  // namespace tibee

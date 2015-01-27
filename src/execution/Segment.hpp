@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_EXECUTION_EXECUTIONSEGMENT_HPP
-#define _TIBEE_EXECUTION_EXECUTIONSEGMENT_HPP
+#ifndef _TIBEE_EXECUTION_SEGMENT_HPP
+#define _TIBEE_EXECUTION_SEGMENT_HPP
 
 #include <vector>
 
@@ -27,11 +27,14 @@ namespace tibee
 namespace execution
 {
 
-class ExecutionSegment
+class Segment
 {
 public:
-    ExecutionSegment()
+    Segment()
         : _thread(-1), _startTs(0), _endTs(0) {}
+
+    Segment(thread_t thread, timestamp_t startTs, timestamp_t endTs)
+        : _thread(thread), _startTs(startTs), _endTs(endTs) {}
 
     thread_t thread() const { return _thread; }
     void set_thread(thread_t thread) { _thread = thread; }
@@ -42,13 +45,13 @@ public:
     timestamp_t endTs() const { return _endTs; }
     void set_endTs(timestamp_t endTs) { _endTs = endTs; }
 
-    bool operator==(const ExecutionSegment& other) const {
+    bool operator==(const Segment& other) const {
         return _thread == other._thread &&
             _startTs == other._startTs &&
             _endTs == other._endTs;
     }
 
-    bool operator<(const ExecutionSegment& other) const {
+    bool operator<(const Segment& other) const {
         if (_startTs < other._startTs)
             return true;
         if (_startTs > other._startTs)
@@ -71,9 +74,9 @@ private:
     timestamp_t _endTs;
 };
 
-typedef std::vector<ExecutionSegment> ExecutionSegments;
+typedef std::vector<Segment> Segments;
 
 }  // namespace execution
 }  // namespace tibee
 
-#endif // _TIBEE_EXECUTION_EXECUTIONSEGMENT_HPP
+#endif // _TIBEE_EXECUTION_SEGMENT_HPP

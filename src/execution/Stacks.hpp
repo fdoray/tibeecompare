@@ -49,7 +49,7 @@ public:
     // Returns the number of links.
     virtual size_t LinksCount() const = 0;
 
-    // Enumerate links that start and end whithin the specified interval.
+    // Enumerate links that start whithin the specified interval.
     virtual void EnumerateLinks(const containers::Interval& interval,
                                 const EnumerateLinksCallback& callback) const = 0;
 

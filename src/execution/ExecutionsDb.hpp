@@ -59,7 +59,7 @@ private:
     bool UpdateAvailableMetrics(const execution::Execution& execution);
 
     bool IsConnected();
-    bool Connect();   
+    bool Connect();
 
     // MongoDB connection.
     mongo::DBClientConnection _connection;
