@@ -6,11 +6,8 @@ Import(['env',])
 sources = [
     'AbstractExecutionBlock.cpp',
     'ExecutionBlock.cpp',
-    'ProcessBlock.cpp',
     'PunchBlock.cpp',
     'SchedWakeupBlock.cpp',
-    'SyscallOnlyBlock.cpp',
-    'ThreadNameBlock.cpp',
 ]
 
 Return('sources')

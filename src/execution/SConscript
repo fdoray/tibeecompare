@@ -4,16 +4,8 @@ import os.path
 Import(['env',])
 
 sources = [
-    'AbstractStacks.cpp',
     'ExecutionsBuilder.cpp',
-    'ExecutionsDb.cpp',
-    'GenerateExecutionGraph.cpp',
-    'GetSegments.cpp',
-    'StackItem.cpp',
-    'StacksBuilder.cpp',
-    'StacksFromDisk.cpp',
-    'StacksReader.cpp',
-    'StacksWriter.cpp',
+    'LinksBuilder.cpp',
 ]
 
 Return('sources')

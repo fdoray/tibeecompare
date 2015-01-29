@@ -18,7 +18,6 @@
 #include <boost/program_options.hpp>
 #include <base/print.hpp>
 #include <iostream>
-#include <mongo/client/dbclient.h>
 
 #include "base/ex/InvalidArgument.hpp"
 #include "build/Arguments.hpp"
@@ -118,9 +117,6 @@ int main(int argc, char* argv[])
     } else if (ret > 0) {
         return ret;
     }
-
-    // initialize mongodb
-    mongo::client::initialize();
 
     // create a TibeeBuild instance and run it.
     try {

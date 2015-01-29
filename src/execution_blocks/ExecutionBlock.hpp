@@ -20,13 +20,12 @@
 
 #include <string>
 
-#include "critical/CriticalGraph.hpp"
 #include "execution/ExecutionsBuilder.hpp"
-#include "execution/StacksBuilder.hpp"
+#include "execution/LinksBuilder.hpp"
 #include "block/AbstractBlock.hpp"
 #include "notification/NotificationSink.hpp"
 #include "notification/Path.hpp"
-#include "quark/DiskQuarkDatabase.hpp"
+#include "quark/StringQuarkDatabase.hpp"
 
 namespace tibee {
 namespace execution_blocks {
@@ -45,17 +44,14 @@ private:
     void onTimestamp(const notification::Path& path, const value::Value* value);
     void onEnd(const notification::Path& path, const value::Value* value);
 
-    // The quarks database.
-    quark::DiskQuarkDatabase* _quarks;
-
-    // The stacks builder.
-    execution::StacksBuilder _stacksBuilder;
-
     // The executions builder.
     execution::ExecutionsBuilder _executionsBuilder;
 
-    // Critical graph.
-    critical::CriticalGraph* _criticalGraph;
+    // The links builder.
+    execution::LinksBuilder _linksBuilder;
+
+    // The quarks database.
+    quark::StringQuarkDatabase* _quarks;
 
     // Trace identifier.
     std::string _traceId;

@@ -32,14 +32,13 @@ namespace execution
 class ExecutionsBuilder
 {
 public:
-    typedef std::vector<Execution::UP> Executions;
+    typedef std::vector<Execution> Executions;
 
     ExecutionsBuilder();
     ~ExecutionsBuilder();
 
     // Set current state.
     void SetTimestamp(timestamp_t ts) { _ts = ts; }
-    void SetTrace(const std::string& trace) { _trace = trace; }
 
     // Create execution.
     bool StartExecution(
@@ -47,54 +46,32 @@ public:
         const std::string& name,
         bool needsToEnd);
 
-    // Start a segment.
-    // If a segment already exists on the thread, it is
-    // ended and a new segment is started.
-    void StartSegment(thread_t parent, thread_t child);
+    // End an execution.
+    void EndExecution(thread_t thread);
 
-    // End a segment.
-    void EndSegment(thread_t thread);
-
-    // Complete all executions that don't need to end.
+    // Complete active executions that don't need to end.
     void Terminate();
 
-    // Traverse executions.
-    size_t ExecutionsCount() const {
-        return _executions.size();
-    }
+    // Traverse completed executions.
     Executions::iterator begin() {
-        return _executions.begin();
+        return _completedExecutions.begin();
     }
     Executions::iterator end() {
-        return _executions.end();
+        return _completedExecutions.end();
     }
 
 private:
-    typedef size_t ExecutionIndex;
-
     // Current timestamp.
     timestamp_t _ts;
 
-    // Current trace.
-    std::string _trace;
+    // Completed executions.
+    Executions _completedExecutions;
 
-    // Executions.
-    Executions _executions;
+    // Active executions.
+    std::unordered_map<thread_t, Execution> _activeExecutions;
 
-    // Indicates which executions need to end.
-    std::vector<bool> _executionNeedsToEnd;
-
-    // A segment wrapper contains a segment and the
-    // index of the execution it belongs to.
-    struct SegmentWrapper
-    {
-        ExecutionIndex executionIndex;
-        Segment segment;
-    };
-
-    // Current segment per thread.
-    typedef std::unordered_map<thread_t, SegmentWrapper> SegmentPerThread;
-    SegmentPerThread _segments;
+    // Indicates whether the current executions needs to end.
+    std::unordered_map<thread_t, bool> _needsToEnd;
 };
 
 }  // namespace execution

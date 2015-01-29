@@ -36,91 +36,44 @@ bool ExecutionsBuilder::StartExecution(
     const std::string& name,
     bool needsToEnd)
 {
-    // Cannot create an execution if there is
-    // already a segment on the thread.
-    auto look = _segments.find(thread);
-    if (look != _segments.end())
-        return false;
-
     // Create execution.
-    Execution::UP execution(new Execution);
-    execution->set_name(name);
-    execution->set_trace(_trace);
-    execution->set_startTs(_ts);
-    execution->set_startThread(thread);
-    execution->set_endTs(_ts);
-    execution->set_endThread(thread);
+    Execution& execution = _activeExecutions[thread];
 
-    auto executionIndex = _executions.size();
-    _executions.push_back(std::move(execution));
-    _executionNeedsToEnd.push_back(needsToEnd);
+    execution.set_name(name);
+    execution.set_startTs(_ts);
+    execution.set_startThread(thread);
+    execution.set_endTs(_ts);
+    execution.set_endThread(thread);
 
-    // Create initial segment.
-    SegmentWrapper segment;
-    segment.executionIndex = executionIndex;
-    segment.segment.set_thread(thread);
-    segment.segment.set_startTs(_ts);
-    _segments[thread] = segment;
+    // Remember whether the execution needs to end.
+    _needsToEnd[thread] = needsToEnd;
 
     return true;
 }
 
-void ExecutionsBuilder::StartSegment(thread_t parent, thread_t child)
+void ExecutionsBuilder::EndExecution(thread_t thread)
 {
-    // If there is no segment on the parent, we cannot
-    // create the child segment.
-    auto lookParent = _segments.find(parent);
-    if (lookParent == _segments.end())
-        return;
-    auto executionIndex = lookParent->second.executionIndex;
-
-    auto lookChild = _segments.find(child);
-    if (lookChild != _segments.end())
-    {
-        // If there is already a segment on the thread,
-        // end it at (_ts - 1).
-        --_ts;
-        EndSegment(child);
-        ++_ts;
-    }
-
-    // Start the new segment.
-    SegmentWrapper segment;
-    segment.executionIndex = executionIndex;
-    segment.segment.set_thread(child);
-    segment.segment.set_startTs(_ts);
-    segment.segment.set_endTs(_ts);
-    _segments[child] = segment;
-}
-
-void ExecutionsBuilder::EndSegment(thread_t thread)
-{
-    auto look = _segments.find(thread);
-    if (look == _segments.end())
+    auto look = _activeExecutions.find(thread);
+    if (look == _activeExecutions.end())
         return;
 
-    auto executionIndex = look->second.executionIndex;
-    auto& execution = _executions[executionIndex];
-    auto& segment = look->second.segment;
-    segment.set_endTs(_ts);
-    execution->AddSegment(segment);
-    execution->set_endTs(_ts);
+    look->second.set_endTs(_ts);
+    look->second.set_endThread(thread);
+    _completedExecutions.push_back(look->second);
 
-    _segments.erase(look);
+    _activeExecutions.erase(look);
 }
 
 void ExecutionsBuilder::Terminate()
 {
-    std::vector<thread_t> threads;
-    for (const auto& segment : _segments)
+    for (const auto& needsToEnd : _needsToEnd)
     {
-        auto executionIndex = segment.second.executionIndex;
-        if (!_executionNeedsToEnd[executionIndex])
-            threads.push_back(segment.first);
+        if (!needsToEnd.second)
+        {
+            auto thread = needsToEnd.first;
+            EndExecution(thread);
+        }
     }
-
-    for (const auto& thread : threads)
-        EndSegment(thread);
 }
 
 }  // namespace execution

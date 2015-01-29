@@ -28,12 +28,6 @@
 #include "base/Constants.hpp"
 #include "base/print.hpp"
 #include "block/ServiceList.hpp"
-#include "critical/CriticalGraphWriter.hpp"
-#include "execution/ExecutionsDb.hpp"
-#include "execution/GenerateExecutionGraph.hpp"
-#include "execution/GetSegments.hpp"
-#include "execution/StacksWriter.hpp"
-#include "metrics/CriticalMetricsExtractor.hpp"
 #include "notification/NotificationCenter.hpp"
 #include "notification/Token.hpp"
 
@@ -55,6 +49,7 @@ const char kDurationMetricName[] = "duration";
 }  // namespace
 
 ExecutionBlock::ExecutionBlock()
+    : _quarks(nullptr)
 {
     _traceId = boost::lexical_cast<std::string>(
         boost::uuids::uuid(boost::uuids::random_generator()()));
@@ -66,16 +61,14 @@ ExecutionBlock::~ExecutionBlock()
 
 void ExecutionBlock::RegisterServices(block::ServiceList* serviceList)
 {
+    serviceList->AddService(kLinksBuilderServiceName, &_linksBuilder);
     serviceList->AddService(kExecutionsBuilderServiceName, &_executionsBuilder);
-    serviceList->AddService(kStacksBuilderServiceName, &_stacksBuilder);
 }
 
 void ExecutionBlock::LoadServices(const block::ServiceList& serviceList)
 {
     serviceList.QueryService(kQuarksServiceName,
                              reinterpret_cast<void**>(&_quarks));
-    serviceList.QueryService(kCriticalGraphServiceName,
-                             reinterpret_cast<void**>(&_criticalGraph));
 }
 
 void ExecutionBlock::AddObservers(notification::NotificationCenter* notificationCenter)
@@ -91,28 +84,19 @@ void ExecutionBlock::AddObservers(notification::NotificationCenter* notification
 void ExecutionBlock::onTimestamp(const notification::Path& path, const value::Value* value)
 {
     auto ts = value->AsULong();
-    _stacksBuilder.SetTimestamp(ts);
     _executionsBuilder.SetTimestamp(ts);
+    _linksBuilder.SetTimestamp(ts);
 }
 
 void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* value)
 {  
-    _stacksBuilder.Terminate();
+    /*
+    // Notify the executions builder that we reached
+    // the end of the trace.
     _executionsBuilder.Terminate();
-
-    // Write critical graph to disk.
-    bfs::path criticalFileName =
-        bfs::path(kHistoryDirectoryName) / (_traceId + kCriticalFileName);
-    critical::WriteCriticalGraph(criticalFileName.string(), *_criticalGraph);
-
-    // Write stacks to disk.
-    bfs::path stacksFileName =
-        bfs::path(kHistoryDirectoryName) / (_traceId + kStacksFileName);
-    WriteStacks(stacksFileName.string(), _stacksBuilder);
 
     // Write executions to database.
     quark::Quark Q_DURATION = _quarks->StrQuark(kDurationMetricName);
-    execution::ExecutionsDb executionsDb(_quarks);
     for (const auto& execution : _executionsBuilder)
     {
         // Collect all threads involved in the execution.
@@ -124,7 +108,7 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
         execution::Segments extraSegments;
         for (const auto& segment : execution->segments())
         {
-            GetSegments(segment, _stacksBuilder, threads, &extraSegments);
+            GetSegments(segment, _linksBuilder, threads, &extraSegments);
         }
         for (const auto& segment : extraSegments)
         {
@@ -134,18 +118,22 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
 
         // Compute the critical path.
         critical::CriticalPath criticalPath;
-        auto startCriticalNode = _criticalGraph->GetNodeIntersecting(execution->startTs(), execution->startThread());
-        auto endCriticalNode = _criticalGraph->GetNodeIntersecting(execution->endTs(), execution->endThread());
-        if (!_criticalGraph->ComputeCriticalPath(startCriticalNode, endCriticalNode, threads, &criticalPath))
+        auto startCriticalNode = _criticalGraph->GetNodeIntersecting(
+            execution->startTs(),
+            execution->startThread());
+        auto endCriticalNode = _criticalGraph->GetNodeIntersecting(
+            execution->endTs(),
+            execution->endThread());
+        if (!_criticalGraph->ComputeCriticalPath(
+                startCriticalNode, endCriticalNode,
+                threads, &criticalPath))
         {
             tberror() << "Unable to compute critical path." << tbendl();
         }
 
-        // Add duration metric.
+        // Add metrics.
         timestamp_t duration = execution->endTs() - execution->startTs();
         execution->SetMetric(Q_DURATION, duration);
-
-        // Add critical metrics.
         metrics::ExtractCriticalMetrics(
             criticalPath,
             execution->endTs(),
@@ -155,18 +143,9 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
         // Set trace id.
         execution->set_trace(_traceId);
 
-        execution::ExecutionId executionId;
-        if (executionsDb.InsertExecution(*execution, &executionId))
-        {
-            tbinfo() << "Execution " << executionId
-                     << " with name " << execution->name() << tbendl();
-        }
-        else
-        {
-            tberror() << "Unable to insert execution with name "
-                      << execution->name() << "in database." << tbendl();
-        }
+        // Insert the execution in a database!
     }
+    */
 }
 
 }  // namespace execution_blocks

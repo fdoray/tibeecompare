@@ -93,7 +93,7 @@ void PunchBlock::onEnd(const trace::EventValue& event)
     if (!TidIsAnalyzed(tid))
         return;
 
-    Executions()->EndSegment(tid);
+    Executions()->EndExecution(tid);
 }
 
 bool PunchBlock::TidIsAnalyzed(uint32_t tid) const

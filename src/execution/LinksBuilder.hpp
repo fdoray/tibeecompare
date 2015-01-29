@@ -15,48 +15,47 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_EXECUTION_VERTEX_HPP
-#define _TIBEE_EXECUTION_VERTEX_HPP
+#ifndef _TIBEE_EXECUTION_LINKSBUILDER_HPP
+#define _TIBEE_EXECUTION_LINKSBUILDER_HPP
 
-#include <memory>
-#include <unordered_map>
-#include <vector>
+#include <functional>
 
-#include "base/BasicTypes.hpp"
+#include "execution/Link.hpp"
 
 namespace tibee
 {
 namespace execution
 {
 
-const timestamp_t kInvalidTs = -1;
-const uint32_t kInvalidLevel = -1;
-
-struct Vertex
+class LinksBuilder
 {
-    typedef std::unique_ptr<Vertex> UP;
+public:
+    typedef std::function<void (const Link&)> EnumerateLinksCallback;
 
-    Vertex(thread_t thread, timestamp_t ts)
-        : thread(thread), ts(ts),
-          hout(nullptr), hin(nullptr),
-          vout(nullptr), vin(nullptr),
-          level(kInvalidLevel) {}
+    LinksBuilder();
+    ~LinksBuilder();
 
-    thread_t thread;
-    timestamp_t ts;
+    // Set current timestamp.
+    void SetTimestamp(timestamp_t ts) { _ts = ts; }
 
-    Vertex* hout;
-    Vertex* hin;
-    Vertex* vout;
-    Vertex* vin;
+    // Add a link.
+    void AddLink(const Link& link);
+    void AddLink(thread_t source, thread_t target);
 
-    uint32_t level;
+    // Enumerate links that start whithin the specified interval.
+    void EnumerateLinks(timestamp_t start,
+                        timestamp_t end,
+                        const EnumerateLinksCallback& callback) const;
+
+private:
+    // Current timestamp.
+    timestamp_t _ts;
+
+    // Links.
+    Links _links;
 };
-
-typedef std::vector<Vertex::UP> Vertices;
-typedef std::unordered_map<thread_t, Vertices> VerticesPerThread;
 
 }  // namespace execution
 }  // namespace tibee
 
-#endif // _TIBEE_EXECUTION_VERTEX_HPP
+#endif // _TIBEE_EXECUTION_LINKSBUILDER_HPP

@@ -19,14 +19,9 @@
 #define _TIBEE_EXECUTION_EXECUTION_HPP
 
 #include <memory>
-#include <set>
 #include <string>
-#include <unordered_map>
 
 #include "base/BasicTypes.hpp"
-#include "execution/ExecutionId.hpp"
-#include "execution/Segment.hpp"
-#include "quark/Quark.hpp"
 
 namespace tibee
 {
@@ -37,16 +32,11 @@ class Execution
 {
 public:
     typedef std::unique_ptr<Execution> UP;
-    typedef std::unordered_map<quark::Quark, uint64_t> Metrics;
 
     Execution() 
         : _startTs(0), _startThread(-1),
           _endTs(0), _endThread(-1) {}
     ~Execution() {}
-
-    // Identifier of the execution.
-    const ExecutionId& id() const { return _id; }
-    void set_id(const ExecutionId& id) { _id = id; }
 
     // Name of the execution.
     const std::string& name() const { return _name; }
@@ -55,10 +45,6 @@ public:
     // Trace of the execution.
     const std::string& trace() const { return _trace; }
     void set_trace(const std::string& trace) { _trace = trace; }
-
-    // Segments.
-    const Segments& segments() const { return _segments; }
-    void AddSegment(const Segment& segment) { _segments.push_back(segment); }
 
     // Start time of the execution.
     timestamp_t startTs() const { return _startTs; }
@@ -76,39 +62,12 @@ public:
     thread_t endThread() const { return _endThread; }
     void set_endThread(thread_t endThread) { _endThread = endThread; }
 
-    // Metrics.
-    bool GetMetric(quark::Quark key, uint64_t* value) const {
-        auto look = _metrics.find(key);
-        if (look == _metrics.end())
-            return false;
-        *value = look->second;
-        return true;
-    }
-    void SetMetric(quark::Quark key, uint64_t value) {
-        _metrics[key] = value;
-    }
-    Metrics::const_iterator metrics_begin() const {
-        return _metrics.begin();
-    }
-    Metrics::const_iterator metrics_end() const {
-        return _metrics.end();
-    }
-    size_t MetricsCount() const {
-        return _metrics.size();
-    }
-
 private:
-    // Identifier of the execution.
-    ExecutionId _id;
-
     // Name of the execution.
     std::string _name;
 
     // Trace of the execution.
     std::string _trace;
-
-    // Segments of the execution.
-    Segments _segments;
 
     // Start time of the execution.
     timestamp_t _startTs;
@@ -121,9 +80,6 @@ private:
 
     // End thread of the execution.
     thread_t _endThread;
-
-    // Metrics of the execution.
-    Metrics _metrics;
 };
 
 }  // namespace execution

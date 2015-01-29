@@ -25,6 +25,10 @@ namespace tibee {
 namespace execution_blocks {
 
 AbstractExecutionBlock::AbstractExecutionBlock()
+    : _currentState(nullptr),
+      _quarks(nullptr),
+      _executionsBuilder(nullptr),
+      _linksBuilder(nullptr)
 {
 }
 
@@ -33,9 +37,9 @@ void AbstractExecutionBlock::LoadServices(const block::ServiceList& serviceList)
     serviceList.QueryService(kExecutionsBuilderServiceName,
                              reinterpret_cast<void**>(&_executionsBuilder));
 
-    serviceList.QueryService(kStacksBuilderServiceName,
-                             reinterpret_cast<void**>(&_stacksBuilder));
-    
+    serviceList.QueryService(kLinksBuilderServiceName,
+                             reinterpret_cast<void**>(&_linksBuilder));
+
     serviceList.QueryService(kCurrentStateServiceName,
                              reinterpret_cast<void**>(&_currentState));
 

@@ -80,7 +80,7 @@ void SchedWakeupBlock::OnTTWU(const trace::EventValue& event)
     uint32_t source_tid = ThreadForEvent(event);
     uint32_t target_tid = event.getEventField("tid")->AsUInteger();
 
-    // Ignore kernel threads.
+    // Ignore annoying kernel threads.
     if (_excludedThreads.find(target_tid) != _excludedThreads.end())
         return;
 
@@ -99,7 +99,7 @@ void SchedWakeupBlock::OnTTWU(const trace::EventValue& event)
         }
     }
 
-    Stacks()->AddLink(source_tid, target_tid);
+    Links()->AddLink(source_tid, target_tid);
 }
 
 void SchedWakeupBlock::OnInterruptEntry(const trace::EventValue& event)

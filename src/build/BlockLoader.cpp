@@ -18,16 +18,11 @@
 #include "build/BlockLoader.hpp"
 
 #include "base/CompareConstants.hpp"
-#include "critical_blocks/CriticalBlock.hpp"
 #include "execution_blocks/ExecutionBlock.hpp"
-#include "execution_blocks/ProcessBlock.hpp"
 #include "execution_blocks/PunchBlock.hpp"
 #include "execution_blocks/SchedWakeupBlock.hpp"
-#include "execution_blocks/SyscallOnlyBlock.hpp"
-#include "execution_blocks/ThreadNameBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
-#include "symbols_blocks/FinstrumentSymbolsBlock.hpp"
 #include "trace_blocks/TraceBlock.hpp"
 
 namespace tibee
@@ -39,28 +34,18 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
 {
     block::BlockInterface::UP block;
 
-    if (name == kCriticalBlockName) {
-        block.reset(new critical_blocks::CriticalBlock);
-    } else if (name == kExecutionBlockName) {
+    if (name == kExecutionBlockName) {
         block.reset(new execution_blocks::ExecutionBlock);
-    } else if (name == kProcessBlockName) {
-        block.reset(new execution_blocks::ProcessBlock);
     } else if (name == kPunchBlockName) {
         block.reset(new execution_blocks::PunchBlock);
     } else if (name == kSchedWakeupBlockName) {
         block.reset(new execution_blocks::SchedWakeupBlock);
-    } else if (name == kSyscallOnlyBlockName) {
-        block.reset(new execution_blocks::SyscallOnlyBlock);
-    } else if (name == kThreadNameBlockName) {
-        block.reset(new execution_blocks::ThreadNameBlock);
     } else if (name == kTraceBlockName) {
         block.reset(new trace_blocks::TraceBlock);
     } else if (name == kCurrentStateBlockName) {
         block.reset(new state_blocks::CurrentStateBlock);
     } else if (name == kLinuxSchedStateBlockName) {
         block.reset(new state_blocks::LinuxSchedStateBlock);
-    } else if (name == kFinstrumentSymbolsBlockName) {
-        block.reset(new symbols_blocks::FinstrumentSymbolsBlock);
     }
 
     return block;

@@ -20,7 +20,7 @@
 
 #include "block/AbstractBlock.hpp"
 #include "execution/ExecutionsBuilder.hpp"
-#include "execution/StacksBuilder.hpp"
+#include "execution/LinksBuilder.hpp"
 #include "state/CurrentState.hpp"
 
 namespace tibee {
@@ -43,13 +43,13 @@ protected:
     state::CurrentState* State() const { return _currentState; }
 
     // Quarks.
-    quark::DiskQuarkDatabase* Quarks() const { return _quarks; }
+    quark::StringQuarkDatabase* Quarks() const { return _quarks; }
 
     // Executions builder.
     execution::ExecutionsBuilder* Executions() const { return _executionsBuilder; }
 
-    // Stacks builder.
-    execution::StacksBuilder* Stacks() const { return _stacksBuilder; }
+    // Links builder.
+    execution::LinksBuilder* Links() const { return _linksBuilder; }
 
     // CPU for an event.
     uint32_t CpuForEvent(const trace::EventValue& event) const;
@@ -62,13 +62,13 @@ private:
     state::CurrentState* _currentState;
 
     // Quarks.
-    quark::DiskQuarkDatabase* _quarks;
+    quark::StringQuarkDatabase* _quarks;
 
     // Executions builder.
     execution::ExecutionsBuilder* _executionsBuilder;
 
-    // Stacks builder.
-    execution::StacksBuilder* _stacksBuilder;
+    // Links builder.
+    execution::LinksBuilder* _linksBuilder;
 };
 
 }  // namespace execution_blocks

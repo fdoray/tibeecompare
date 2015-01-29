@@ -19,15 +19,8 @@
 
 namespace tibee
 {
-
-const char kHistoryDirectoryName[] = "history";
-const char kStacksFileName[] = "-stacks";
-const char kCriticalFileName[] = "-critical";
-const char kSegmentsFileName[] = "-segments";
-
 const char kExecutionsBuilderServiceName[] = "executions-builder";
-const char kStacksBuilderServiceName[] = "stacks-builder";
-const char kCriticalGraphServiceName[] = "critical-graph";
+const char kLinksBuilderServiceName[] = "links-builder";
 
 // Block names.
 // - Trace
@@ -37,15 +30,8 @@ const char kCurrentStateBlockName[] = "current-state";
 const char kLinuxSchedStateBlockName[] = "linux-sched-state";
 // - Execution
 const char kExecutionBlockName[] = "execution";
-const char kProcessBlockName[] = "process";
 const char kPunchBlockName[] = "punch";
 const char kSchedWakeupBlockName[] = "sched-wakeup";
-const char kSyscallOnlyBlockName[] = "syscall-only";
-const char kThreadNameBlockName[] = "thread-name";
-// - Critical.
-const char kCriticalBlockName[] = "critical";
-// - Symbols.
-const char kFinstrumentSymbolsBlockName[] = "finstrument-symbols";
 
 const char kInstructions[] = "instructions";
 const char kCacheReferences[] = "cache-references";
@@ -59,19 +45,5 @@ const char kPageFault[] = "page-fault";
 const char kFaults[] = "faults";
 const char kMajorFaults[] = "major-faults";
 const char kMinorFaults[] = "minor-faults";
-
-// Mongo.
-const char kMongoHost[] = "localhost:27017";
-const char kExecutionsCollection[] = "tibeecompare.executions";
-const char kIdField[] = "_id";
-const char kNameField[] = "desc";
-const char kTraceField[] = "trace";
-const char kStartTsField[] = "startts";
-const char kStartThreadField[] = "startthread";
-const char kEndTsField[] = "endts";
-const char kEndThreadField[] = "endthread";
-const char kMetricsField[] = "metrics";
-const char kMetricsCollection[] = "tibeecompare.metrics";
-const char kDot[] = ".";
 
 }

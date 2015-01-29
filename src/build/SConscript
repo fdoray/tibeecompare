@@ -9,7 +9,6 @@ target = 'tibeebuild'
 libs = [
     tibeecomparelib,
     'delorean',
-    'mongoclient',
     'tigerbeetle',
     'boost_program_options',
     'boost_filesystem',

@@ -35,7 +35,7 @@ extern const char kSegmentsFileName[];
 
 // Services.
 extern const char kExecutionsBuilderServiceName[];
-extern const char kStacksBuilderServiceName[];
+extern const char kLinksBuilderServiceName[];
 extern const char kCriticalGraphServiceName[];
 
 // Block names.
@@ -46,15 +46,8 @@ extern const char kCurrentStateBlockName[];
 extern const char kLinuxSchedStateBlockName[];
 // - Execution
 extern const char kExecutionBlockName[];
-extern const char kProcessBlockName[];
 extern const char kPunchBlockName[];
 extern const char kSchedWakeupBlockName[];
-extern const char kSyscallOnlyBlockName[];
-extern const char kThreadNameBlockName[];
-// - Critical.
-extern const char kCriticalBlockName[];
-// - Symbols.
-extern const char kFinstrumentSymbolsBlockName[];
 
 // Execution: performance counters.
 extern const char kInstructions[];
@@ -69,22 +62,6 @@ extern const char kPageFault[];
 extern const char kFaults[];
 extern const char kMajorFaults[];
 extern const char kMinorFaults[];
-
-// Mongo.
-const size_t kOIDLength = 24;
-
-extern const char kMongoHost[];
-extern const char kExecutionsCollection[];
-extern const char kIdField[];
-extern const char kNameField[];
-extern const char kTraceField[];
-extern const char kStartTsField[];
-extern const char kStartThreadField[];
-extern const char kEndTsField[];
-extern const char kEndThreadField[];
-extern const char kMetricsField[];
-extern const char kMetricsCollection[];
-extern const char kDot[];
 
 }  // namespace tibee
 

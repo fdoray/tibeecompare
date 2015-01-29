@@ -7,9 +7,6 @@ env:
   - BUILD_MODE=debug
   - BUILD_MODE=release
 
-services:
-  - mongodb
-
 before_install:
   # R
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
@@ -66,12 +63,6 @@ install:
   - make
   - sudo make install
   - cd ../..
-
-  # mongodb cxx driver
-  - git clone https://github.com/mongodb/mongo-cxx-driver.git
-  - cd mongo-cxx-driver
-  - sudo scons --prefix=/usr/local install --cxx=g++-4.8 --cc=gcc --c++11=on
-  - cd ..
 
   # create a history directory for the tests
   - mkdir history

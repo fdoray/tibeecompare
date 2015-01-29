@@ -9,25 +9,15 @@ env.Append(CPPPATH=['#/src'])
 
 # Generate a static library.
 base = SConscript(os.path.join('base', 'SConscript'), exports=['env'])
-critical = SConscript(os.path.join('critical', 'SConscript'), exports=['env'])
-critical_blocks = SConscript(os.path.join('critical_blocks', 'SConscript'), exports=['env'])
 execution = SConscript(os.path.join('execution', 'SConscript'), exports=['env'])
 execution_blocks = SConscript(os.path.join('execution_blocks', 'SConscript'), exports=['env'])
-metrics = SConscript(os.path.join('metrics', 'SConscript'), exports=['env'])
-mq = SConscript(os.path.join('mq', 'SConscript'), exports=['env'])
 symbols = SConscript(os.path.join('symbols', 'SConscript'), exports=['env'])
-symbols_blocks = SConscript(os.path.join('symbols_blocks', 'SConscript'), exports=['env'])
 
 subs = [
     ('base', base),
-    ('critical', critical),
-    ('critical_blocks', critical_blocks),
     ('execution', execution),
     ('execution_blocks', execution_blocks),
-    ('metrics', metrics),
-    ('mq', mq),
     ('symbols', symbols),
-    ('symbols_blocks', symbols_blocks),
 ]
 
 sources = []
@@ -42,10 +32,6 @@ tibeecomparelib = lib_env.StaticLibrary(target='tibeecomparelib', source=sources
 # Generate the executables.
 build = SConscript(os.path.join('build', 'SConscript'),
                    exports=['env', 'tibeecomparelib'])
-report = SConscript(os.path.join('report', 'SConscript'),
-                    exports=['env', 'tibeecomparelib'])
-server = SConscript(os.path.join('server', 'SConscript'),
-                    exports=['env', 'tibeecomparelib'])
 test = SConscript(os.path.join('test', 'SConscript'),
                   exports=['env', 'tibeecomparelib'])
 

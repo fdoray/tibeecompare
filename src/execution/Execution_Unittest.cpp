@@ -33,9 +33,6 @@ TEST(Execution, Execution)
     const timestamp_t kEndTs = 20;
     const thread_t kEndThread = 2;
 
-    const quark::Quark kKey(5);
-    const uint64_t kValue = 42;
-
     Execution execution;
     EXPECT_EQ("", execution.name());
     EXPECT_EQ("", execution.trace());
@@ -43,7 +40,6 @@ TEST(Execution, Execution)
     EXPECT_EQ(static_cast<thread_t>(-1), execution.startThread());
     EXPECT_EQ(0u, execution.endTs());
     EXPECT_EQ(static_cast<thread_t>(-1), execution.endThread());
-    EXPECT_EQ(0u, execution.MetricsCount());
 
     execution.set_name(kName);
     execution.set_trace(kTrace);
@@ -51,7 +47,6 @@ TEST(Execution, Execution)
     execution.set_startThread(kStartThread);
     execution.set_endTs(kEndTs);
     execution.set_endThread(kEndThread);
-    execution.SetMetric(kKey, kValue);
 
     EXPECT_EQ(kName, execution.name());
     EXPECT_EQ(kTrace, execution.trace());
@@ -59,11 +54,6 @@ TEST(Execution, Execution)
     EXPECT_EQ(kStartThread, execution.startThread());
     EXPECT_EQ(kEndTs, execution.endTs());
     EXPECT_EQ(kEndThread, execution.endThread());
-    EXPECT_EQ(1u, execution.MetricsCount());
-
-    uint64_t value = 0;
-    EXPECT_TRUE(execution.GetMetric(kKey, &value));
-    EXPECT_EQ(kValue, value);
 }
 
 }  // namespace execution
