@@ -1,17 +1,14 @@
 blocks:
   - trace
   - punch:
-      name: query
-      exec: apache2
-      begin: syscall_exit_accept4
-      end: syscall_entry_shutdown
+      name: demo
+      exec: trace-kit-profile
+      begin: tracekit:begin
+      end: tracekit:end
       type: kernel
   - current-state
   - sched-wakeup:
       io: yes
       futex: no
   - linux-sched-state
-  - syscall-only
-  - thread-name
-  - critical
   - execution

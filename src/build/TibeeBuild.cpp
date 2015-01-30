@@ -37,9 +37,36 @@ namespace tibee
 namespace build
 {
 
+namespace
+{
+
 using base::tbendl;
 using base::tberror;
 using base::tbmsg;
+
+void FindTraces(const bfs::path& parent,
+                std::vector<bfs::path>* traces)
+{
+    bfs::path metadataFile = parent / "metadata";
+    if (bfs::exists(metadataFile))
+    {
+        // |parent| is a trace directory
+        traces->push_back(parent);
+        return;
+    }
+
+    // Find traces in subdirectories.
+    bfs::directory_iterator end;
+    for (bfs::directory_iterator it(parent);
+         it != end;
+         ++it)
+    {
+        if (bfs::is_directory(it->status()))
+            FindTraces(it->path(), traces);
+    }
+}
+
+}  // namespace
 
 TibeeBuild::TibeeBuild(const Arguments& args)
 {
@@ -53,20 +80,26 @@ void TibeeBuild::validateSaveArguments(const Arguments& args)
     _configuration = args.configuration;
 
     // make sure all traces actually exist
-    for (const auto& pathStr : args.traces) {
+    for (const auto& pathStr : args.traces)
+    {
         auto tracePath = bfs::path {pathStr};
 
         // make sure this trace exists (at least, may still be invalid)
-        if (!bfs::exists(tracePath)) {
+        if (!bfs::exists(tracePath))
+        {
             std::stringstream ss;
-
-            ss << "trace " << tracePath << " does not exist";
-
+            ss << "trace path " << tracePath << " does not exist";
+            throw base::ex::InvalidArgument {ss.str()};
+        }
+        else if (!bfs::is_directory(tracePath))
+        {
+            std::stringstream ss;
+            ss << "trace path " << tracePath << " is not a directory";
             throw base::ex::InvalidArgument {ss.str()};
         }
 
-        // append trace path
-        _traces.push_back(tracePath);
+        // find directories that contain a metadata file
+        FindTraces(tracePath, &_traces);
     }
 
     // verbose
