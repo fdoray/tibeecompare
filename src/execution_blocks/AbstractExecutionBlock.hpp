@@ -21,6 +21,7 @@
 #include "block/AbstractBlock.hpp"
 #include "execution/ExecutionsBuilder.hpp"
 #include "execution/LinksBuilder.hpp"
+#include "execution/StacksBuilder.hpp"
 #include "state/CurrentState.hpp"
 
 namespace tibee {
@@ -51,6 +52,9 @@ protected:
     // Links builder.
     execution::LinksBuilder* Links() const { return _linksBuilder; }
 
+    // Stacks builder.
+    execution::StacksBuilder* Stacks() const { return _stacksBuilder; }
+
     // CPU for an event.
     uint32_t CpuForEvent(const trace::EventValue& event) const;
 
@@ -72,6 +76,9 @@ private:
 
     // Links builder.
     execution::LinksBuilder* _linksBuilder;
+
+    // Stacks builder.
+    execution::StacksBuilder* _stacksBuilder;
 };
 
 }  // namespace execution_blocks

@@ -24,16 +24,10 @@
 namespace tibee
 {
 
-// Directory that contains built files.
-extern const char kHistoryDirectoryName[];
-extern const char kStacksFileName[];
-extern const char kCriticalFileName[];
-extern const char kSegmentsFileName[];
-
 // Services.
 extern const char kExecutionsBuilderServiceName[];
 extern const char kLinksBuilderServiceName[];
-extern const char kCriticalGraphServiceName[];
+extern const char kStacksBuilderServiceName[];
 
 // Block names.
 // - Trace

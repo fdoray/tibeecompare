@@ -28,23 +28,27 @@ AbstractExecutionBlock::AbstractExecutionBlock()
     : _currentState(nullptr),
       _quarks(nullptr),
       _executionsBuilder(nullptr),
-      _linksBuilder(nullptr)
+      _linksBuilder(nullptr),
+      _stacksBuilder(nullptr)
 {
 }
 
 void AbstractExecutionBlock::LoadServices(const block::ServiceList& serviceList)
 {
+    serviceList.QueryService(kCurrentStateServiceName,
+                             reinterpret_cast<void**>(&_currentState));
+
+    serviceList.QueryService(kQuarksServiceName,
+                             reinterpret_cast<void**>(&_quarks));
+
     serviceList.QueryService(kExecutionsBuilderServiceName,
                              reinterpret_cast<void**>(&_executionsBuilder));
 
     serviceList.QueryService(kLinksBuilderServiceName,
                              reinterpret_cast<void**>(&_linksBuilder));
 
-    serviceList.QueryService(kCurrentStateServiceName,
-                             reinterpret_cast<void**>(&_currentState));
-
-    serviceList.QueryService(kQuarksServiceName,
-                             reinterpret_cast<void**>(&_quarks));
+    serviceList.QueryService(kStacksBuilderServiceName,
+                             reinterpret_cast<void**>(&_stacksBuilder));
 }
 
 uint32_t AbstractExecutionBlock::CpuForEvent(const trace::EventValue& event) const

@@ -21,6 +21,7 @@ namespace tibee
 {
 const char kExecutionsBuilderServiceName[] = "executions-builder";
 const char kLinksBuilderServiceName[] = "links-builder";
+const char kStacksBuilderServiceName[] = "stacks-builder";
 
 // Block names.
 // - Trace

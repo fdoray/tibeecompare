@@ -22,6 +22,7 @@
 
 #include "execution/ExecutionsBuilder.hpp"
 #include "execution/LinksBuilder.hpp"
+#include "execution/StacksBuilder.hpp"
 #include "block/AbstractBlock.hpp"
 #include "notification/NotificationSink.hpp"
 #include "notification/Path.hpp"
@@ -49,6 +50,9 @@ private:
 
     // The links builder.
     execution::LinksBuilder _linksBuilder;
+
+    // The stacks builder.
+    execution::StacksBuilder _stacksBuilder;
 
     // The quarks database.
     quark::StringQuarkDatabase* _quarks;

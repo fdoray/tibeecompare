@@ -61,8 +61,9 @@ ExecutionBlock::~ExecutionBlock()
 
 void ExecutionBlock::RegisterServices(block::ServiceList* serviceList)
 {
-    serviceList->AddService(kLinksBuilderServiceName, &_linksBuilder);
     serviceList->AddService(kExecutionsBuilderServiceName, &_executionsBuilder);
+    serviceList->AddService(kLinksBuilderServiceName, &_linksBuilder);
+    serviceList->AddService(kStacksBuilderServiceName, &_stacksBuilder);
 }
 
 void ExecutionBlock::LoadServices(const block::ServiceList& serviceList)
@@ -86,66 +87,15 @@ void ExecutionBlock::onTimestamp(const notification::Path& path, const value::Va
     auto ts = value->AsULong();
     _executionsBuilder.SetTimestamp(ts);
     _linksBuilder.SetTimestamp(ts);
+    _stacksBuilder.SetTimestamp(ts);
 }
 
 void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* value)
 {  
-    /*
-    // Notify the executions builder that we reached
+    // Notify the executions and stacks builder that we reached
     // the end of the trace.
     _executionsBuilder.Terminate();
-
-    // Write executions to database.
-    quark::Quark Q_DURATION = _quarks->StrQuark(kDurationMetricName);
-    for (const auto& execution : _executionsBuilder)
-    {
-        // Collect all threads involved in the execution.
-        std::unordered_set<thread_t> threads;
-        for (const auto& segment : execution->segments())
-            threads.insert(segment.thread());
-
-        // Try to find more threads involved in the execution.
-        execution::Segments extraSegments;
-        for (const auto& segment : execution->segments())
-        {
-            GetSegments(segment, _linksBuilder, threads, &extraSegments);
-        }
-        for (const auto& segment : extraSegments)
-        {
-            execution->AddSegment(segment);
-            threads.insert(segment.thread());
-        }
-
-        // Compute the critical path.
-        critical::CriticalPath criticalPath;
-        auto startCriticalNode = _criticalGraph->GetNodeIntersecting(
-            execution->startTs(),
-            execution->startThread());
-        auto endCriticalNode = _criticalGraph->GetNodeIntersecting(
-            execution->endTs(),
-            execution->endThread());
-        if (!_criticalGraph->ComputeCriticalPath(
-                startCriticalNode, endCriticalNode,
-                threads, &criticalPath))
-        {
-            tberror() << "Unable to compute critical path." << tbendl();
-        }
-
-        // Add metrics.
-        timestamp_t duration = execution->endTs() - execution->startTs();
-        execution->SetMetric(Q_DURATION, duration);
-        metrics::ExtractCriticalMetrics(
-            criticalPath,
-            execution->endTs(),
-            _quarks,
-            execution.get());
-
-        // Set trace id.
-        execution->set_trace(_traceId);
-
-        // Insert the execution in a database!
-    }
-    */
+    _stacksBuilder.Terminate();
 }
 
 }  // namespace execution_blocks

@@ -85,6 +85,7 @@ void ProfilerBlock::OnSample(const trace::EventValue& event)
         symbolizedStack.push_back(symbol.name());
     }
 
+    Stacks()->SetStack(tid, symbolizedStack);
 }
 
 }  // namespace execution_blocks
