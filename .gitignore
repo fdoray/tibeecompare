@@ -37,3 +37,4 @@ src/test/unittests
 prod-db
 test-db
 .*
+*.json

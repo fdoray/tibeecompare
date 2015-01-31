@@ -34,6 +34,8 @@ JsonWriter::JsonWriter()
 
 JsonWriter::~JsonWriter()
 {
+    if (!_sections.empty())
+        throw ex::FatalError("Json: Some sections were not closed.");
 }
 
 bool JsonWriter::Open(const boost::filesystem::path& path)
@@ -73,18 +75,6 @@ void JsonWriter::Value(const std::string& value)
     ValueInternal(std::string("\"") + EscapeString(value) + "\"");
 }
 
-void JsonWriter::Value(int64_t value)
-{
-    EnsureFile();
-    ValueInternal(std::to_string(value));
-}
-
-void JsonWriter::Value(uint64_t value)
-{
-    EnsureFile();
-    ValueInternal(std::to_string(value));
-}
-
 void JsonWriter::BeginDict()
 {
     EnsureFile();
@@ -114,18 +104,6 @@ void JsonWriter::KeyValue(const std::string& key, const std::string& value)
 {
     EnsureFile();
     KeyValueInternal(key, std::string("\"") + EscapeString(value) + "\"");
-}
-
-void JsonWriter::KeyValue(const std::string& key, int64_t value)
-{
-    EnsureFile();
-    KeyValueInternal(key, std::to_string(value));
-}
-
-void JsonWriter::KeyValue(const std::string& key, uint64_t value)
-{
-    EnsureFile();
-    KeyValueInternal(key, std::to_string(value));
 }
 
 void JsonWriter::KeyDictValue(const std::string& key)

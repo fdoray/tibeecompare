@@ -41,16 +41,29 @@ public:
     void BeginArray();
     void EndArray();
     void Value(const std::string& value);
-    void Value(int64_t value);
-    void Value(uint64_t value);
+
+    template<typename T>
+    void Value(const T& value)
+    {
+        EnsureFile();
+        ValueInternal(std::to_string(value));
+    }
 
     // Dictionary.
     void BeginDict();
     void EndDict();
     void KeyValue(const std::string& key, const std::string& value);
-    void KeyValue(const std::string& key, int64_t value);
-    void KeyValue(const std::string& key, uint64_t value);
+
+    template<typename T>
+    void KeyValue(const std::string& key, const T& value)
+    {
+        EnsureFile();
+        KeyValueInternal(key, std::to_string(value));
+    }
+
     void KeyDictValue(const std::string& key);
+
+    size_t sec() { return _sections.size(); }
 
 private:
     void EnsureFile();

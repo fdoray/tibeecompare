@@ -24,6 +24,7 @@ sources = [
     'main.cpp',
     'TibeeReport.cpp',
     'WriteExecutions.cpp',
+    'WriteStacks.cpp',
 ]
 
 app_env = env.Clone()
