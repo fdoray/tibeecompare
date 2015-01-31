@@ -24,9 +24,6 @@
 namespace tibee
 {
 
-// A huge cost.
-const uint64_t kHugeCost = -1;
-
 // Directory that contains built files.
 extern const char kHistoryDirectoryName[];
 extern const char kStacksFileName[];

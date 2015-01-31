@@ -17,8 +17,6 @@
  */
 #include "gtest/gtest.h"
 
-#include <iostream>
-
 #include "execution/ExecutionsBuilder.hpp"
 
 namespace tibee

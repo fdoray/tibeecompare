@@ -6,6 +6,7 @@ Import(['env',])
 sources = [
     'ExecutionsBuilder.cpp',
     'LinksBuilder.cpp',
+    'StacksBuilder.cpp',
 ]
 
 Return('sources')

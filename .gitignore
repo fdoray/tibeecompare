@@ -33,6 +33,6 @@ src/test/unittests
 .sconsign.dblite
 
 # Generated files.
-db
+prod-db
 test-db
 .*

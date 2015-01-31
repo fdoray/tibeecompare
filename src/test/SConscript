@@ -10,6 +10,7 @@ sources_unittests = [
     'db/Database_Unittest.cpp',
     'execution/Execution_Unittest.cpp',
     'execution/ExecutionsBuilder_Unittest.cpp',
+    'execution/StacksBuilder_Unittest.cpp',
 ]
 
 sources_contrib = [
