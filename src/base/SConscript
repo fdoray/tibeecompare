@@ -5,6 +5,7 @@ Import(['env',])
 
 sources = [
     'CompareConstants.cpp',
+    'EscapeString.cpp',
 ]
 
 Return('sources')
