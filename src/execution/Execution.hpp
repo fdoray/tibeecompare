@@ -20,8 +20,11 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "base/BasicTypes.hpp"
+#include "base/CompareConstants.hpp"
+#include "execution/Identifiers.hpp"
 
 namespace tibee
 {
@@ -32,6 +35,8 @@ class Execution
 {
 public:
     typedef std::unique_ptr<Execution> UP;
+    typedef std::unordered_map<MetricId, uint64_t> Metrics;
+    typedef std::unordered_map<StackId, uint64_t> Samples;
 
     Execution() 
         : _startTs(0), _startThread(-1),
@@ -62,6 +67,54 @@ public:
     thread_t endThread() const { return _endThread; }
     void set_endThread(thread_t endThread) { _endThread = endThread; }
 
+    // Metrics of the execution.
+    size_t metrics_size() const {
+        return _metrics.size();
+    }
+    Metrics::const_iterator metrics_begin() const {
+        return _metrics.begin();
+    }
+    Metrics::const_iterator metrics_end() const {
+        return _metrics.end();
+    }
+
+    bool GetMetric(MetricId metricId, uint64_t* value) const {
+        auto look = _metrics.find(metricId);
+        if (look == _metrics.end())
+            return false;
+        *value = look->second;
+        return true;
+    }
+    void SetMetric(MetricId metricId, uint64_t value) {
+        _metrics[metricId] = value;
+    }
+
+    // Samples of the execution.
+    size_t samples_size() const {
+        return _samples.size();
+    }
+    Samples::const_iterator samples_begin() const {
+        return _samples.begin();
+    }
+    Samples::const_iterator samples_end() const {
+        return _samples.end();
+    }
+    void IncrementSample(StackId stackId, uint64_t value) {
+        _samples[stackId] += value;
+    }
+
+    // Equal operator.
+    bool operator==(const Execution& other) const {
+        return _name == other._name &&
+            _trace == other._trace &&
+            _startTs == other._startTs &&
+            _startThread == other._startThread &&
+            _endTs == other._endTs &&
+            _endThread == other._endThread &&
+            _metrics == other._metrics &&
+            _samples == other._samples;
+    }
+
 private:
     // Name of the execution.
     std::string _name;
@@ -80,6 +133,12 @@ private:
 
     // End thread of the execution.
     thread_t _endThread;
+
+    // Metrics of the execution.
+    Metrics _metrics;
+
+    // Samples of the execution.
+    Samples _samples;
 };
 
 }  // namespace execution

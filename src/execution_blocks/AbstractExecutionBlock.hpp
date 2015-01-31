@@ -57,6 +57,9 @@ protected:
     // Thread for an event.
     thread_t ThreadForEvent(const trace::EventValue& event) const;
 
+    // Process for an event.
+    process_t ProcessForEvent(const trace::EventValue& event) const;
+
 private:
     // Current state.
     state::CurrentState* _currentState;

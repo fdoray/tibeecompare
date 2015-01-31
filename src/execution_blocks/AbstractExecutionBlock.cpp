@@ -62,5 +62,14 @@ thread_t AbstractExecutionBlock::ThreadForEvent(const trace::EventValue& event) 
     return thread;
 }
 
+thread_t AbstractExecutionBlock::ProcessForEvent(const trace::EventValue& event) const
+{
+    auto process_context_value = event.getStreamEventContext()->GetField("vpid");
+    if (process_context_value != nullptr)
+        return process_context_value->AsUInteger();
+    // TODO: Get the process from the current state.
+    return -1;
+}
+
 }  // namespace execution_blocks
 }  // namespace tibee

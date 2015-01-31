@@ -32,7 +32,7 @@ namespace execution
 class ExecutionsBuilder
 {
 public:
-    typedef std::vector<Execution> Executions;
+    typedef std::vector<Execution::UP> Executions;
 
     ExecutionsBuilder();
     ~ExecutionsBuilder();
@@ -68,7 +68,7 @@ private:
     Executions _completedExecutions;
 
     // Active executions.
-    std::unordered_map<thread_t, Execution> _activeExecutions;
+    std::unordered_map<thread_t, Execution::UP> _activeExecutions;
 
     // Indicates whether the current executions needs to end.
     std::unordered_map<thread_t, bool> _needsToEnd;

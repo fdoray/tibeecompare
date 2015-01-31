@@ -19,6 +19,7 @@
 
 #include "base/CompareConstants.hpp"
 #include "execution_blocks/ExecutionBlock.hpp"
+#include "execution_blocks/ProfilerBlock.hpp"
 #include "execution_blocks/PunchBlock.hpp"
 #include "execution_blocks/SchedWakeupBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
@@ -36,6 +37,8 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
 
     if (name == kExecutionBlockName) {
         block.reset(new execution_blocks::ExecutionBlock);
+    } else if (name == kProfilerBlockName) {
+        block.reset(new execution_blocks::ProfilerBlock);
     } else if (name == kPunchBlockName) {
         block.reset(new execution_blocks::PunchBlock);
     } else if (name == kSchedWakeupBlockName) {

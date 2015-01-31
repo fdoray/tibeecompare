@@ -37,13 +37,14 @@ bool ExecutionsBuilder::StartExecution(
     bool needsToEnd)
 {
     // Create execution.
-    Execution& execution = _activeExecutions[thread];
+    Execution::UP& execution = _activeExecutions[thread];
+    execution.reset(new Execution);
 
-    execution.set_name(name);
-    execution.set_startTs(_ts);
-    execution.set_startThread(thread);
-    execution.set_endTs(_ts);
-    execution.set_endThread(thread);
+    execution->set_name(name);
+    execution->set_startTs(_ts);
+    execution->set_startThread(thread);
+    execution->set_endTs(_ts);
+    execution->set_endThread(thread);
 
     // Remember whether the execution needs to end.
     _needsToEnd[thread] = needsToEnd;
@@ -57,9 +58,9 @@ void ExecutionsBuilder::EndExecution(thread_t thread)
     if (look == _activeExecutions.end())
         return;
 
-    look->second.set_endTs(_ts);
-    look->second.set_endThread(thread);
-    _completedExecutions.push_back(look->second);
+    look->second->set_endTs(_ts);
+    look->second->set_endThread(thread);
+    _completedExecutions.push_back(std::move(look->second));
 
     _activeExecutions.erase(look);
 }

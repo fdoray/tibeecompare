@@ -46,22 +46,24 @@ extern const char kCurrentStateBlockName[];
 extern const char kLinuxSchedStateBlockName[];
 // - Execution
 extern const char kExecutionBlockName[];
+extern const char kProfilerBlockName[];
 extern const char kPunchBlockName[];
 extern const char kSchedWakeupBlockName[];
 
-// Execution: performance counters.
-extern const char kInstructions[];
-extern const char kCacheReferences[];
-extern const char kCacheMisses[];
-extern const char kBranchInstructions[];
-extern const char kBranches[];
-extern const char kBranchMisses[];
-extern const char kBranchLoads[];
-extern const char kBranchLoadMisses[];
-extern const char kPageFault[];
-extern const char kFaults[];
-extern const char kMajorFaults[];
-extern const char kMinorFaults[];
+// Metrics.
+typedef uint32_t MetricId;
+extern const char* kMetricNames[];
+const uint32_t kDurationMetricId = 0;
+const uint32_t kUsermodeMetricId = 1;
+const uint32_t kSystemMetricId = 2;
+const uint32_t kInterruptedMetricId = 3;
+const uint32_t kWaitCpuMetricId = 4;
+const uint32_t kWaitBlockedMetricId = 5;
+const uint32_t kTimerMetricId = 6;
+const uint32_t kNetworkMetricId = 7;
+const uint32_t kBlockDeviceMetricId = 8;
+const uint32_t kInputMetricId = 9;
+extern const size_t kNumMetrics;
 
 }  // namespace tibee
 

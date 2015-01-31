@@ -26,16 +26,13 @@
 *.exe
 *.out
 *.app
-src/analyze/tibeeanalyze
 src/build/tibeebuild
-src/report/tibeereport
-src/server/tibeeserver
 src/test/unittests
 
 # scons temporary file
 .sconsign.dblite
 
 # Generated files.
-history
-log.txt
+db
+test-db
 .*

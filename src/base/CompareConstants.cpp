@@ -30,6 +30,7 @@ const char kCurrentStateBlockName[] = "current-state";
 const char kLinuxSchedStateBlockName[] = "linux-sched-state";
 // - Execution
 const char kExecutionBlockName[] = "execution";
+const char kProfilerBlockName[] = "profiler";
 const char kPunchBlockName[] = "punch";
 const char kSchedWakeupBlockName[] = "sched-wakeup";
 
@@ -45,5 +46,19 @@ const char kPageFault[] = "page-fault";
 const char kFaults[] = "faults";
 const char kMajorFaults[] = "major-faults";
 const char kMinorFaults[] = "minor-faults";
+
+const char* kMetricNames[] = {
+    "duration",
+    "usermode",
+    "system",
+    "interrupted",
+    "waitcpu",
+    "waitblocked",
+    "timer",
+    "network",
+    "blockdevice",
+    "input",
+};
+const size_t kNumMetrics = sizeof(kMetricNames) / sizeof(char*);
 
 }

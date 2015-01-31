@@ -49,11 +49,11 @@ TEST(ExecutionsBuilder, Simple)
     auto it = builder.begin();
     ASSERT_NE(it, builder.end());
 
-    EXPECT_EQ(kNameA, it->name());
-    EXPECT_EQ(10u, it->startTs());
-    EXPECT_EQ(kThreadA, it->startThread());
-    EXPECT_EQ(20u, it->endTs());
-    EXPECT_EQ(kThreadA, it->endThread());
+    EXPECT_EQ(kNameA, (*it)->name());
+    EXPECT_EQ(10u, (*it)->startTs());
+    EXPECT_EQ(kThreadA, (*it)->startThread());
+    EXPECT_EQ(20u, (*it)->endTs());
+    EXPECT_EQ(kThreadA, (*it)->endThread());
 
     ++it;
     EXPECT_EQ(builder.end(), it);
@@ -75,11 +75,11 @@ TEST(ExecutionsBuilder, Terminate)
     auto it = builder.begin();
     ASSERT_NE(it, builder.end());
 
-    EXPECT_EQ(kNameB, it->name());
-    EXPECT_EQ(20u, it->startTs());
-    EXPECT_EQ(kThreadB, it->startThread());
-    EXPECT_EQ(30u, it->endTs());
-    EXPECT_EQ(kThreadB, it->endThread());
+    EXPECT_EQ(kNameB, (*it)->name());
+    EXPECT_EQ(20u, (*it)->startTs());
+    EXPECT_EQ(kThreadB, (*it)->startThread());
+    EXPECT_EQ(30u, (*it)->endTs());
+    EXPECT_EQ(kThreadB, (*it)->endThread());
 
     ++it;
     EXPECT_EQ(builder.end(), it);
