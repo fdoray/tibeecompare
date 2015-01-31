@@ -27,6 +27,7 @@
 *.out
 *.app
 src/build/tibeebuild
+src/report/tibeereport
 src/test/unittests
 
 # scons temporary file
