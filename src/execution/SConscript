@@ -5,6 +5,7 @@ Import(['env',])
 
 sources = [
     'ExecutionsBuilder.cpp',
+    'ExtractMetrics.cpp',
     'ExtractStacks.cpp',
     'LinksBuilder.cpp',
     'StacksBuilder.cpp',

@@ -29,6 +29,7 @@
 #include "base/print.hpp"
 #include "block/ServiceList.hpp"
 #include "critical/Segment.hpp"
+#include "execution/ExtractMetrics.hpp"
 #include "execution/ExtractStacks.hpp"
 #include "notification/NotificationCenter.hpp"
 #include "notification/Token.hpp"
@@ -53,6 +54,8 @@ ExecutionBlock::ExecutionBlock()
 {
     _traceId = boost::lexical_cast<std::string>(
         boost::uuids::uuid(boost::uuids::random_generator()()));
+
+    _stacksBuilder.SetDatabase(&_db);
 }
 
 ExecutionBlock::~ExecutionBlock()
@@ -111,8 +114,8 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
         execution::ExtractStacks(
             _stacksBuilder, segments, execution.get());
 
-        // Compute metrics.
-        // TODO.
+        // Extract metrics.
+        execution::ExtractMetrics(execution.get());
 
         // Add the execution to the database.
         _db.AddExecution(*execution);
