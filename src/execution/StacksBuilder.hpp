@@ -52,7 +52,7 @@ public:
     // Enumerate the stacks encountered on a thread in
     // the specified time interval.
     void EnumerateStacks(thread_t thread, timestamp_t start, timestamp_t end,
-                         const EnumerateStacksCallback& callback);
+                         const EnumerateStacksCallback& callback) const;
 
     // Set the end timestamp of the last stack of each thread to now.
     void Terminate();

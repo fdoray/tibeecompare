@@ -72,7 +72,7 @@ void StacksBuilder::SetStack(
 
 void StacksBuilder::EnumerateStacks(
     thread_t thread, timestamp_t start, timestamp_t end,
-    const EnumerateStacksCallback& callback)
+    const EnumerateStacksCallback& callback) const
 {
     auto look = _stacks.find(thread);
     if (look == _stacks.end())

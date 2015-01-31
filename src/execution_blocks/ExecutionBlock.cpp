@@ -28,6 +28,8 @@
 #include "base/Constants.hpp"
 #include "base/print.hpp"
 #include "block/ServiceList.hpp"
+#include "critical/Segment.hpp"
+#include "execution/ExtractStacks.hpp"
 #include "notification/NotificationCenter.hpp"
 #include "notification/Token.hpp"
 
@@ -99,10 +101,21 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
     for (auto& execution : _executionsBuilder)
     {
         // Extract the segments.
-        
+        // TODO: For now, we only have one segment per execution.
+        critical::Segment segment(
+            execution->startThread(), execution->startTs(),
+            execution->endTs(), true);
+        critical::Segments segments({segment});
+
+        // Extract the stacks.
+        execution::ExtractStacks(
+            _stacksBuilder, segments, execution.get());
 
         // Compute metrics.
+        // TODO.
 
+        // Add the execution to the database.
+        _db.AddExecution(*execution);
     }
 }
 

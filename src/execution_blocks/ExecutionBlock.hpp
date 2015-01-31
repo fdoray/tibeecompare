@@ -20,6 +20,7 @@
 
 #include <string>
 
+#include "db/Database.hpp"
 #include "execution/ExecutionsBuilder.hpp"
 #include "execution/LinksBuilder.hpp"
 #include "execution/StacksBuilder.hpp"
@@ -44,6 +45,9 @@ private:
 
     void onTimestamp(const notification::Path& path, const value::Value* value);
     void onEnd(const notification::Path& path, const value::Value* value);
+
+    // Database.
+    db::Database _db;
 
     // The executions builder.
     execution::ExecutionsBuilder _executionsBuilder;
