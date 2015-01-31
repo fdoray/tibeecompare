@@ -17,7 +17,8 @@
  */
 #include "symbols/SymbolLookup.hpp"
 
-#include "bfd.h"
+#include <bfd.h>
+#include <cxxabi.h>
 
 #include <assert.h>
 #include <iostream>
@@ -30,6 +31,19 @@ namespace {
 
 const size_t kElfSymbolSizeOffset = 7;
 
+std::string Demangle(const char* name)
+{
+  int status = 0;    
+  char* ret = abi::__cxa_demangle(name, 0, 0, &status); 
+  std::string demangled;
+  if (ret != nullptr)
+    demangled = ret;
+  else
+    demangled = name;
+  free(ret);
+  return demangled;
+}
+
 bool AddSymbolToCache(bfd* file,
                       asymbol* symbol,
                       SymbolLookup::ImageSymbolCache* cache) {
@@ -40,7 +54,7 @@ bool AddSymbolToCache(bfd* file,
   new_symbol.set_address(symbol_info.value);
   new_symbol.set_size(0);
   new_symbol.set_type(symbol_info.type);
-  new_symbol.set_name(symbol_info.name);
+  new_symbol.set_name(Demangle(symbol_info.name));
 
   if (bfd_get_flavour(file) == bfd_target_elf_flavour) {
     new_symbol.set_size(
