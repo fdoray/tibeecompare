@@ -2,10 +2,10 @@ blocks:
   - trace
   - punch:
       name: demo
-      exec: trace-kit-profile
+      exec: trace-kit-profi
       begin: tracekit:begin
       end: tracekit:end
-      type: kernel
+      type: ust
   - current-state
   - profiler
   - sched-wakeup:

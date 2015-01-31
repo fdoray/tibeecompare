@@ -23,6 +23,7 @@ libs = [
 sources = [
     'main.cpp',
     'TibeeReport.cpp',
+    'WriteExecutions.cpp',
 ]
 
 app_env = env.Clone()

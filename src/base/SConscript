@@ -6,6 +6,7 @@ Import(['env',])
 sources = [
     'CompareConstants.cpp',
     'EscapeString.cpp',
+    'JsonWriter.cpp',
 ]
 
 Return('sources')

@@ -30,9 +30,9 @@ namespace
 
 void EscapeCharacter(char character, std::string* escaped)
 {
-    if (character == '\'')
+    if (character == '"')
     {
-        *escaped += "\\'";
+        *escaped += "\\\"";
     }
     else if (character == '\\')
     {

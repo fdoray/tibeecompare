@@ -18,8 +18,12 @@
 #include "report/TibeeReport.hpp"
 
 #include <boost/filesystem.hpp>
+#include <set>
 
 #include "base/print.hpp"
+#include "db/Database.hpp"
+#include "execution/Identifiers.hpp"
+#include "report/WriteExecutions.hpp"
 
 #define THIS_MODULE "tibeereport"
 
@@ -58,6 +62,20 @@ bool TibeeReport::run()
 {
     if (_verbose)
         tbmsg(THIS_MODULE) << "starting" << tbendl();
+
+    if (_verbose)
+        tbmsg(THIS_MODULE) << "opening database" << tbendl();
+
+    db::Database db;
+
+    if (_verbose)
+        tbmsg(THIS_MODULE) << "writing executions" << tbendl();
+
+    std::set<execution::StackId> stacks;
+    WriteExecutions(_name, db, &stacks);
+
+    if (_verbose)
+        tbmsg(THIS_MODULE) << "done" << tbendl();
 
     return true;
 }

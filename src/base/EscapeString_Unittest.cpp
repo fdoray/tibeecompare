@@ -28,19 +28,19 @@ TEST(EscapeString, EscapeString)
 {
     EXPECT_EQ("", EscapeString(""));
     EXPECT_EQ("hello", EscapeString("hello"));
-    EXPECT_EQ("\\'", EscapeString("'"));
+    EXPECT_EQ("\\\"", EscapeString("\""));
     EXPECT_EQ("\\\\", EscapeString("\\"));
-    EXPECT_EQ("\\'hello\\'", EscapeString("'hello'"));
-    EXPECT_EQ("\\'he\\'llo\\'", EscapeString("'he'llo'"));
+    EXPECT_EQ("\\\"hello\\\"", EscapeString("\"hello\""));
+    EXPECT_EQ("\\\"he\\\"llo\\\"", EscapeString("\"he\"llo\""));
     EXPECT_EQ("\\\\\\\\\\\\\\\\\\\\", EscapeString("\\\\\\\\\\"));
-    EXPECT_EQ("\\\\\\'\\\\\\'\\\\\\'\\\\\\'\\\\",
-              EscapeString("\\'\\'\\'\\'\\"));
+    EXPECT_EQ("\\\\\\\"\\\\\\\"\\\\\\\"\\\\\\\"\\\\",
+              EscapeString("\\\"\\\"\\\"\\\"\\"));
     EXPECT_EQ("\\x01\\x02\\x03hello",
               EscapeString("\x01\x02\x03hello"));
-    EXPECT_EQ("\\x01\\x02\\x03hello\\\\\\'",
-              EscapeString("\x01\x02\x03hello\\'"));
-    EXPECT_EQ("\"#!/$%?&*()_+=-.,;}{",
-              EscapeString("\"#!/$%?&*()_+=-.,;}{"));
+    EXPECT_EQ("\\x01\\x02\\x03hello\\\\\\\"",
+              EscapeString("\x01\x02\x03hello\\\""));
+    EXPECT_EQ("'#!/$%?&*()_+=-.,;}{",
+              EscapeString("'#!/$%?&*()_+=-.,;}{"));
     EXPECT_EQ("123456789abcdefghijklmnopqrstuvwxyz",
               EscapeString("123456789abcdefghijklmnopqrstuvwxyz"));
 }
