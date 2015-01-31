@@ -44,8 +44,6 @@ using base::tberror;
 using base::tbendl;
 using notification::Token;
 
-const char kDurationMetricName[] = "duration";
-
 }  // namespace
 
 ExecutionBlock::ExecutionBlock()
@@ -96,6 +94,16 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
     // the end of the trace.
     _executionsBuilder.Terminate();
     _stacksBuilder.Terminate();
+
+    // Save all executions.
+    for (auto& execution : _executionsBuilder)
+    {
+        // Extract the segments.
+        
+
+        // Compute metrics.
+
+    }
 }
 
 }  // namespace execution_blocks

@@ -7,6 +7,7 @@ target = 'unittests'
 app_env = env.Clone()
 
 sources_unittests = [
+    'critical/GetSegments_Unittest.cpp',
     'db/Database_Unittest.cpp',
     'execution/Execution_Unittest.cpp',
     'execution/ExecutionsBuilder_Unittest.cpp',

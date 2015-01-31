@@ -1,0 +1,11 @@
+
+import os.path
+
+Import(['env',])
+
+sources = [
+    'GenerateExecutionGraph.cpp',
+    'GetSegments.cpp',
+]
+
+Return('sources')
