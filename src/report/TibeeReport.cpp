@@ -20,6 +20,7 @@
 #include <boost/filesystem.hpp>
 #include <set>
 
+#include "base/JsonWriter.hpp"
 #include "base/print.hpp"
 #include "db/Database.hpp"
 #include "execution/Identifiers.hpp"
@@ -70,15 +71,27 @@ bool TibeeReport::run()
     db::Database db;
 
     if (_verbose)
+        tbmsg(THIS_MODULE) << "opening output file" << tbendl();
+
+    base::JsonWriter writer;
+    writer.Open(_name + ".json");
+    writer.BeginDict();
+
+    if (_verbose)
         tbmsg(THIS_MODULE) << "writing executions" << tbendl();
 
     std::set<execution::StackId> stacks;
-    WriteExecutions(_name, db, &stacks);
+    WriteExecutions(_name, db, &stacks, &writer);
 
     if (_verbose)
         tbmsg(THIS_MODULE) << "writing stacks" << tbendl();
 
-    WriteStacks(_name, db, stacks);
+    WriteStacks(db, stacks, &writer);
+
+    if (_verbose)
+        tbmsg(THIS_MODULE) << "closing output file" << tbendl();
+
+    writer.EndDict();
 
     if (_verbose)
         tbmsg(THIS_MODULE) << "done" << tbendl();

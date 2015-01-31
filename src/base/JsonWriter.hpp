@@ -62,6 +62,7 @@ public:
     }
 
     void KeyDictValue(const std::string& key);
+    void KeyArrayValue(const std::string& key);
 
     size_t sec() { return _sections.size(); }
 

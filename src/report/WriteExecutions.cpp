@@ -64,20 +64,18 @@ void WriteExecution(
 void WriteExecutions(
     const std::string& name,
     const db::Database& db,
-    std::set<execution::StackId>* stacks)
+    std::set<execution::StackId>* stacks,
+    base::JsonWriter* writer)
 {
     namespace pl = std::placeholders;
 
-    base::JsonWriter writer;
-    writer.Open(name + "-executions.json");
-
-    writer.BeginArray();
+    writer->KeyArrayValue("executions");
 
     db.EnumerateExecutions(
         name,
-        std::bind(&WriteExecution, pl::_1, &writer, stacks));
+        std::bind(&WriteExecution, pl::_1, writer, stacks));
 
-    writer.EndArray();
+    writer->EndArray();
 }
 
 }  // namespace report

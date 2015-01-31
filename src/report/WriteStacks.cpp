@@ -17,10 +17,7 @@
  */
 #include "report/WriteStacks.hpp"
 
-#include <iostream>
 #include <vector>
-
-#include "base/JsonWriter.hpp"
 
 namespace tibee
 {
@@ -28,15 +25,11 @@ namespace report
 {
 
 void WriteStacks(
-    const std::string& name,
     const db::Database& db,
-    const std::set<execution::StackId>& stacks)
+    const std::set<execution::StackId>& stacks,
+    base::JsonWriter* writer)
 {
-    // Open Json file.
-    base::JsonWriter writer;
-    writer.Open(name + "-stacks.json");
-
-    writer.BeginDict();
+    writer->KeyDictValue("stacks");
 
     std::vector<execution::StackId> stacksVec(
         stacks.begin(), stacks.end());
@@ -53,17 +46,17 @@ void WriteStacks(
         auto stack = db.GetStack(stackId);
         auto functionName = db.GetFunctionName(stack.function());
 
-        writer.KeyDictValue(std::to_string(stackId));
+        writer->KeyDictValue(std::to_string(stackId));
 
-        writer.KeyValue("b", stack.bottom());
-        writer.KeyValue("f", functionName);
-        writer.EndDict();
+        writer->KeyValue("b", stack.bottom());
+        writer->KeyValue("f", functionName);
+        writer->EndDict();
 
         if (stack.bottom() != execution::kEmptyStackId)
             stacksVec.push_back(stack.bottom());
     }
 
-    writer.EndDict();
+    writer->EndDict();
 }
 
 }  // namespace report

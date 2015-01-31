@@ -123,6 +123,23 @@ void JsonWriter::KeyDictValue(const std::string& key)
     _out << "\"" << EscapeString(key) << "\":{";
 }
 
+void JsonWriter::KeyArrayValue(const std::string& key)
+{
+    EnsureFile();
+
+    if (_sections.empty() || _sections.top() != SectionType::kDict)
+        throw ex::FatalError("Json: Cannot write a key-value outside a dictionary.");
+
+    if (!_isFirstOfSection.top())
+        _out << ",";
+    _isFirstOfSection.top() = false;
+
+    _sections.push(SectionType::kArray);
+    _isFirstOfSection.push(true);
+
+    _out << "\"" << EscapeString(key) << "\":[";
+}
+
 void JsonWriter::EnsureFile()
 {
     if (!_out.is_open())

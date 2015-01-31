@@ -21,6 +21,7 @@
 #include <set>
 #include <string>
 
+#include "base/JsonWriter.hpp"
 #include "db/Database.hpp"
 #include "execution/Identifiers.hpp"
 
@@ -32,7 +33,8 @@ namespace report
 void WriteExecutions(
     const std::string& name,
     const db::Database& db,
-    std::set<execution::StackId>* stacks);
+    std::set<execution::StackId>* stacks,
+    base::JsonWriter* writer);
 
 }  // namespace report
 }  // namespace tibee
