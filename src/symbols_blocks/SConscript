@@ -1,0 +1,9 @@
+import os
+
+Import('env')
+
+sources = [
+    'DumpStacksBlock.cpp',
+]
+
+Return(['sources'])

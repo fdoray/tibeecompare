@@ -24,6 +24,7 @@
 #include "execution_blocks/SchedWakeupBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
+#include "symbols_blocks/DumpStacksBlock.hpp"
 #include "trace_blocks/TraceBlock.hpp"
 
 namespace tibee
@@ -49,6 +50,8 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
         block.reset(new state_blocks::CurrentStateBlock);
     } else if (name == kLinuxSchedStateBlockName) {
         block.reset(new state_blocks::LinuxSchedStateBlock);
+    } else if (name == kDumpStacksBlockName) {
+        block.reset(new symbols_blocks::DumpStacksBlock);
     }
 
     return block;

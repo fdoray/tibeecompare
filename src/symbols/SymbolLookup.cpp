@@ -188,15 +188,8 @@ bool SymbolLookup::LookupSymbol(uint64_t address,
       auto symbol_it = image_cache.upper_bound(relative_address);
 
       if (symbol_it == image_cache.begin()) {
-        auto unknown_symbol_key = std::make_pair(image.path(), relative_address);
-        auto look_unknown = unknown_symbols_.find(unknown_symbol_key);
-        if (look_unknown == unknown_symbols_.end())
-        {
-          std::cerr << "No symbol for offset " << relative_address
-                    << " in image " << image.path() << std::endl;
-          unknown_symbols_.insert(unknown_symbol_key);
-        }
-        return false;
+        symbol->set_name(image.path() + "+" + std::to_string(relative_address));
+        return true;
       }
 
       --symbol_it;

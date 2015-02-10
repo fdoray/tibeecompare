@@ -40,6 +40,8 @@ extern const char kExecutionBlockName[];
 extern const char kProfilerBlockName[];
 extern const char kPunchBlockName[];
 extern const char kSchedWakeupBlockName[];
+// - Symbols
+extern const char kDumpStacksBlockName[];
 
 // Metrics.
 typedef uint32_t MetricId;

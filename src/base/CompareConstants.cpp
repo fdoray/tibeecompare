@@ -34,6 +34,8 @@ const char kExecutionBlockName[] = "execution";
 const char kProfilerBlockName[] = "profiler";
 const char kPunchBlockName[] = "punch";
 const char kSchedWakeupBlockName[] = "sched-wakeup";
+// - Symbols
+const char kDumpStacksBlockName[] = "dump-stacks";
 
 const char kInstructions[] = "instructions";
 const char kCacheReferences[] = "cache-references";

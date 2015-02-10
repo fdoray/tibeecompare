@@ -14,6 +14,7 @@ db = SConscript(os.path.join('db', 'SConscript'), exports=['env'])
 execution = SConscript(os.path.join('execution', 'SConscript'), exports=['env'])
 execution_blocks = SConscript(os.path.join('execution_blocks', 'SConscript'), exports=['env'])
 symbols = SConscript(os.path.join('symbols', 'SConscript'), exports=['env'])
+symbols_blocks = SConscript(os.path.join('symbols_blocks', 'SConscript'), exports=['env'])
 
 subs = [
     ('base', base),
@@ -22,6 +23,7 @@ subs = [
     ('execution', execution),
     ('execution_blocks', execution_blocks),
     ('symbols', symbols),
+    ('symbols_blocks', symbols_blocks),
 ]
 
 sources = []

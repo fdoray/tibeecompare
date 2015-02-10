@@ -45,9 +45,6 @@ class SymbolLookup {
  private:
   // Symbol cache.
   SymbolCache cache_;
-
-  // Unknown symbols previously encountered.
-  std::set<std::pair<std::string, uint64_t>> unknown_symbols_;
 };
 
 }  // namespace symbols
