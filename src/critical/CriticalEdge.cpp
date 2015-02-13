@@ -1,4 +1,4 @@
-/* Copyright (c) 2014 Francois Doray <francois.pierre-doray@polymtl.ca>
+/* Copyright (c) 2015 Francois Doray <francois.pierre-doray@polymtl.ca>
  *
  * This file is part of tibeecompare.
  *
@@ -15,33 +15,38 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_EXECUTION_STATUSBUILDER_HPP
-#define _TIBEE_EXECUTION_STATUSBUILDER_HPP
+#include "critical/CriticalEdge.hpp"
 
-#include "base/BasicTypes.hpp"
+#include <assert.h>
 
 namespace tibee
 {
-namespace execution
+namespace critical
 {
 
-class StatusBuilder
+CriticalEdge::CriticalEdge()
+    : _type(CriticalEdgeType::kUnknown), _from(nullptr), _to(nullptr)
 {
-public:
-    StatusBuilder();
-    ~StatusBuilder();
+}
 
-    // Set current timestamp.
-    void SetTimestamp(timestamp_t ts) { _ts = ts; }
+CriticalEdge::CriticalEdge(CriticalEdgeType type, CriticalNode* from, CriticalNode* to)
+    : _type(type), _from(from), _to(to)
+{
+}
 
+timestamp_t CriticalEdge::Cost() const
+{
+    assert(from() != nullptr);
+    assert(to() != nullptr);
 
-private:
-    // Current timestamp.
-    timestamp_t _ts;
+    if (type() == CriticalEdgeType::kWaitBlocked ||
+        type() == CriticalEdgeType::kTimer)
+    {
+        return 0;
+    }
+    assert(to()->ts() >= from()->ts());
+    return to()->ts() - from()->ts();
+}
 
-};
-
-}  // namespace execution
-}  // namespace tibee
-
-#endif // _TIBEE_EXECUTION_STATUSBUILDER_HPP
+}
+}

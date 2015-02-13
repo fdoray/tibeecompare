@@ -1,4 +1,4 @@
-/* Copyright (c) 2014 Francois Doray <francois.pierre-doray@polymtl.ca>
+/* Copyright (c) 2015 Francois Doray <francois.pierre-doray@polymtl.ca>
  *
  * This file is part of tibeecompare.
  *
@@ -15,33 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_EXECUTION_STATUSBUILDER_HPP
-#define _TIBEE_EXECUTION_STATUSBUILDER_HPP
-
-#include "base/BasicTypes.hpp"
+#include "critical/CriticalNode.hpp"
 
 namespace tibee
 {
-namespace execution
+namespace critical
 {
 
-class StatusBuilder
+CriticalNode::CriticalNode()
+    : _edges({kInvalidCriticalEdgeId,
+              kInvalidCriticalEdgeId,
+              kInvalidCriticalEdgeId,
+              kInvalidCriticalEdgeId}),
+      _ts(-1),
+      _tid(-1)
 {
-public:
-    StatusBuilder();
-    ~StatusBuilder();
-
-    // Set current timestamp.
-    void SetTimestamp(timestamp_t ts) { _ts = ts; }
+}
 
 
-private:
-    // Current timestamp.
-    timestamp_t _ts;
+CriticalNode::CriticalNode(timestamp_t ts, uint32_t tid)
+    : _edges({kInvalidCriticalEdgeId,
+              kInvalidCriticalEdgeId,
+              kInvalidCriticalEdgeId,
+              kInvalidCriticalEdgeId}),
+      _ts(ts),
+      _tid(tid)
+{
+}
 
-};
-
-}  // namespace execution
-}  // namespace tibee
-
-#endif // _TIBEE_EXECUTION_STATUSBUILDER_HPP
+}
+}
