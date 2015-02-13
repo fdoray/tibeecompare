@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include <assert.h>
-#include <iostream>
 #include <queue>
 #include <unordered_set>
 
@@ -37,13 +36,6 @@ namespace
 using base::tbendl;
 using base::tberror;
 
-struct NodeTsComparator
-{
-    bool operator() (const CriticalNode* node, timestamp_t ts) const
-    {
-        return node->ts() < ts;
-    }
-};
 struct NodeTsComparatorReverse
 {
     bool operator() (timestamp_t ts, const CriticalNode* node) const
@@ -51,17 +43,6 @@ struct NodeTsComparatorReverse
         return ts < node->ts();
     }
 };
-
-struct NodeDistance
-{
-    NodeDistance() : distance(0), edge(kInvalidCriticalEdgeId) {}
-    NodeDistance(size_t distance, CriticalEdgeId edge) : distance(distance), edge(edge) {}
-    size_t distance;
-    CriticalEdgeId edge;
-
-};
-
-const size_t kHugeDistance = -1;
 
 }  // namespace
 
@@ -118,14 +99,6 @@ const CriticalNode* CriticalGraph::GetNodeIntersecting(timestamp_t ts, uint32_t 
         return nullptr;
 
     return *node_it;
-}
-
-CriticalNode* CriticalGraph::GetLastNodeForThread(uint32_t tid)
-{
-    auto thread_nodes_it = _tid_to_nodes.find(tid);
-    if (thread_nodes_it == _tid_to_nodes.end() || thread_nodes_it->second->empty())
-        return nullptr;
-    return thread_nodes_it->second->back();
 }
 
 CriticalEdgeId CriticalGraph::CreateHorizontalEdge(

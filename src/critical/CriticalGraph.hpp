@@ -45,20 +45,25 @@ public:
     CriticalGraph();
     ~CriticalGraph();
 
+    // Create a node.
+    // The node is not linked to any other node.
     CriticalNode* CreateNode(timestamp_t ts, uint32_t tid);
 
+    // Get a node which has an horizontal out edge that overlaps |ts|.
     const CriticalNode* GetNodeIntersecting(timestamp_t ts, uint32_t tid) const;
-    CriticalNode* GetLastNodeForThread(uint32_t tid);
 
+    // Create an horizontal edge.
     CriticalEdgeId CreateHorizontalEdge(
         CriticalEdgeType type,
         CriticalNode* from,
         CriticalNode* to);
 
+    // Create a vertical edge.
     CriticalEdgeId CreateVerticalEdge(
         CriticalNode* from,
         CriticalNode* to);
 
+    // Get an edge by id.
     const CriticalEdge& GetEdge(CriticalEdgeId id) const {
         return _edges[id];
     }
