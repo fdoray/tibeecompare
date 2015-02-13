@@ -24,6 +24,7 @@ namespace tibee
 namespace execution
 {
 
+/*
 void ExtractStacks(
     const StacksBuilder& stacks,
     const critical::Segments& segments,
@@ -38,6 +39,7 @@ void ExtractStacks(
             segment.thread(), segment.startTs(), segment.endTs(), callback);
     }
 }
+*/
 
 }  // namespace execution
 }  // namespace tibee

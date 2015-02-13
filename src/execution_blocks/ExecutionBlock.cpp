@@ -28,7 +28,6 @@
 #include "base/Constants.hpp"
 #include "base/print.hpp"
 #include "block/ServiceList.hpp"
-#include "critical/Segment.hpp"
 #include "execution/ExtractMetrics.hpp"
 #include "execution/ExtractStacks.hpp"
 #include "notification/NotificationCenter.hpp"
@@ -103,6 +102,7 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
     // Save all executions.
     for (auto& execution : _executionsBuilder)
     {
+        /*
         // Extract the segments.
         // TODO: For now, we only have one segment per execution.
         critical::Segment segment(
@@ -113,6 +113,7 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
         // Extract the stacks.
         execution::ExtractStacks(
             _stacksBuilder, segments, execution.get());
+        */
 
         // Extract metrics.
         execution::ExtractMetrics(execution.get());

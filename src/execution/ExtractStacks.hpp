@@ -18,7 +18,6 @@
 #ifndef _TIBEE_EXECUTION_EXTRACTSTACKS_HPP
 #define _TIBEE_EXECUTION_EXTRACTSTACKS_HPP
 
-#include "critical/Segment.hpp"
 #include "execution/Execution.hpp"
 #include "execution/StacksBuilder.hpp"
 
@@ -27,10 +26,12 @@ namespace tibee
 namespace execution
 {
 
+/*
 void ExtractStacks(
     const StacksBuilder& stacks,
     const critical::Segments& segments,
     Execution* execution);
+*/
 
 }  // namespace execution
 }  // namespace tibee
