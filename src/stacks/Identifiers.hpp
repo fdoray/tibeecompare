@@ -1,4 +1,4 @@
-/* Copyright (c) 2014 Francois Doray <francois.pierre-doray@polymtl.ca>
+/* Copyright (c) 2015 Francois Doray <francois.pierre-doray@polymtl.ca>
  *
  * This file is part of tibeecompare.
  *
@@ -15,33 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_EXECUTION_STATUSBUILDER_HPP
-#define _TIBEE_EXECUTION_STATUSBUILDER_HPP
+#ifndef _TIBEE_EXECUTION_IDENTIFIERS_HPP
+#define _TIBEE_EXECUTION_IDENTIFIERS_HPP
 
 #include "base/BasicTypes.hpp"
 
 namespace tibee
 {
-namespace execution
+namespace stacks
 {
 
-class StatusBuilder
-{
-public:
-    StatusBuilder();
-    ~StatusBuilder();
+typedef uint32_t FunctionNameId;
+typedef uint32_t StackId;
 
-    // Set current timestamp.
-    void SetTimestamp(timestamp_t ts) { _ts = ts; }
+const StackId kEmptyStackId = 0;
+const StackId kFirstStackId = kEmptyStackId + 1;
 
-
-private:
-    // Current timestamp.
-    timestamp_t _ts;
-
-};
-
-}  // namespace execution
+}  // namespace stacks
 }  // namespace tibee
 
-#endif // _TIBEE_EXECUTION_STATUSBUILDER_HPP
+#endif // _TIBEE_EXECUTION_IDENTIFIERS_HPP

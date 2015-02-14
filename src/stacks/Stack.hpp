@@ -18,11 +18,11 @@
 #ifndef _TIBEE_EXECUTION_STACK_HPP
 #define _TIBEE_EXECUTION_STACK_HPP
 
-#include "execution/Identifiers.hpp"
+#include "stacks/Identifiers.hpp"
 
 namespace tibee
 {
-namespace execution
+namespace stacks
 {
 
 class Stack
@@ -50,7 +50,7 @@ private:
     StackId _bottom;
 };
 
-}  // namespace execution
+}  // namespace stacks
 }  // namespace tibee
 
 #endif // _TIBEE_EXECUTION_STACK_HPP

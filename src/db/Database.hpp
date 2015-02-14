@@ -26,8 +26,8 @@
 
 #include "base/BasicTypes.hpp"
 #include "execution/Execution.hpp"
-#include "execution/Identifiers.hpp"
-#include "execution/Stack.hpp"
+#include "stacks/Identifiers.hpp"
+#include "stacks/Stack.hpp"
 
 namespace tibee
 {
@@ -45,12 +45,12 @@ public:
     ~Database();
 
     // Function names.
-    std::string GetFunctionName(execution::FunctionNameId id) const;
-    execution::FunctionNameId AddFunctionName(const std::string& name);
+    std::string GetFunctionName(stacks::FunctionNameId id) const;
+    stacks::FunctionNameId AddFunctionName(const std::string& name);
 
     // Stacks.
-    execution::Stack GetStack(execution::StackId id) const;
-    execution::StackId AddStack(const execution::Stack& stack);
+    stacks::Stack GetStack(stacks::StackId id) const;
+    stacks::StackId AddStack(const stacks::Stack& stack);
 
     // Executions.
     void EnumerateExecutions(
@@ -71,7 +71,7 @@ private:
 
     // Strings. Uses the same data as function names.
     std::string GetString(uint32_t id) const;
-    execution::FunctionNameId AddString(const std::string& str);
+    stacks::FunctionNameId AddString(const std::string& str);
 
     // Indicates whether we use the test database.
     bool _isTest;

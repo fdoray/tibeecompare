@@ -124,7 +124,7 @@ bool TibeeBuild::run()
     for (const auto& tracePath : _traces)
         traces->Append(value::MakeValue(tracePath.string()));
 
-    configuration.AddParameter(kTraceBlockName, "traces", std::move(traces));
+    configuration.AddParameter("trace", "traces", std::move(traces));
 
     // Run the blocks.
     configuration.Runner().Run();

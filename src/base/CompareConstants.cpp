@@ -20,22 +20,8 @@
 namespace tibee
 {
 const char kExecutionsBuilderServiceName[] = "executions-builder";
-const char kLinksBuilderServiceName[] = "links-builder";
 const char kStacksBuilderServiceName[] = "stacks-builder";
-
-// Block names.
-// - Trace
-const char kTraceBlockName[] = "trace";
-// - State
-const char kCurrentStateBlockName[] = "current-state";
-const char kLinuxSchedStateBlockName[] = "linux-sched-state";
-// - Execution
-const char kExecutionBlockName[] = "execution";
-const char kProfilerBlockName[] = "profiler";
-const char kPunchBlockName[] = "punch";
-const char kSchedWakeupBlockName[] = "sched-wakeup";
-// - Symbols
-const char kDumpStacksBlockName[] = "dump-stacks";
+const char kCriticalGraphServiceName[] = "critical-graph";
 
 const char kInstructions[] = "instructions";
 const char kCacheReferences[] = "cache-references";

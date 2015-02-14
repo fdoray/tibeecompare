@@ -48,5 +48,5 @@ timestamp_t CriticalEdge::Cost() const
     return to()->ts() - from()->ts();
 }
 
-}
-}
+}  // namespace critical
+}  // namespace tibee

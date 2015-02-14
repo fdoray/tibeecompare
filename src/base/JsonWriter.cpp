@@ -17,8 +17,6 @@
  */
 #include "base/JsonWriter.hpp"
 
-#include <cctype>
-
 #include "base/EscapeString.hpp"
 #include "base/ex/FatalError.hpp"
 

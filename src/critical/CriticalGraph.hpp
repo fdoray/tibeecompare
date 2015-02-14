@@ -45,12 +45,18 @@ public:
     CriticalGraph();
     ~CriticalGraph();
 
+    // Set the current timestamp.
+    void SetTimestamp(timestamp_t ts) { _ts = ts; }
+
     // Create a node.
     // The node is not linked to any other node.
-    CriticalNode* CreateNode(timestamp_t ts, uint32_t tid);
+    CriticalNode* CreateNode(uint32_t tid);
 
     // Get a node which has an horizontal out edge that overlaps |ts|.
     const CriticalNode* GetNodeIntersecting(timestamp_t ts, uint32_t tid) const;
+
+    // Get the last created node for the given thread.
+    CriticalNode* GetLastNodeForThread(uint32_t tid);
 
     // Create an horizontal edge.
     CriticalEdgeId CreateHorizontalEdge(
@@ -69,8 +75,8 @@ public:
     }
 
 private:
-    // Timestamp of the last node created.
-    timestamp_t _last_ts;
+    // Timestamp.
+    timestamp_t _ts;
 
     // Nodes.
     std::vector<CriticalNode::UP> _nodes;
@@ -82,7 +88,7 @@ private:
     std::vector<CriticalEdge> _edges;
 };
 
-}
-}
+}  // namespace critical
+}  // namespace tibee
 
 #endif  // TIBEE_SRC_CRITICAL_CRITICALGRAPH_HPP_

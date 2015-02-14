@@ -23,7 +23,7 @@
 
 #include "base/JsonWriter.hpp"
 #include "db/Database.hpp"
-#include "execution/Identifiers.hpp"
+#include "stacks/Identifiers.hpp"
 
 namespace tibee
 {
@@ -32,7 +32,7 @@ namespace report
 
 void WriteStacks(
     const db::Database& db,
-    const std::set<execution::StackId>& stacks,
+    const std::set<stacks::StackId>& stacks,
     base::JsonWriter* writer);
 
 }  // namespace report

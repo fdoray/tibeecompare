@@ -15,28 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_EXECUTIONBLOCKS_EXECUTIONBLOCK_HPP
-#define _TIBEE_EXECUTIONBLOCKS_EXECUTIONBLOCK_HPP
+#ifndef _TIBEE_BUILDBLOCKS_BUILDBLOCK_HPP
+#define _TIBEE_BUILDBLOCKS_BUILDBLOCK_HPP
 
 #include <string>
 
+#include "block/AbstractBlock.hpp"
+#include "critical/CriticalGraph.hpp"
 #include "db/Database.hpp"
 #include "execution/ExecutionsBuilder.hpp"
-#include "execution/LinksBuilder.hpp"
-#include "execution/StacksBuilder.hpp"
-#include "block/AbstractBlock.hpp"
-#include "notification/NotificationSink.hpp"
 #include "notification/Path.hpp"
 #include "quark/StringQuarkDatabase.hpp"
+#include "stacks/StacksBuilder.hpp"
 
 namespace tibee {
-namespace execution_blocks {
+namespace build_blocks {
 
-class ExecutionBlock : public block::AbstractBlock
+class BuildBlock : public block::AbstractBlock
 {
 public:
-    ExecutionBlock();
-    ~ExecutionBlock();
+    BuildBlock();
+    ~BuildBlock();
 
 private:
     virtual void LoadServices(const block::ServiceList& serviceList) override;
@@ -52,11 +51,11 @@ private:
     // The executions builder.
     execution::ExecutionsBuilder _executionsBuilder;
 
-    // The links builder.
-    execution::LinksBuilder _linksBuilder;
-
     // The stacks builder.
-    execution::StacksBuilder _stacksBuilder;
+    stacks::StacksBuilder _stacksBuilder;
+
+    // The critical graph.
+    critical::CriticalGraph _criticalGraph;
 
     // The quarks database.
     quark::StringQuarkDatabase* _quarks;
@@ -65,7 +64,7 @@ private:
     std::string _traceId;
 };
 
-}  // namespace execution_blocks
+}  // namespace build_blocks
 }  // namespace tibee
 
-#endif // _TIBEE_EXECUTIONBLOCKS_EXECUTIONBLOCK_HPP
+#endif // _TIBEE_BUILDBLOCKS_BUILDBLOCK_HPP

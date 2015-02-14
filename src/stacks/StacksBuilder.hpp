@@ -23,11 +23,11 @@
 
 #include "base/BasicTypes.hpp"
 #include "db/Database.hpp"
-#include "execution/Identifiers.hpp"
+#include "stacks/Identifiers.hpp"
 
 namespace tibee
 {
-namespace execution
+namespace stacks
 {
 
 class StacksBuilder
@@ -82,7 +82,7 @@ private:
     };
 };
 
-}  // namespace execution
+}  // namespace stacks
 }  // namespace tibee
 
 #endif // _TIBEE_EXECUTION_STACKSBUILDER_HPP

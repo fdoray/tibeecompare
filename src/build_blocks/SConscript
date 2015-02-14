@@ -4,7 +4,8 @@ import os.path
 Import(['env',])
 
 sources = [
-    'PunchBlock.cpp',
+    'AbstractBuildBlock.cpp',
+    'BuildBlock.cpp',
 ]
 
 Return('sources')

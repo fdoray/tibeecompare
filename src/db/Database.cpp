@@ -227,7 +227,7 @@ bool ReadExecutionSamplesFromBuffer(
 
     for (size_t i = 0; i < samples_size; ++i)
     {
-        execution::StackId stackId = 0;
+        stacks::StackId stackId = 0;
         uint64_t stackValue = 0;
         
         if (!ReadBuffer(buffer, pos, &stackId) ||
@@ -263,7 +263,7 @@ Database::~Database()
     _comparator.reset(nullptr);
 }
 
-std::string Database::GetFunctionName(execution::FunctionNameId id) const
+std::string Database::GetFunctionName(stacks::FunctionNameId id) const
 {
     OpenDatabase();
 
@@ -285,7 +285,7 @@ std::string Database::GetFunctionName(execution::FunctionNameId id) const
     return name;
 }
 
-execution::FunctionNameId Database::AddFunctionName(const std::string& name)
+stacks::FunctionNameId Database::AddFunctionName(const std::string& name)
 {
     OpenDatabase();
 
@@ -332,7 +332,7 @@ execution::FunctionNameId Database::AddFunctionName(const std::string& name)
     return id;
 }
 
-execution::Stack Database::GetStack(execution::StackId id) const
+stacks::Stack Database::GetStack(stacks::StackId id) const
 {
     OpenDatabase();
 
@@ -351,19 +351,19 @@ execution::Stack Database::GetStack(execution::StackId id) const
             "Unable to retrieve a function name for the provided id.");
     }
 
-    if (stackStr.size() != sizeof(execution::Stack))
+    if (stackStr.size() != sizeof(stacks::Stack))
     {
         throw base::ex::FatalError(
             "Read a stack with an incorrect size.");
     }
 
-    execution::Stack stack;
+    stacks::Stack stack;
     memcpy(&stack, stackStr.c_str(), sizeof(stack));
 
     return stack;
 }
 
-execution::StackId Database::AddStack(const execution::Stack& stack)
+stacks::StackId Database::AddStack(const stacks::Stack& stack)
 {
     OpenDatabase();
 
@@ -566,7 +566,7 @@ std::string Database::GetString(uint32_t id) const
     return GetFunctionName(id);
 }
 
-execution::FunctionNameId Database::AddString(const std::string& str)
+stacks::FunctionNameId Database::AddString(const std::string& str)
 {
     return AddFunctionName(str);
 }

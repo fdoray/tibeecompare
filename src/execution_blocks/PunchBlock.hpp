@@ -20,7 +20,7 @@
 
 #include <string>
 
-#include "execution_blocks/AbstractExecutionBlock.hpp"
+#include "build_blocks/AbstractBuildBlock.hpp"
 #include "notification/NotificationCenter.hpp"
 #include "notification/Path.hpp"
 #include "quark/Quark.hpp"
@@ -36,7 +36,7 @@ namespace execution_blocks {
  *
  * @author Francois Doray
  */
-class PunchBlock : public execution_blocks::AbstractExecutionBlock
+class PunchBlock : public build_blocks::AbstractBuildBlock
 {
 public:
     PunchBlock();

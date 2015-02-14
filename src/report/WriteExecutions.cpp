@@ -30,7 +30,7 @@ namespace
 void WriteExecution(
     const execution::Execution& execution,
     base::JsonWriter* writer,
-    std::set<execution::StackId>* stacks)
+    std::set<stacks::StackId>* stacks)
 {
     writer->BeginDict();
 
@@ -64,7 +64,7 @@ void WriteExecution(
 void WriteExecutions(
     const std::string& name,
     const db::Database& db,
-    std::set<execution::StackId>* stacks,
+    std::set<stacks::StackId>* stacks,
     base::JsonWriter* writer)
 {
     namespace pl = std::placeholders;

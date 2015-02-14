@@ -18,30 +18,15 @@
 #ifndef _TIBEE_BASE_COMPARECONSTANTS_HPP
 #define _TIBEE_BASE_COMPARECONSTANTS_HPP
 
-#include <stddef.h>
-#include <stdint.h>
+#include "base/BasicTypes.hpp"
 
 namespace tibee
 {
 
 // Services.
 extern const char kExecutionsBuilderServiceName[];
-extern const char kLinksBuilderServiceName[];
 extern const char kStacksBuilderServiceName[];
-
-// Block names.
-// - Trace
-extern const char kTraceBlockName[];
-// - State
-extern const char kCurrentStateBlockName[];
-extern const char kLinuxSchedStateBlockName[];
-// - Execution
-extern const char kExecutionBlockName[];
-extern const char kProfilerBlockName[];
-extern const char kPunchBlockName[];
-extern const char kSchedWakeupBlockName[];
-// - Symbols
-extern const char kDumpStacksBlockName[];
+extern const char kCriticalGraphServiceName[];
 
 // Metrics.
 typedef uint32_t MetricId;

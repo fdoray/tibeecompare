@@ -4,7 +4,7 @@ import os.path
 Import(['env',])
 
 sources = [
-    'PunchBlock.cpp',
+    'StacksBuilder.cpp',
 ]
 
 Return('sources')

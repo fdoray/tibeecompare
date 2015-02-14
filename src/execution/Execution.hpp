@@ -24,7 +24,7 @@
 
 #include "base/BasicTypes.hpp"
 #include "base/CompareConstants.hpp"
-#include "execution/Identifiers.hpp"
+#include "stacks/Identifiers.hpp"
 
 namespace tibee
 {
@@ -36,7 +36,7 @@ class Execution
 public:
     typedef std::unique_ptr<Execution> UP;
     typedef std::unordered_map<MetricId, uint64_t> Metrics;
-    typedef std::unordered_map<StackId, uint64_t> Samples;
+    typedef std::unordered_map<stacks::StackId, uint64_t> Samples;
 
     Execution() 
         : _startTs(0), _startThread(-1),
@@ -99,7 +99,7 @@ public:
     Samples::const_iterator samples_end() const {
         return _samples.end();
     }
-    void IncrementSample(StackId stackId, uint64_t value) {
+    void IncrementSample(stacks::StackId stackId, uint64_t value) {
         _samples[stackId] += value;
     }
 

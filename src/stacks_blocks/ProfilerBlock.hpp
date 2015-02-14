@@ -15,23 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with tigerbeetle.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_BUILDERBLOCKS_PROFILERBLOCK_HPP
-#define _TIBEE_BUILDERBLOCKS_PROFILERBLOCK_HPP
+#ifndef _TIBEE_STACKSBLOCKS_PROFILERBLOCK_HPP
+#define _TIBEE_STACKSBLOCKS_PROFILERBLOCK_HPP
 
 #include "base/BasicTypes.hpp"
-#include "execution_blocks/AbstractExecutionBlock.hpp"
+#include "build_blocks/AbstractBuildBlock.hpp"
 #include "symbols/SymbolLookup.hpp"
 #include "trace/value/EventValue.hpp"
 
 namespace tibee {
-namespace execution_blocks {
+namespace stacks_blocks {
 
 /**
  * Blocks that handles lttng-profile events.
  *
  * @author Francois Doray
  */
-class ProfilerBlock : public execution_blocks::AbstractExecutionBlock
+class ProfilerBlock : public build_blocks::AbstractBuildBlock
 {
 public:
     ProfilerBlock();
@@ -50,7 +50,7 @@ private:
     symbols::SymbolLookup _symbols;
 };
 
-}  // namespace execution_blocks
+}  // namespace stacks_blocks
 }  // namespace tibee
 
-#endif // _TIBEE_BUILDERBLOCKS_PROFILERBLOCK_HPP
+#endif // _TIBEE_STACKSBLOCKS_PROFILERBLOCK_HPP

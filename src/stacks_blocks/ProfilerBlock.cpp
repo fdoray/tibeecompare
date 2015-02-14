@@ -15,40 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with tigerbeetle.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "symbols_blocks/DumpStacksBlock.hpp"
-
-#include <boost/algorithm/string.hpp> 
-#include <boost/algorithm/string/predicate.hpp>
-#include <iostream>
+#include "stacks_blocks/ProfilerBlock.hpp"
 
 #include "base/BindObject.hpp"
 #include "value/Value.hpp"
 
 namespace tibee {
-namespace symbols_blocks {
+namespace stacks_blocks {
 
 using notification::Token;
 
-DumpStacksBlock::DumpStacksBlock()
+ProfilerBlock::ProfilerBlock()
 {
 }
 
-DumpStacksBlock::~DumpStacksBlock()
+ProfilerBlock::~ProfilerBlock()
 {
 }
 
-void DumpStacksBlock::AddObservers(
+void ProfilerBlock::AddObservers(
     notification::NotificationCenter* notificationCenter)
 {
     AddUstObserver(notificationCenter, 
                    Token("ust_baddr_statedump:soinfo"),
-                   base::BindObject(&DumpStacksBlock::OnBaddr, this));
+                   base::BindObject(&ProfilerBlock::OnBaddr, this));
     AddUstObserver(notificationCenter,
-                   Token("lttng_profile:on_cpu_sample"),
-                   base::BindObject(&DumpStacksBlock::OnSample, this));
+                   Token("lttng_profile:sample"),
+                   base::BindObject(&ProfilerBlock::OnSample, this));
 }
 
-void DumpStacksBlock::OnBaddr(const trace::EventValue& event)
+void ProfilerBlock::OnBaddr(const trace::EventValue& event)
 {
     process_t pid = ProcessForEvent(event);
     uint64_t baddr = event.getEventField("baddr")->AsULong();
@@ -69,14 +65,13 @@ void DumpStacksBlock::OnBaddr(const trace::EventValue& event)
     _images[pid].push_back(image);
 }
 
-void DumpStacksBlock::OnSample(const trace::EventValue& event)
+void ProfilerBlock::OnSample(const trace::EventValue& event)
 {
+    thread_t tid = ThreadForEvent(event);
     process_t pid = ProcessForEvent(event);
 
     std::vector<std::string> symbolizedStack;
     const auto* stack = value::ArrayValue::Cast(event.getEventField("stack"));
-
-    bool first = true;
 
     for (const auto& addressValue : *stack)
     {
@@ -87,18 +82,11 @@ void DumpStacksBlock::OnSample(const trace::EventValue& event)
         if (!_symbols.LookupSymbol(address, _images[pid], &symbol, &offset))
             symbol.set_name("unknown");
 
-        if (first && boost::algorithm::contains(symbol.name(), "/libc")) {
-            continue;
-        }
-        if (boost::starts_with(symbol.name(), "lttng_profile"))
-            continue;
         symbolizedStack.push_back(symbol.name());
-        std::cout << symbol.name() << std::endl;
-        first = false;
     }
 
-    std::cout << std::endl;
+    Stacks()->SetStack(tid, symbolizedStack);
 }
 
-}  // namespace symbols_blocks
+}  // namespace stacks_blocks
 }  // namespace tibee

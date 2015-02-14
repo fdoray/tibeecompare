@@ -15,16 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "execution/StacksBuilder.hpp"
+#include "stacks/StacksBuilder.hpp"
 
 #include <algorithm>
 
 namespace tibee
 {
-namespace execution
+namespace stacks
 {
 
 StacksBuilder::StacksBuilder()
+    : _ts(0),
+      _db(nullptr)
 {
 }
 
@@ -111,5 +113,5 @@ void StacksBuilder::Terminate()
     }
 }
 
-}  // namespace execution
+}  // namespace stacks
 }  // namespace tibee

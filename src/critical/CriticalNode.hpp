@@ -68,6 +68,7 @@ private:
     uint32_t _tid;
 };
 
-}
-}
+}  // namespace critical
+}  // namespace tibee
+
 #endif  // TIBEE_CRITICAL_CRITICALNODE_HPP_

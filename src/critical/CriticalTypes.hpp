@@ -51,7 +51,7 @@ enum class CriticalEdgeType {
     kUserInput,       // Waiting for user input.
 };
 
-}
-}
+}  // namespace critical
+}  // namespace tibee
 
 #endif  // TIBEE_CRITICAL_CRITICALTYPES_HPP_

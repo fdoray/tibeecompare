@@ -9,21 +9,25 @@ env.Append(CPPPATH=['#/src'])
 
 # Generate a static library.
 base = SConscript(os.path.join('base', 'SConscript'), exports=['env'])
+build_blocks = SConscript(os.path.join('build_blocks', 'SConscript'), exports=['env'])
 critical = SConscript(os.path.join('critical', 'SConscript'), exports=['env'])
 db = SConscript(os.path.join('db', 'SConscript'), exports=['env'])
 execution = SConscript(os.path.join('execution', 'SConscript'), exports=['env'])
 execution_blocks = SConscript(os.path.join('execution_blocks', 'SConscript'), exports=['env'])
+stacks = SConscript(os.path.join('stacks', 'SConscript'), exports=['env'])
+stacks_blocks = SConscript(os.path.join('stacks_blocks', 'SConscript'), exports=['env'])
 symbols = SConscript(os.path.join('symbols', 'SConscript'), exports=['env'])
-symbols_blocks = SConscript(os.path.join('symbols_blocks', 'SConscript'), exports=['env'])
 
 subs = [
     ('base', base),
+    ('build_blocks', build_blocks),
     ('critical', critical),
     ('db', db),
     ('execution', execution),
     ('execution_blocks', execution_blocks),
+    ('stacks', stacks),
+    ('stacks_blocks', stacks_blocks),
     ('symbols', symbols),
-    ('symbols_blocks', symbols_blocks),
 ]
 
 sources = []

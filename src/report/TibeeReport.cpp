@@ -23,9 +23,9 @@
 #include "base/JsonWriter.hpp"
 #include "base/print.hpp"
 #include "db/Database.hpp"
-#include "execution/Identifiers.hpp"
 #include "report/WriteExecutions.hpp"
 #include "report/WriteStacks.hpp"
+#include "stacks/Identifiers.hpp"
 
 #define THIS_MODULE "tibeereport"
 
@@ -80,7 +80,7 @@ bool TibeeReport::run()
     if (_verbose)
         tbmsg(THIS_MODULE) << "writing executions" << tbendl();
 
-    std::set<execution::StackId> stacks;
+    std::set<stacks::StackId> stacks;
     WriteExecutions(_name, db, &stacks, &writer);
 
     if (_verbose)

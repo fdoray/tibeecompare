@@ -17,15 +17,19 @@
  */
 #include "build/BlockLoader.hpp"
 
-#include "base/CompareConstants.hpp"
-#include "execution_blocks/ExecutionBlock.hpp"
-#include "execution_blocks/ProfilerBlock.hpp"
+#include "build_blocks/BuildBlock.hpp"
 #include "execution_blocks/PunchBlock.hpp"
-#include "execution_blocks/SchedWakeupBlock.hpp"
+#include "stacks_blocks/DumpStacksBlock.hpp"
+#include "stacks_blocks/ProfilerBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
-#include "symbols_blocks/DumpStacksBlock.hpp"
 #include "trace_blocks/TraceBlock.hpp"
+
+#define BLOCK(blockName, blockType)  \
+    if (name == blockName) {         \
+	    block.reset(new blockType);  \
+        return block;                \
+    }
 
 namespace tibee
 {
@@ -36,23 +40,13 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
 {
     block::BlockInterface::UP block;
 
-    if (name == kExecutionBlockName) {
-        block.reset(new execution_blocks::ExecutionBlock);
-    } else if (name == kProfilerBlockName) {
-        block.reset(new execution_blocks::ProfilerBlock);
-    } else if (name == kPunchBlockName) {
-        block.reset(new execution_blocks::PunchBlock);
-    } else if (name == kSchedWakeupBlockName) {
-        block.reset(new execution_blocks::SchedWakeupBlock);
-    } else if (name == kTraceBlockName) {
-        block.reset(new trace_blocks::TraceBlock);
-    } else if (name == kCurrentStateBlockName) {
-        block.reset(new state_blocks::CurrentStateBlock);
-    } else if (name == kLinuxSchedStateBlockName) {
-        block.reset(new state_blocks::LinuxSchedStateBlock);
-    } else if (name == kDumpStacksBlockName) {
-        block.reset(new symbols_blocks::DumpStacksBlock);
-    }
+    BLOCK("execution", build_blocks::BuildBlock);
+    BLOCK("punch", execution_blocks::PunchBlock);
+    BLOCK("profiler", stacks_blocks::ProfilerBlock);
+    BLOCK("trace", trace_blocks::TraceBlock);
+    BLOCK("current-state", state_blocks::CurrentStateBlock);
+    BLOCK("linux-sched-state", state_blocks::LinuxSchedStateBlock);
+    BLOCK("dump-stacks", stacks_blocks::DumpStacksBlock);
 
     return block;
 }

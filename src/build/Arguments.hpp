@@ -33,8 +33,13 @@ namespace build
  */
 struct Arguments
 {
+    // Configuration file.
     std::string configuration;
+
+    // Traces to analyze.
     std::vector<std::string> traces;
+
+    // Verbose flag.
     bool verbose;
 };
 

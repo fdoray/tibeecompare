@@ -57,8 +57,8 @@ private:
 
 };
 
-}
-}
+}  // namespace critical
+}  // namespace tibee
 
 
 #endif  // TIBEE_CRITICAL_CRITICALEDGE_HPP_

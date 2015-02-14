@@ -15,27 +15,27 @@
  * You should have received a copy of the GNU General Public License
  * along with tigerbeetle.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_EXECUTIONBLOCKS_ABSTRACTEXECUTIONBLOCK_HPP
-#define _TIBEE_EXECUTIONBLOCKS_ABSTRACTEXECUTIONBLOCK_HPP
+#ifndef _TIBEE_BUILDBLOCKS_ABSTRACTBUILDBLOCK_HPP
+#define _TIBEE_BUILDBLOCKS_ABSTRACTBUILDBLOCK_HPP
 
 #include "block/AbstractBlock.hpp"
+#include "critical/CriticalGraph.hpp"
 #include "execution/ExecutionsBuilder.hpp"
-#include "execution/LinksBuilder.hpp"
-#include "execution/StacksBuilder.hpp"
+#include "stacks/StacksBuilder.hpp"
 #include "state/CurrentState.hpp"
 
 namespace tibee {
-namespace execution_blocks {
+namespace build_blocks {
 
 /**
- * Abstract execution block.
+ * Abstract build block.
  *
  * @author Francois Doray
  */
-class AbstractExecutionBlock : public block::AbstractBlock
+class AbstractBuildBlock : public block::AbstractBlock
 {
 public:
-    AbstractExecutionBlock();
+    AbstractBuildBlock();
 
     virtual void LoadServices(const block::ServiceList& serviceList) override;
 
@@ -49,11 +49,11 @@ protected:
     // Executions builder.
     execution::ExecutionsBuilder* Executions() const { return _executionsBuilder; }
 
-    // Links builder.
-    execution::LinksBuilder* Links() const { return _linksBuilder; }
-
     // Stacks builder.
-    execution::StacksBuilder* Stacks() const { return _stacksBuilder; }
+    stacks::StacksBuilder* Stacks() const { return _stacksBuilder; }
+
+    // Critical graph.
+    critical::CriticalGraph* CriticalGraph() const { return _criticalGraph; }
 
     // CPU for an event.
     uint32_t CpuForEvent(const trace::EventValue& event) const;
@@ -74,14 +74,14 @@ private:
     // Executions builder.
     execution::ExecutionsBuilder* _executionsBuilder;
 
-    // Links builder.
-    execution::LinksBuilder* _linksBuilder;
-
     // Stacks builder.
-    execution::StacksBuilder* _stacksBuilder;
+    stacks::StacksBuilder* _stacksBuilder;
+
+    // Critical graph.
+    critical::CriticalGraph* _criticalGraph;
 };
 
-}  // namespace execution_blocks
+}  // namespace build_blocks
 }  // namespace tibee
 
-#endif // _TIBEE_EXECUTIONBLOCKS_ABSTRACTEXECUTIONBLOCK_HPP
+#endif // _TIBEE_BUILDBLOCKS_ABSTRACTBUILDBLOCK_HPP

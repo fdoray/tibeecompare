@@ -16,9 +16,9 @@
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/program_options.hpp>
-#include <base/print.hpp>
 #include <iostream>
 
+#include "base/print.hpp"
 #include "base/ex/InvalidArgument.hpp"
 #include "build/Arguments.hpp"
 #include "build/TibeeBuild.hpp"

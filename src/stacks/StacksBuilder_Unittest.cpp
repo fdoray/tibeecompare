@@ -20,11 +20,11 @@
 #include <utility>
 
 #include "db/Database.hpp"
-#include "execution/StacksBuilder.hpp"
+#include "stacks/StacksBuilder.hpp"
 
 namespace tibee
 {
-namespace execution
+namespace stacks
 {
 
 namespace
@@ -81,5 +81,5 @@ TEST(StacksBuilder, StacksBuilder)
     stacks.clear();
 }
 
-}  // namespace execution
+}  // namespace stacks
 }  // namespace tibee

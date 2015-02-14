@@ -60,14 +60,18 @@ public:
     {
     }
 
-    virtual void OnScalar(const YAML::Mark& mark, const std::string& tag, YAML::anchor_t anchor, const std::string& value) override
+    virtual void OnScalar(const YAML::Mark& mark,
+                          const std::string& tag,
+                          YAML::anchor_t anchor,
+                          const std::string& value) override
     {
         _lastScalar = value;
 
         if (_blockListDepth == 1 || _blockListDepth == 2)
         {
             if (!_configuration->AddBlock(value)) {
-                base::tberror() << "Unable to load block " << value << "." << base::tbendl();
+                base::tberror() << "Unable to load block " << value << "."
+                                << base::tbendl();
                 _error = true;
             } else {
                 _lastBlock = value;
@@ -78,13 +82,15 @@ public:
             if (_lastParam.empty()) {
                 _lastParam = value;
             } else {
-                _configuration->AddParameter(_lastBlock, _lastParam, value::MakeValue(value));
+                _configuration->AddParameter(
+                        _lastBlock, _lastParam, value::MakeValue(value));
                 _lastParam.clear();
             }
         }
     }
 
-    virtual void OnSequenceStart(const YAML::Mark& mark, const std::string& tag, YAML::anchor_t anchor) override
+    virtual void OnSequenceStart(const YAML::Mark& mark, const std::string& tag,
+                                 YAML::anchor_t anchor) override
     {
         if (_lastScalar == "blocks")
             _blockListDepth = 1;
@@ -98,7 +104,8 @@ public:
             --_blockListDepth;
     }
 
-    virtual void OnMapStart(const YAML::Mark& mark, const std::string& tag, YAML::anchor_t anchor) override
+    virtual void OnMapStart(const YAML::Mark& mark, const std::string& tag,
+                            YAML::anchor_t anchor) override
     {
         if (_blockListDepth != 0)
             ++_blockListDepth;
@@ -141,7 +148,8 @@ Configuration::Configuration()
 {
 }
 
-bool Configuration::LoadConfiguration(const boost::filesystem::path& configuration)
+bool Configuration::LoadConfiguration(
+        const boost::filesystem::path& configuration)
 {
     std::ifstream file(configuration.string());
 
@@ -165,7 +173,9 @@ bool Configuration::AddBlock(const std::string& block)
     return true;
 }
 
-bool Configuration::AddParameter(const std::string& block, const std::string& parameter, value::Value::UP value)
+bool Configuration::AddParameter(const std::string& block,
+                                 const std::string& parameter,
+                                 value::Value::UP value)
 {
     auto it = _parameters.find(block);
     if (it == _parameters.end())

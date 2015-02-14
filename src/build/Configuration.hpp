@@ -30,7 +30,7 @@ namespace build
 {
 
 /**
- * Configuration.
+ * Reads a configuration file.
  *
  * @author Francois Doray
  */

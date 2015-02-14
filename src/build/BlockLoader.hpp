@@ -18,7 +18,6 @@
 #ifndef _TIBEE_BUILD_BLOCKLOADER_HPP
 #define _TIBEE_BUILD_BLOCKLOADER_HPP
 
-#include <memory>
 #include <string>
 
 #include "block/BlockInterface.hpp"

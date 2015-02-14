@@ -43,5 +43,5 @@ CriticalNode::CriticalNode(timestamp_t ts, uint32_t tid)
 {
 }
 
-}
-}
+}  // namespace critical
+}  // namespace tibee

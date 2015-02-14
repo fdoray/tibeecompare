@@ -47,7 +47,7 @@ struct NodeTsComparatorReverse
 }  // namespace
 
 CriticalGraph::CriticalGraph()
-    : _last_ts(0)
+    : _ts(0)
 {
 }
 
@@ -55,13 +55,10 @@ CriticalGraph::~CriticalGraph()
 {
 }
 
-CriticalNode* CriticalGraph::CreateNode(timestamp_t ts, uint32_t tid)
+CriticalNode* CriticalGraph::CreateNode(uint32_t tid)
 {
-    assert(ts >= _last_ts);
-    _last_ts = ts;
-
     // Create node.
-    CriticalNode::UP node(new CriticalNode(ts, tid));
+    CriticalNode::UP node(new CriticalNode(_ts, tid));
     auto node_ptr = node.get();
     _nodes.push_back(std::move(node));
 
@@ -99,6 +96,14 @@ const CriticalNode* CriticalGraph::GetNodeIntersecting(timestamp_t ts, uint32_t 
         return nullptr;
 
     return *node_it;
+}
+
+CriticalNode* CriticalGraph::GetLastNodeForThread(uint32_t tid)
+{
+    auto thread_nodes_it = _tid_to_nodes.find(tid);
+    if (thread_nodes_it == _tid_to_nodes.end() || thread_nodes_it->second->empty())
+        return nullptr;
+    return thread_nodes_it->second->back();
 }
 
 CriticalEdgeId CriticalGraph::CreateHorizontalEdge(

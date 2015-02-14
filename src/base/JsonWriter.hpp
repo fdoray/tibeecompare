@@ -29,6 +29,11 @@ namespace tibee
 namespace base
 {
 
+/**
+ * Json file writer.
+ *
+ * @author Francois Doray
+ */
 class JsonWriter
 {
 public:

@@ -26,14 +26,14 @@ namespace report
 
 void WriteStacks(
     const db::Database& db,
-    const std::set<execution::StackId>& stacks,
+    const std::set<stacks::StackId>& stacks,
     base::JsonWriter* writer)
 {
     writer->KeyDictValue("stacks");
 
-    std::vector<execution::StackId> stacksVec(
+    std::vector<stacks::StackId> stacksVec(
         stacks.begin(), stacks.end());
-    std::set<execution::StackId> stacksDone;
+    std::set<stacks::StackId> stacksDone;
 
     for (size_t i = 0; i < stacksVec.size(); ++i)
     {
@@ -52,7 +52,7 @@ void WriteStacks(
         writer->KeyValue("f", functionName);
         writer->EndDict();
 
-        if (stack.bottom() != execution::kEmptyStackId)
+        if (stack.bottom() != stacks::kEmptyStackId)
             stacksVec.push_back(stack.bottom());
     }
 

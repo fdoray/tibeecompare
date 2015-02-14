@@ -15,23 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with tigerbeetle.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_SYMBOLSBLOCK_DUMPSTACKSBLOCK_HPP
-#define _TIBEE_SYMBOLSBLOCK_DUMPSTACKSBLOCK_HPP
+#ifndef _TIBEE_STACKSBLOCKS_DUMPSTACKSBLOCK_HPP
+#define _TIBEE_STACKSBLOCKS_DUMPSTACKSBLOCK_HPP
 
 #include "base/BasicTypes.hpp"
-#include "execution_blocks/AbstractExecutionBlock.hpp"
+#include "build_blocks/AbstractBuildBlock.hpp"
 #include "symbols/SymbolLookup.hpp"
 #include "trace/value/EventValue.hpp"
 
 namespace tibee {
-namespace symbols_blocks {
+namespace stacks_blocks {
 
 /**
  * Blocks that prints stacks in the std output.
  *
  * @author Francois Doray
  */
-class DumpStacksBlock : public execution_blocks::AbstractExecutionBlock
+class DumpStacksBlock : public build_blocks::AbstractBuildBlock
 {
 public:
     DumpStacksBlock();
@@ -51,7 +51,7 @@ private:
     symbols::SymbolLookup _symbols;
 };
 
-}  // namespace symbols_blocks
+}  // namespace stacks_blocks
 }  // namespace tibee
 
-#endif // _TIBEE_SYMBOLSBLOCK_DUMPSTACKSBLOCK_HPP
+#endif // _TIBEE_STACKSBLOCKS_DUMPSTACKSBLOCK_HPP

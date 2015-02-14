@@ -15,25 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with tigerbeetle.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "execution_blocks/AbstractExecutionBlock.hpp"
+#include "build_blocks/AbstractBuildBlock.hpp"
 
 #include "base/CompareConstants.hpp"
 #include "base/Constants.hpp"
 #include "block/ServiceList.hpp"
 
 namespace tibee {
-namespace execution_blocks {
+namespace build_blocks {
 
-AbstractExecutionBlock::AbstractExecutionBlock()
+AbstractBuildBlock::AbstractBuildBlock()
     : _currentState(nullptr),
       _quarks(nullptr),
       _executionsBuilder(nullptr),
-      _linksBuilder(nullptr),
-      _stacksBuilder(nullptr)
+      _stacksBuilder(nullptr),
+      _criticalGraph(nullptr)
 {
 }
 
-void AbstractExecutionBlock::LoadServices(const block::ServiceList& serviceList)
+void AbstractBuildBlock::LoadServices(const block::ServiceList& serviceList)
 {
     serviceList.QueryService(kCurrentStateServiceName,
                              reinterpret_cast<void**>(&_currentState));
@@ -44,19 +44,19 @@ void AbstractExecutionBlock::LoadServices(const block::ServiceList& serviceList)
     serviceList.QueryService(kExecutionsBuilderServiceName,
                              reinterpret_cast<void**>(&_executionsBuilder));
 
-    serviceList.QueryService(kLinksBuilderServiceName,
-                             reinterpret_cast<void**>(&_linksBuilder));
-
     serviceList.QueryService(kStacksBuilderServiceName,
                              reinterpret_cast<void**>(&_stacksBuilder));
+
+    serviceList.QueryService(kCriticalGraphServiceName,
+                             reinterpret_cast<void**>(&_criticalGraph));
 }
 
-uint32_t AbstractExecutionBlock::CpuForEvent(const trace::EventValue& event) const
+uint32_t AbstractBuildBlock::CpuForEvent(const trace::EventValue& event) const
 {
     return event.getStreamPacketContext()->GetField("cpu_id")->AsUInteger();
 }
 
-thread_t AbstractExecutionBlock::ThreadForEvent(const trace::EventValue& event) const
+thread_t AbstractBuildBlock::ThreadForEvent(const trace::EventValue& event) const
 {
     auto thread_context_value = event.getStreamEventContext()->GetField("vtid");
     if (thread_context_value != nullptr)
@@ -66,7 +66,7 @@ thread_t AbstractExecutionBlock::ThreadForEvent(const trace::EventValue& event) 
     return thread;
 }
 
-thread_t AbstractExecutionBlock::ProcessForEvent(const trace::EventValue& event) const
+thread_t AbstractBuildBlock::ProcessForEvent(const trace::EventValue& event) const
 {
     auto process_context_value = event.getStreamEventContext()->GetField("vpid");
     if (process_context_value != nullptr)
@@ -75,5 +75,5 @@ thread_t AbstractExecutionBlock::ProcessForEvent(const trace::EventValue& event)
     return -1;
 }
 
-}  // namespace execution_blocks
+}  // namespace build_blocks
 }  // namespace tibee

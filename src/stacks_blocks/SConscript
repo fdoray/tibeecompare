@@ -4,6 +4,7 @@ Import('env')
 
 sources = [
     'DumpStacksBlock.cpp',
+    'ProfilerBlock.cpp',
 ]
 
 Return(['sources'])

@@ -74,36 +74,36 @@ TEST(Database, Stack)
 
     std::unique_ptr<Database> db(new Database(true));
 
-    auto keyA = db->AddStack(execution::Stack(1, 2));
-    auto keyB = db->AddStack(execution::Stack(3, 4));
-    auto keyC = db->AddStack(execution::Stack(5, 6));
-    auto keyD = db->AddStack(execution::Stack(7, 8));
+    auto keyA = db->AddStack(stacks::Stack(1, 2));
+    auto keyB = db->AddStack(stacks::Stack(3, 4));
+    auto keyC = db->AddStack(stacks::Stack(5, 6));
+    auto keyD = db->AddStack(stacks::Stack(7, 8));
 
-    EXPECT_EQ(execution::Stack(1, 2), db->GetStack(keyA));
-    EXPECT_EQ(execution::Stack(3, 4), db->GetStack(keyB));
-    EXPECT_EQ(execution::Stack(5, 6), db->GetStack(keyC));
-    EXPECT_EQ(execution::Stack(7, 8), db->GetStack(keyD));
+    EXPECT_EQ(stacks::Stack(1, 2), db->GetStack(keyA));
+    EXPECT_EQ(stacks::Stack(3, 4), db->GetStack(keyB));
+    EXPECT_EQ(stacks::Stack(5, 6), db->GetStack(keyC));
+    EXPECT_EQ(stacks::Stack(7, 8), db->GetStack(keyD));
 
     db.reset(nullptr);
     db.reset(new Database(true));
 
-    EXPECT_EQ(execution::Stack(1, 2), db->GetStack(keyA));
-    EXPECT_EQ(execution::Stack(3, 4), db->GetStack(keyB));
-    EXPECT_EQ(execution::Stack(5, 6), db->GetStack(keyC));
-    EXPECT_EQ(execution::Stack(7, 8), db->GetStack(keyD));
+    EXPECT_EQ(stacks::Stack(1, 2), db->GetStack(keyA));
+    EXPECT_EQ(stacks::Stack(3, 4), db->GetStack(keyB));
+    EXPECT_EQ(stacks::Stack(5, 6), db->GetStack(keyC));
+    EXPECT_EQ(stacks::Stack(7, 8), db->GetStack(keyD));
 
-    auto keyE = db->AddStack(execution::Stack(9, 9));
-    auto keyF = db->AddStack(execution::Stack(9, 10));
-    auto keyG = db->AddStack(execution::Stack(10, 9));
+    auto keyE = db->AddStack(stacks::Stack(9, 9));
+    auto keyF = db->AddStack(stacks::Stack(9, 10));
+    auto keyG = db->AddStack(stacks::Stack(10, 9));
 
-    EXPECT_EQ(execution::Stack(9, 9), db->GetStack(keyE));
-    EXPECT_EQ(execution::Stack(9, 10), db->GetStack(keyF));
-    EXPECT_EQ(execution::Stack(10, 9), db->GetStack(keyG));
+    EXPECT_EQ(stacks::Stack(9, 9), db->GetStack(keyE));
+    EXPECT_EQ(stacks::Stack(9, 10), db->GetStack(keyF));
+    EXPECT_EQ(stacks::Stack(10, 9), db->GetStack(keyG));
 
-    auto otherKeyA = db->AddStack(execution::Stack(1, 2));
-    auto otherKeyB = db->AddStack(execution::Stack(3, 4));
-    auto otherKeyC = db->AddStack(execution::Stack(5, 6));
-    auto otherKeyD = db->AddStack(execution::Stack(7, 8));
+    auto otherKeyA = db->AddStack(stacks::Stack(1, 2));
+    auto otherKeyB = db->AddStack(stacks::Stack(3, 4));
+    auto otherKeyC = db->AddStack(stacks::Stack(5, 6));
+    auto otherKeyD = db->AddStack(stacks::Stack(7, 8));
 
     EXPECT_EQ(keyA, otherKeyA);
     EXPECT_EQ(keyB, otherKeyB);

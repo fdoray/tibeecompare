@@ -19,7 +19,7 @@
 #define _TIBEE_EXECUTION_EXTRACTSTACKS_HPP
 
 #include "execution/Execution.hpp"
-#include "execution/StacksBuilder.hpp"
+#include "stacks/StacksBuilder.hpp"
 
 namespace tibee
 {

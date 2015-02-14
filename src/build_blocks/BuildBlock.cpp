@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with tigerbeetle.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "execution_blocks/ExecutionBlock.hpp"
+#include "build_blocks/BuildBlock.hpp"
 
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
@@ -34,7 +34,7 @@
 #include "notification/Token.hpp"
 
 namespace tibee {
-namespace execution_blocks {
+namespace build_blocks {
 
 namespace
 {
@@ -48,7 +48,7 @@ using notification::Token;
 
 }  // namespace
 
-ExecutionBlock::ExecutionBlock()
+BuildBlock::BuildBlock()
     : _quarks(nullptr)
 {
     _traceId = boost::lexical_cast<std::string>(
@@ -57,42 +57,42 @@ ExecutionBlock::ExecutionBlock()
     _stacksBuilder.SetDatabase(&_db);
 }
 
-ExecutionBlock::~ExecutionBlock()
+BuildBlock::~BuildBlock()
 {
 }
 
-void ExecutionBlock::RegisterServices(block::ServiceList* serviceList)
+void BuildBlock::RegisterServices(block::ServiceList* serviceList)
 {
     serviceList->AddService(kExecutionsBuilderServiceName, &_executionsBuilder);
-    serviceList->AddService(kLinksBuilderServiceName, &_linksBuilder);
     serviceList->AddService(kStacksBuilderServiceName, &_stacksBuilder);
+    serviceList->AddService(kCriticalGraphServiceName, &_criticalGraph);
 }
 
-void ExecutionBlock::LoadServices(const block::ServiceList& serviceList)
+void BuildBlock::LoadServices(const block::ServiceList& serviceList)
 {
     serviceList.QueryService(kQuarksServiceName,
                              reinterpret_cast<void**>(&_quarks));
 }
 
-void ExecutionBlock::AddObservers(notification::NotificationCenter* notificationCenter)
+void BuildBlock::AddObservers(notification::NotificationCenter* notificationCenter)
 {
     notificationCenter->AddObserver(
         {Token(kTraceNotificationPrefix), Token(kTimestampNotificationName)},
-        base::BindObject(&ExecutionBlock::onTimestamp, this));
+        base::BindObject(&BuildBlock::onTimestamp, this));
     notificationCenter->AddObserver(
         {Token(kTraceNotificationPrefix), Token(kEndNotificationName)},
-        base::BindObject(&ExecutionBlock::onEnd, this));
+        base::BindObject(&BuildBlock::onEnd, this));
 }
 
-void ExecutionBlock::onTimestamp(const notification::Path& path, const value::Value* value)
+void BuildBlock::onTimestamp(const notification::Path& path, const value::Value* value)
 {
     auto ts = value->AsULong();
     _executionsBuilder.SetTimestamp(ts);
-    _linksBuilder.SetTimestamp(ts);
     _stacksBuilder.SetTimestamp(ts);
+    _criticalGraph.SetTimestamp(ts);
 }
 
-void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* value)
+void BuildBlock::onEnd(const notification::Path& path, const value::Value* value)
 {  
     // Notify the executions and stacks builder that we reached
     // the end of the trace.
@@ -123,5 +123,5 @@ void ExecutionBlock::onEnd(const notification::Path& path, const value::Value* v
     }
 }
 
-}  // namespace execution_blocks
+}  // namespace build_blocks
 }  // namespace tibee
