@@ -18,6 +18,7 @@
 #include "build/BlockLoader.hpp"
 
 #include "build_blocks/BuildBlock.hpp"
+#include "critical_blocks/CriticalBlock.hpp"
 #include "execution_blocks/PunchBlock.hpp"
 #include "stacks_blocks/DumpStacksBlock.hpp"
 #include "stacks_blocks/ProfilerBlock.hpp"
@@ -40,13 +41,14 @@ block::BlockInterface::UP LoadBlock(const std::string& name)
 {
     block::BlockInterface::UP block;
 
-    BLOCK("execution", build_blocks::BuildBlock);
+    BLOCK("build", build_blocks::BuildBlock);
+    BLOCK("critical", critical_blocks::CriticalBlock);
     BLOCK("punch", execution_blocks::PunchBlock);
+    BLOCK("dump-stacks", stacks_blocks::DumpStacksBlock);
     BLOCK("profiler", stacks_blocks::ProfilerBlock);
-    BLOCK("trace", trace_blocks::TraceBlock);
     BLOCK("current-state", state_blocks::CurrentStateBlock);
     BLOCK("linux-sched-state", state_blocks::LinuxSchedStateBlock);
-    BLOCK("dump-stacks", stacks_blocks::DumpStacksBlock);
+    BLOCK("trace", trace_blocks::TraceBlock);
 
     return block;
 }

@@ -8,8 +8,5 @@ blocks:
       type: ust
   - current-state
   - profiler
-  - sched-wakeup:
-      io: yes
-      futex: no
   - linux-sched-state
   - execution

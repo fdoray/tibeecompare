@@ -11,6 +11,7 @@ env.Append(CPPPATH=['#/src'])
 base = SConscript(os.path.join('base', 'SConscript'), exports=['env'])
 build_blocks = SConscript(os.path.join('build_blocks', 'SConscript'), exports=['env'])
 critical = SConscript(os.path.join('critical', 'SConscript'), exports=['env'])
+critical_blocks = SConscript(os.path.join('critical_blocks', 'SConscript'), exports=['env'])
 db = SConscript(os.path.join('db', 'SConscript'), exports=['env'])
 execution = SConscript(os.path.join('execution', 'SConscript'), exports=['env'])
 execution_blocks = SConscript(os.path.join('execution_blocks', 'SConscript'), exports=['env'])
@@ -22,6 +23,7 @@ subs = [
     ('base', base),
     ('build_blocks', build_blocks),
     ('critical', critical),
+    ('critical_blocks', critical_blocks),
     ('db', db),
     ('execution', execution),
     ('execution_blocks', execution_blocks),

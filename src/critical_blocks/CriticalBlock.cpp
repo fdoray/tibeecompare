@@ -90,6 +90,10 @@ CriticalBlock::CriticalBlock()
 {
 }
 
+CriticalBlock::~CriticalBlock()
+{
+}
+
 void CriticalBlock::LoadServices(const block::ServiceList& serviceList)
 {
     Q_RUN_USERMODE = Quarks()->StrQuark(kStateRunUsermode);
@@ -308,7 +312,7 @@ void CriticalBlock::OnThreadStatus(
 
 uint32_t CriticalBlock::ThreadForCPU(uint32_t cpu) const
 {
-    auto thread = _currentState->CurrentThreadForCpu(cpu);
+    auto thread = State()->CurrentThreadForCpu(cpu);
     return thread;
 }
 
