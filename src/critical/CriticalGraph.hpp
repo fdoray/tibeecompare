@@ -53,7 +53,10 @@ public:
     CriticalNode* CreateNode(uint32_t tid);
 
     // Get a node which has an horizontal out edge that overlaps |ts|.
-    const CriticalNode* GetNodeIntersecting(timestamp_t ts, uint32_t tid) const;
+    const CriticalNode* GetNodeIntersecting(timestamp_t ts, thread_t tid) const;
+
+    // Get a node that starts after the specified timestamp.
+    const CriticalNode* GetNodeStartingAfter(timestamp_t ts, thread_t tid) const;
 
     // Get the last created node for the given thread.
     CriticalNode* GetLastNodeForThread(uint32_t tid);

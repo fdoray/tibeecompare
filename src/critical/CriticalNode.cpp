@@ -32,8 +32,7 @@ CriticalNode::CriticalNode()
 {
 }
 
-
-CriticalNode::CriticalNode(timestamp_t ts, uint32_t tid)
+CriticalNode::CriticalNode(timestamp_t ts, thread_t tid)
     : _edges({kInvalidCriticalEdgeId,
               kInvalidCriticalEdgeId,
               kInvalidCriticalEdgeId,

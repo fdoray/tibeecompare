@@ -15,49 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef TIBEE_CRITICAL_CRITICALEDGE_HPP_
-#define TIBEE_CRITICAL_CRITICALEDGE_HPP_
+#ifndef TIBEE_CRITICAL_CRITICALPATH_HPP_
+#define TIBEE_CRITICAL_CRITICALPATH_HPP_
 
-#include <stddef.h>
+#include <vector>
 
-#include "critical/CriticalNode.hpp"
-#include "critical/CriticalTypes.hpp"
+#include "critical/CriticalPathSegment.hpp"
 
 namespace tibee
 {
 namespace critical
 {
 
-/**
- * Critical edge.
- *
- * @author Francois Doray
- */
-class CriticalEdge
-{
-public:
-    CriticalEdge();
-    CriticalEdge(CriticalEdgeType type, CriticalNode* from, CriticalNode* to);
-
-    CriticalEdgeType type() const { return _type; }
-    const CriticalNode* from() const { return _from; }
-    const CriticalNode* to() const { return _to; }
-
-    timestamp_t Cost() const;
-
-private:
-    // Type.
-    CriticalEdgeType _type;
-
-    // From node.
-    const CriticalNode* _from;
-
-    // To node.
-    const CriticalNode* _to;
-};
+typedef std::vector<CriticalPathSegment> CriticalPath;
 
 }  // namespace critical
 }  // namespace tibee
 
-
-#endif  // TIBEE_CRITICAL_CRITICALEDGE_HPP_
+#endif  // TIBEE_CRITICAL_CRITICALPATH_HPP_

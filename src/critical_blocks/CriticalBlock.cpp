@@ -303,11 +303,19 @@ void CriticalBlock::OnThreadStatus(
     auto prevNode = CriticalGraph()->GetLastNodeForThread(tid);
     auto newNode = CriticalGraph()->CreateNode(tid);
 
-    if (prevNode != nullptr)
+    if (prevNode != nullptr && lookLastType != _lastEdgeTypePerThread.end())
         CriticalGraph()->CreateHorizontalEdge(lookLastType->second, prevNode, newNode);
 
-    // Keep track of the type of the next edge.
-    _lastEdgeTypePerThread[tid] = newEdgeType;
+    if (newStatusValue != nullptr)
+    {
+        // Keep track of the type of the next edge.
+        _lastEdgeTypePerThread[tid] = newEdgeType;
+    }
+    else
+    {
+        // When the status is null, it means that the thread exited.
+        _lastEdgeTypePerThread.erase(tid);
+    }
 }
 
 uint32_t CriticalBlock::ThreadForCPU(uint32_t cpu) const

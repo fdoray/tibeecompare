@@ -15,49 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef TIBEE_CRITICAL_CRITICALEDGE_HPP_
-#define TIBEE_CRITICAL_CRITICALEDGE_HPP_
+#ifndef TIBEE_CRITICAL_COMPUTECRITICALPATH_HPP_
+#define TIBEE_CRITICAL_COMPUTECRITICALPATH_HPP_
 
-#include <stddef.h>
-
-#include "critical/CriticalNode.hpp"
-#include "critical/CriticalTypes.hpp"
+#include "base/BasicTypes.hpp"
+#include "critical/CriticalGraph.hpp"
+#include "critical/CriticalPath.hpp"
 
 namespace tibee
 {
 namespace critical
 {
 
-/**
- * Critical edge.
- *
- * @author Francois Doray
- */
-class CriticalEdge
-{
-public:
-    CriticalEdge();
-    CriticalEdge(CriticalEdgeType type, CriticalNode* from, CriticalNode* to);
-
-    CriticalEdgeType type() const { return _type; }
-    const CriticalNode* from() const { return _from; }
-    const CriticalNode* to() const { return _to; }
-
-    timestamp_t Cost() const;
-
-private:
-    // Type.
-    CriticalEdgeType _type;
-
-    // From node.
-    const CriticalNode* _from;
-
-    // To node.
-    const CriticalNode* _to;
-};
+void ComputeCriticalPath(
+    const CriticalGraph& graph,
+    timestamp_t startTs,
+    timestamp_t endTs,
+    thread_t tid,
+    CriticalPath* path);
 
 }  // namespace critical
 }  // namespace tibee
 
-
-#endif  // TIBEE_CRITICAL_CRITICALEDGE_HPP_
+#endif  // TIBEE_CRITICAL_COMPUTECRITICALPATH_HPP_

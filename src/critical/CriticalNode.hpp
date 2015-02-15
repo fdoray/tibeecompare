@@ -42,7 +42,7 @@ public:
     typedef std::unique_ptr<CriticalNode> UP;
 
     CriticalNode();
-    CriticalNode(timestamp_t ts, uint32_t tid);
+    CriticalNode(timestamp_t ts, thread_t tid);
 
     CriticalEdgeId edge(CriticalEdgePosition position) const
     {
@@ -55,7 +55,7 @@ public:
     }
 
     timestamp_t ts() const { return _ts; }
-    uint32_t tid() const { return _tid; }
+    thread_t tid() const { return _tid; }
 
 private:
     // Edges.
@@ -65,7 +65,7 @@ private:
     timestamp_t _ts;
 
     // Thread id.
-    uint32_t _tid;
+    thread_t _tid;
 };
 
 }  // namespace critical

@@ -77,7 +77,7 @@ CriticalNode* CriticalGraph::CreateNode(uint32_t tid)
     return node_ptr;
 }
 
-const CriticalNode* CriticalGraph::GetNodeIntersecting(timestamp_t ts, uint32_t tid) const
+const CriticalNode* CriticalGraph::GetNodeIntersecting(timestamp_t ts, thread_t tid) const
 {
     auto thread_nodes_it = _tid_to_nodes.find(tid);
     if (thread_nodes_it == _tid_to_nodes.end())
@@ -92,8 +92,25 @@ const CriticalNode* CriticalGraph::GetNodeIntersecting(timestamp_t ts, uint32_t 
         return nullptr;
 
     auto edgeId = (*node_it)->edge(kCriticalEdgeOutHorizontal);
-    if (edgeId != kInvalidCriticalEdgeId && GetEdge(edgeId).to()->ts() < ts)
+    if (edgeId == kInvalidCriticalEdgeId)
+        return (*node_it)->ts() == ts ? (*node_it) : nullptr;
+    if (GetEdge(edgeId).to()->ts() < ts)
         return nullptr;
+
+    return *node_it;
+}
+
+const CriticalNode* CriticalGraph::GetNodeStartingAfter(timestamp_t ts, thread_t tid) const
+{
+    auto thread_nodes_it = _tid_to_nodes.find(tid);
+    if (thread_nodes_it == _tid_to_nodes.end())
+        return nullptr;
+    const auto& thread_nodes = thread_nodes_it->second;
+    NodeTsComparatorReverse comparator;
+    auto node_it = std::upper_bound(thread_nodes->begin(), thread_nodes->end(), ts, comparator);
+
+    if (node_it == thread_nodes->end())
+      return nullptr;
 
     return *node_it;
 }

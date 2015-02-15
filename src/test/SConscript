@@ -8,6 +8,7 @@ app_env = env.Clone()
 
 sources_unittests = [
     'base/EscapeString_Unittest.cpp',
+    'critical/ComputeCriticalPath_Unittest.cpp',
     'critical/CriticalGraph_Unittest.cpp',
     'db/Database_Unittest.cpp',
     'execution/Execution_Unittest.cpp',
