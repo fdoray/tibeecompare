@@ -81,12 +81,12 @@ TEST(StacksBuilder, StacksBuilder)
     stacks.clear();
 
     EXPECT_EQ(kEmptyStackId, builder.GetStack(1, 500));
-    EXPECT_EQ(1, builder.GetStack(1, 1000));
-    EXPECT_EQ(1, builder.GetStack(1, 1500));
-    EXPECT_EQ(2, builder.GetStack(1, 2000));
-    EXPECT_EQ(2, builder.GetStack(1, 2500));
-    EXPECT_EQ(3, builder.GetStack(1, 3000));
-    EXPECT_EQ(3, builder.GetStack(1, 3500));
+    EXPECT_EQ(1u, builder.GetStack(1, 1000));
+    EXPECT_EQ(1u, builder.GetStack(1, 1500));
+    EXPECT_EQ(2u, builder.GetStack(1, 2000));
+    EXPECT_EQ(2u, builder.GetStack(1, 2500));
+    EXPECT_EQ(3u, builder.GetStack(1, 3000));
+    EXPECT_EQ(3u, builder.GetStack(1, 3500));
     EXPECT_EQ(kEmptyStackId, builder.GetStack(1, 4000));
     EXPECT_EQ(kEmptyStackId, builder.GetStack(1, 4500));
 }

@@ -1,5 +1,0 @@
-blocks:
-  - trace
-  - current-state
-  - linux-sched-state
-  - dump-stacks

@@ -18,6 +18,8 @@
 #ifndef _TIBEE_BASE_COMPARECONSTANTS_HPP
 #define _TIBEE_BASE_COMPARECONSTANTS_HPP
 
+#include <stddef.h>
+
 #include "base/BasicTypes.hpp"
 
 namespace tibee
