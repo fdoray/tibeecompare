@@ -30,7 +30,7 @@ class CriticalPathSegment
 {
 public:
     CriticalPathSegment()
-        : _startTs(0), _endTs(0), _tid(-1), _type(CriticalEdgeType::kUnknown) {}
+        : _startTs(0), _endTs(0), _tid(-1), _type(kUnknown) {}
     CriticalPathSegment(
             timestamp_t startTs, timestamp_t endTs, thread_t tid, CriticalEdgeType type)
             : _startTs(startTs), _endTs(endTs), _tid(tid), _type(type) {}

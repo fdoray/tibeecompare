@@ -1,4 +1,4 @@
-/* Copyright (c) 2014 Francois Pierre Doray <francois.pierre-doray@polymtl.ca>
+/* Copyright (c) 2015 Francois Doray <francois.pierre-doray@polymtl.ca>
  *
  * This file is part of tibeecompare.
  *
@@ -15,27 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_BASE_COMPARECONSTANTS_HPP
-#define _TIBEE_BASE_COMPARECONSTANTS_HPP
+#include "critical/GetStatusString.hpp"
 
-#include "base/BasicTypes.hpp"
+#include <iostream>
 
-namespace tibee
+#include "base/CompareConstants.hpp"
+
+namespace tibee {
+namespace critical {
+
+std::string GetStatusString(CriticalEdgeType type)
 {
+    return std::string("[") + kMetricNames[kNumCustomMetrics + type] + "]";
+}
 
-// Services.
-extern const char kExecutionsBuilderServiceName[];
-extern const char kStacksBuilderServiceName[];
-extern const char kCriticalGraphServiceName[];
-
-// Metrics.
-typedef uint32_t MetricId;
-extern const char* kMetricNames[];
-extern const size_t kNumMetrics;
-const uint32_t kDurationMetricId = 0;
-const uint32_t kTsMetricId = 1;
-const uint32_t kNumCustomMetrics = 2;
-
+}  // namespace critical
 }  // namespace tibee
-
-#endif // _TIBEE_BASE_COMPARECONSTANTS_HPP

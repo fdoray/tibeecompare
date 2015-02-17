@@ -39,12 +39,12 @@ critical::CriticalEdgeType ResolveIRQ(uint32_t irq)
     switch (irq)
     {
         case 0:
-            return critical::CriticalEdgeType::kInterrupted;
+            return critical::kInterrupted;
         case 19:
         case 23:
-            return critical::CriticalEdgeType::kUserInput;
+            return critical::kUserInput;
         default:
-            return critical::CriticalEdgeType::kWaitBlocked;
+            return critical::kWaitBlocked;
     }
 }
 
@@ -65,17 +65,17 @@ critical::CriticalEdgeType ResolveSoftIRQ(uint32_t vec)
     {
         case kTimer:
         case kHrTimer:
-            return critical::CriticalEdgeType::kTimer;
+            return critical::kTimer;
         case kBlock:
         case kBlockIoPoll:
-            return critical::CriticalEdgeType::kBlockDevice;
+            return critical::kBlockDevice;
         case kNetTx:
         case kNetRx:
-            return critical::CriticalEdgeType::kNetwork;
+            return critical::kNetwork;
         case kSched:
-            return critical::CriticalEdgeType::kInterrupted;
+            return critical::kInterrupted;
         default:
-            return critical::CriticalEdgeType::kWaitBlocked;
+            return critical::kWaitBlocked;
     }
 }
 
@@ -96,6 +96,8 @@ CriticalBlock::~CriticalBlock()
 
 void CriticalBlock::LoadServices(const block::ServiceList& serviceList)
 {
+    AbstractBuildBlock::LoadServices(serviceList);
+
     Q_RUN_USERMODE = Quarks()->StrQuark(kStateRunUsermode);
     Q_RUN_SYSCALL = Quarks()->StrQuark(kStateRunSyscall);
     Q_WAIT_BLOCKED = Quarks()->StrQuark(kStateWaitBlocked);
@@ -181,7 +183,7 @@ void CriticalBlock::OnIrqHandlerExit(const trace::EventValue& event)
 void CriticalBlock::OnHrtimerExpireEntry(const trace::EventValue& event)
 {
     uint32_t cpu = GetEventCPU(event);
-    _context[cpu].push(critical::CriticalEdgeType::kTimer);
+    _context[cpu].push(critical::kTimer);
 }
 
 void CriticalBlock::OnHrtimerExpireExit(const trace::EventValue& event)
@@ -189,7 +191,7 @@ void CriticalBlock::OnHrtimerExpireExit(const trace::EventValue& event)
     uint32_t cpu = GetEventCPU(event);
 
     auto& cpu_context_stack = _context[cpu];
-    if (cpu_context_stack.empty() || cpu_context_stack.top() != critical::CriticalEdgeType::kTimer)
+    if (cpu_context_stack.empty() || cpu_context_stack.top() != critical::kTimer)
     {
         tberror() << "Unexpected hr timer expire exit." << tbendl();
         return;
@@ -210,10 +212,8 @@ void CriticalBlock::OnTTWUBetweenThreads(uint32_t source_tid, uint32_t target_ti
     }
     auto prevTypeSourceIt = _lastEdgeTypePerThread.find(source_tid);
 
-    // TODO: Is it normal to have usermode as the source of a ttwu?
     if (prevTypeSourceIt == _lastEdgeTypePerThread.end() &&
-        (prevTypeSourceIt->second != critical::CriticalEdgeType::kRunSyscall ||
-         prevTypeSourceIt->second != critical::CriticalEdgeType::kRunUsermode))
+        prevTypeSourceIt->second != critical::kRun)
     {
         tberror() << "Unexpected edge type for source of TTWU ("
             << source_tid << " > " << target_tid << ")." << tbendl();
@@ -239,8 +239,7 @@ void CriticalBlock::OnTTWUBetweenThreads(uint32_t source_tid, uint32_t target_ti
             << source_tid << " > " << target_tid << ")." << tbendl();
         return;
     }
-    if (prevTypeTargetIt->second == critical::CriticalEdgeType::kRunUsermode ||
-        prevTypeTargetIt->second == critical::CriticalEdgeType::kRunSyscall)
+    if (prevTypeTargetIt->second == critical::kRun)
     {
         // TODO: Determine whether this is normal.
         //tberror() << "Waking up a thread that is already running ("
@@ -258,7 +257,7 @@ void CriticalBlock::OnWakeupFromInterrupt(critical::CriticalEdgeType type, uint3
 {
     auto look = _lastEdgeTypePerThread.find(target_tid);
     if (look == _lastEdgeTypePerThread.end() ||
-        look->second != critical::CriticalEdgeType::kWaitBlocked)
+        look->second != critical::kWaitBlocked)
     {
         return;
     }
@@ -273,22 +272,20 @@ void CriticalBlock::OnThreadStatus(
 {
     // Determine the new edge type.
     auto newStatusValue = value->GetField(kCurrentStateAttributeValueField);
-    critical::CriticalEdgeType newEdgeType = critical::CriticalEdgeType::kUnknown;
+    critical::CriticalEdgeType newEdgeType = critical::kUnknown;
 
     if (newStatusValue != nullptr)
     {
         quark::Quark qNewStatus(newStatusValue->AsUInteger());
 
-        if (qNewStatus == Q_RUN_USERMODE)
-            newEdgeType = critical::CriticalEdgeType::kRunUsermode;
-        else if (qNewStatus == Q_RUN_SYSCALL)
-            newEdgeType = critical::CriticalEdgeType::kRunSyscall;
+        if (qNewStatus == Q_RUN_USERMODE || qNewStatus == Q_RUN_SYSCALL)
+            newEdgeType = critical::kRun;
         else if (qNewStatus == Q_INTERRUPTED)
-            newEdgeType = critical::CriticalEdgeType::kInterrupted;
+            newEdgeType = critical::kInterrupted;
         else if (qNewStatus == Q_WAIT_FOR_CPU)
-            newEdgeType = critical::CriticalEdgeType::kWaitCpu;
+            newEdgeType = critical::kWaitCpu;
         else if (qNewStatus == Q_WAIT_BLOCKED)
-            newEdgeType = critical::CriticalEdgeType::kWaitBlocked;
+            newEdgeType = critical::kWaitBlocked;
     }
 
     // Get the last edge type for the thread.

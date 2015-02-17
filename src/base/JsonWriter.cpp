@@ -18,6 +18,7 @@
 #include "base/JsonWriter.hpp"
 
 #include "base/EscapeString.hpp"
+#include "base/print.hpp"
 #include "base/ex/FatalError.hpp"
 
 namespace tibee
@@ -32,8 +33,9 @@ JsonWriter::JsonWriter()
 
 JsonWriter::~JsonWriter()
 {
-    if (!_sections.empty())
-        throw ex::FatalError("Json: Some sections were not closed.");
+    if (!_sections.empty()) {
+        base::tberror() << "Json: Some sections were not closed." << base::tbendl();
+    }
 }
 
 bool JsonWriter::Open(const boost::filesystem::path& path)

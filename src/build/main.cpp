@@ -46,7 +46,10 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
 
     desc.add_options()
         ("help,h", "help")
-        ("configuration,c", bpo::value<std::string>())
+        ("name,n", bpo::value<std::string>())
+        ("start,s", bpo::value<std::string>())
+        ("end,e", bpo::value<std::string>())
+        ("exec,x", bpo::value<std::string>())
         ("trace,t", bpo::value<std::vector<std::string>>())
         ("verbose,v", bpo::bool_switch()->default_value(false))
     ;
@@ -70,7 +73,10 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
             "options:" << std::endl <<
             std::endl <<
             "  -h, --help          print this help message" << std::endl <<
-            "  -c, --configuration configuration file" << std::endl <<
+            "  -n, --name          name of the executions" << std::endl <<
+            "  -s, --start         start event, prepend with ust/ or kernel/" << std::endl <<
+            "  -e, --end           end event, prepend with ust/ or kernel/" << std::endl <<
+            "  -x, --exec          executable to analyze (optional)" << std::endl <<
             "  -t, --trace         path(s) of the trace(s)" << std::endl <<
             "  -v, --verbose       verbose" << std::endl;
 
@@ -84,12 +90,34 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
         return 1;
     }
 
-    // configuration
-    if (vm["configuration"].empty()) {
-        tberror() << "no configuration file specified" << tbendl();
+    // verbose
+    args.verbose = vm["verbose"].as<bool>();
+
+    // name
+    if (vm["name"].empty()) {
+        tberror() << "No name specified." << tbendl();
         return 1;
     }
-    args.configuration = vm["configuration"].as<std::string>();
+    args.name = vm["name"].as<std::string>();
+
+    // name
+    if (vm["start"].empty()) {
+        tberror() << "No start event specified." << tbendl();
+        return 1;
+    }
+    args.startEvent = vm["start"].as<std::string>();
+
+    // name
+    if (vm["end"].empty()) {
+        tberror() << "No end event specified." << tbendl();
+        return 1;
+    }
+    args.endEvent = vm["end"].as<std::string>();
+
+    // name
+    if (!vm["exec"].empty()) {
+        args.exec = vm["exec"].as<std::string>();
+    }
 
     // trace
     if (vm["trace"].empty()) {
@@ -97,9 +125,6 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
         return 1;
     }
     args.traces = vm["trace"].as<std::vector<std::string>>();
-
-    // verbose
-    args.verbose = vm["verbose"].as<bool>();
 
     return 0;
 }

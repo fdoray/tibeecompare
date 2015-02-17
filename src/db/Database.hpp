@@ -56,6 +56,10 @@ public:
     void EnumerateExecutions(
         const std::string& name,
         const EnumerateExecutionsCallback& callback) const;
+    void EnumerateExecutions(
+        const std::string& name,
+        uint64_t numDesired,
+        const EnumerateExecutionsCallback& callback) const;
     void AddExecution(const execution::Execution& execution);
 
     // Destroy test database.
@@ -72,6 +76,9 @@ private:
     // Strings. Uses the same data as function names.
     std::string GetString(uint32_t id) const;
     stacks::FunctionNameId AddString(const std::string& str);
+
+    // Find the approximative size of an execution.
+    uint64_t ApproxExecutionSize(stacks::FunctionNameId executionNameId) const;
 
     // Indicates whether we use the test database.
     bool _isTest;

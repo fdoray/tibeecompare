@@ -20,13 +20,20 @@
 #include <boost/filesystem.hpp>
 #include <sstream>
 
-#include "base/CompareConstants.hpp"
 #include "base/print.hpp"
 #include "base/ex/InvalidArgument.hpp"
 #include "block/BlockRunner.hpp"
-#include "build/Configuration.hpp"
 #include "value/MakeValue.hpp"
 #include "value/Value.hpp"
+
+// Blocks
+#include "build_blocks/BuildBlock.hpp"
+#include "critical_blocks/CriticalBlock.hpp"
+#include "execution_blocks/PunchBlock.hpp"
+#include "stacks_blocks/ProfilerBlock.hpp"
+#include "state_blocks/CurrentStateBlock.hpp"
+#include "state_blocks/LinuxSchedStateBlock.hpp"
+#include "trace_blocks/TraceBlock.hpp"
 
 #define THIS_MODULE "tibeebuild"
 
@@ -76,8 +83,7 @@ TibeeBuild::TibeeBuild(const Arguments& args)
 
 void TibeeBuild::validateSaveArguments(const Arguments& args)
 {
-    // configuration
-    _configuration = args.configuration;
+    _args = args;
 
     // make sure all traces actually exist
     for (const auto& pathStr : args.traces)
@@ -101,33 +107,58 @@ void TibeeBuild::validateSaveArguments(const Arguments& args)
         // find directories that contain a metadata file
         FindTraces(tracePath, &_traces);
     }
-
-    // verbose
-    _verbose = args.verbose;
 }
 
 bool TibeeBuild::run()
 {
-    if (_verbose)
+    if (_args.verbose)
         tbmsg(THIS_MODULE) << "starting" << tbendl();
 
-    // Instantiate the required modules.
-    Configuration configuration;
-    if (!configuration.LoadConfiguration(_configuration)) {
-        tberror() << "Unable to load configuration file." << tbendl();
-        return false;
-    }
+    block::BlockRunner runner;
 
-    // Add the traces.
+    // Trace block.
     value::ArrayValue::UP traces {new value::ArrayValue};
-
     for (const auto& tracePath : _traces)
         traces->Append(value::MakeValue(tracePath.string()));
+    value::StructValue::UP traceParams {new value::StructValue};
+    traceParams->AddField("traces", std::move(traces));
+    block::BlockInterface::UP traceBlock(new trace_blocks::TraceBlock);
+    runner.AddBlock(traceBlock.get(), traceParams.get());
 
-    configuration.AddParameter("trace", "traces", std::move(traces));
+    // Punch block.
+    value::StructValue::UP punchParams {new value::StructValue};
+    punchParams->AddField("name", value::MakeValue(_args.name));
+    punchParams->AddField("exec", value::MakeValue(_args.exec));
+    punchParams->AddField("begin", value::MakeValue(_args.startEvent));
+    punchParams->AddField("end", value::MakeValue(_args.endEvent));
+    block::BlockInterface::UP punchBlock(new execution_blocks::PunchBlock);
+    runner.AddBlock(punchBlock.get(), punchParams.get());
+
+    // Current state block.
+    block::BlockInterface::UP currentStateBlock(new state_blocks::CurrentStateBlock);
+    runner.AddBlock(currentStateBlock.get(), nullptr);
+
+    // Profiler block.
+    block::BlockInterface::UP profilerBlock(new stacks_blocks::ProfilerBlock);
+    runner.AddBlock(profilerBlock.get(), nullptr);
+
+    // Critical block.
+    block::BlockInterface::UP criticalBlock(new critical_blocks::CriticalBlock);
+    runner.AddBlock(criticalBlock.get(), nullptr);
+
+    // Linux sched state block.
+    block::BlockInterface::UP linuxSchedStateBlock(new state_blocks::LinuxSchedStateBlock);
+    runner.AddBlock(linuxSchedStateBlock.get(), nullptr);
+
+    // Build block.
+    block::BlockInterface::UP buildBlock(new build_blocks::BuildBlock);
+    runner.AddBlock(buildBlock.get(), nullptr);
 
     // Run the blocks.
-    configuration.Runner().Run();
+    runner.Run();
+
+    if (_args.verbose)
+        tbmsg(THIS_MODULE) << "ending" << tbendl();
 
     return true;
 }

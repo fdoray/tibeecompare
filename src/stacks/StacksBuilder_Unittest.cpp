@@ -79,6 +79,65 @@ TEST(StacksBuilder, StacksBuilder)
     expectedStacks = std::vector<Pair>({{1, 1000}, {2, 1000}, {3, 1000}});
     EXPECT_EQ(expectedStacks, stacks);
     stacks.clear();
+
+    EXPECT_EQ(kEmptyStackId, builder.GetStack(1, 500));
+    EXPECT_EQ(1, builder.GetStack(1, 1000));
+    EXPECT_EQ(1, builder.GetStack(1, 1500));
+    EXPECT_EQ(2, builder.GetStack(1, 2000));
+    EXPECT_EQ(2, builder.GetStack(1, 2500));
+    EXPECT_EQ(3, builder.GetStack(1, 3000));
+    EXPECT_EQ(3, builder.GetStack(1, 3500));
+    EXPECT_EQ(kEmptyStackId, builder.GetStack(1, 4000));
+    EXPECT_EQ(kEmptyStackId, builder.GetStack(1, 4500));
+}
+
+TEST(StacksBuilder, StartEmpty)
+{
+    namespace pl = std::placeholders;
+
+    db::Database::DestroyTestDb();
+    db::Database db(true);
+    StacksBuilder builder;
+    builder.SetDatabase(&db);
+
+    builder.SetTimestamp(2000);
+    builder.SetStack(1, 2);
+    builder.SetTimestamp(3000);
+    builder.SetStack(1, 3);
+    builder.SetStack(2, 4);
+    builder.SetTimestamp(4000);
+    builder.Terminate();
+
+    std::vector<Pair> stacks;
+    builder.EnumerateStacks(
+        1, 1500, 3500,
+        std::bind(&Callback, pl::_1, pl::_2, &stacks));
+    std::vector<Pair> expectedStacks({{2, 1000}, {3, 500}});
+    EXPECT_EQ(expectedStacks, stacks);
+}
+
+TEST(StacksBuilder, EndEmpty)
+{
+    namespace pl = std::placeholders;
+
+    db::Database::DestroyTestDb();
+    db::Database db(true);
+    StacksBuilder builder;
+    builder.SetDatabase(&db);
+
+    builder.SetTimestamp(1000);
+    builder.SetStack(1, 1);
+    builder.SetTimestamp(2000);
+    builder.SetStack(1, 2);
+    builder.SetTimestamp(3000);
+    builder.Terminate();
+
+    std::vector<Pair> stacks;
+    builder.EnumerateStacks(
+        1, 1500, 3500,
+        std::bind(&Callback, pl::_1, pl::_2, &stacks));
+    std::vector<Pair> expectedStacks({{1, 500}, {2, 1000}});
+    EXPECT_EQ(expectedStacks, stacks);
 }
 
 }  // namespace stacks

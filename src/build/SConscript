@@ -21,8 +21,6 @@ libs = [
 ]
 
 sources = [
-    'BlockLoader.cpp',
-    'Configuration.cpp',
     'main.cpp',
     'TibeeBuild.cpp',
 ]

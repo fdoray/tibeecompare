@@ -46,18 +46,9 @@ using base::tbmsg;
 }  // namespace
 
 TibeeReport::TibeeReport(const Arguments& args)
+    : _name(args.name),
+      _verbose(args.verbose)
 {
-    // validate arguments as soon as possible (will throw if anything wrong)
-    this->validateSaveArguments(args);
-}
-
-void TibeeReport::validateSaveArguments(const Arguments& args)
-{
-    // name
-    _name = args.name;
-
-    // verbose
-    _verbose = args.verbose;
 }
 
 bool TibeeReport::run()

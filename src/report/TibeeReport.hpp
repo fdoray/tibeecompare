@@ -50,8 +50,6 @@ public:
     bool run();
 
 private:
-    void validateSaveArguments(const Arguments& args);
-
     std::string _name;
     bool _verbose;
 };

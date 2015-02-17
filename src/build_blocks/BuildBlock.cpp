@@ -28,6 +28,7 @@
 #include "base/Constants.hpp"
 #include "base/print.hpp"
 #include "block/ServiceList.hpp"
+#include "critical/ComputeCriticalPath.hpp"
 #include "execution/ExtractMetrics.hpp"
 #include "execution/ExtractStacks.hpp"
 #include "notification/NotificationCenter.hpp"
@@ -94,29 +95,28 @@ void BuildBlock::onTimestamp(const notification::Path& path, const value::Value*
 
 void BuildBlock::onEnd(const notification::Path& path, const value::Value* value)
 {  
+    tbinfo() << "Completed reading the trace." << tbendl();
+
     // Notify the executions and stacks builder that we reached
     // the end of the trace.
     _executionsBuilder.Terminate();
     _stacksBuilder.Terminate();
 
-    // Save all executions.
+    // Save all executions in the database.
     for (auto& execution : _executionsBuilder)
     {
-        /*
-        // Extract the segments.
-        // TODO: For now, we only have one segment per execution.
-        critical::Segment segment(
-            execution->startThread(), execution->startTs(),
-            execution->endTs(), true);
-        critical::Segments segments({segment});
+        // Compute the critical path of the execution.
+        critical::CriticalPath criticalPath;
+        critical::ComputeCriticalPath(
+            _criticalGraph, execution->startTs(), execution->endTs(),
+            execution->startThread(), &criticalPath);
 
-        // Extract the stacks.
+        // Extract the stacks that belong to the execution.
         execution::ExtractStacks(
-            _stacksBuilder, segments, execution.get());
-        */
+            _stacksBuilder, criticalPath, &_db, execution.get());
 
-        // Extract metrics.
-        execution::ExtractMetrics(execution.get());
+        // Extract execution metrics.
+        execution::ExtractMetrics(criticalPath, execution.get());
 
         // Add the execution to the database.
         _db.AddExecution(*execution);

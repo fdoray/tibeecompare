@@ -54,9 +54,9 @@ public:
 private:
     void validateSaveArguments(const Arguments& args);
 
-    boost::filesystem::path _configuration;
+    // Arguments.
+    Arguments _args;
     std::vector<boost::filesystem::path> _traces;
-    bool _verbose;
 };
 
 }  // namespace build

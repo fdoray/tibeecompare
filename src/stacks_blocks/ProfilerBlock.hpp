@@ -18,6 +18,9 @@
 #ifndef _TIBEE_STACKSBLOCKS_PROFILERBLOCK_HPP
 #define _TIBEE_STACKSBLOCKS_PROFILERBLOCK_HPP
 
+#include <string>
+#include <vector>
+
 #include "base/BasicTypes.hpp"
 #include "build_blocks/AbstractBuildBlock.hpp"
 #include "symbols/SymbolLookup.hpp"
@@ -41,7 +44,12 @@ public:
 
 private:
     void OnBaddr(const trace::EventValue& event);
-    void OnSample(const trace::EventValue& event);
+    void OnOnCpuSample(const trace::EventValue& event);
+    void OnOffCpuSample(const trace::EventValue& event);
+    void OnSyscallEntry(const trace::EventValue& event);
+    void OnSyscallExit(const trace::EventValue& event);
+
+    void ReadStack(const trace::EventValue& event, std::vector<std::string>* stack);
 
     // Images loaded in each process.
     std::unordered_map<process_t, symbols::ImageVector> _images;

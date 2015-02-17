@@ -1,4 +1,4 @@
-/* Copyright (c) 2014 Francois Doray <francois.pierre-doray@polymtl.ca>
+/* Copyright (c) 2015 Francois Doray <francois.pierre-doray@polymtl.ca>
  *
  * This file is part of tibeecompare.
  *
@@ -15,21 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_BUILD_BLOCKLOADER_HPP
-#define _TIBEE_BUILD_BLOCKLOADER_HPP
+#ifndef TIBEE_CRITICAL_GETSTATUSSTRING_HPP_
+#define TIBEE_CRITICAL_GETSTATUSSTRING_HPP_
 
 #include <string>
 
-#include "block/BlockInterface.hpp"
+#include "critical/CriticalTypes.hpp"
 
-namespace tibee
-{
-namespace build
-{
+namespace tibee {
+namespace critical {
 
-block::BlockInterface::UP LoadBlock(const std::string& name);
+std::string GetStatusString(CriticalEdgeType type);
 
-}  // namespace build
+}  // namespace critical
 }  // namespace tibee
 
-#endif // _TIBEE_BUILD_BLOCKLOADER_HPP
+#endif  // TIBEE_CRITICAL_GETSTATUSSTRING_HPP_

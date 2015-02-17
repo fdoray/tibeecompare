@@ -17,6 +17,8 @@
  */
 #include "report/WriteExecutions.hpp"
 
+#include <iostream>
+
 #include "base/JsonWriter.hpp"
 
 namespace tibee
@@ -26,6 +28,8 @@ namespace report
 
 namespace
 {
+
+const size_t kNumDesiredExecutions = 50000;
 
 void WriteExecution(
     const execution::Execution& execution,
@@ -72,7 +76,7 @@ void WriteExecutions(
     writer->KeyArrayValue("executions");
 
     db.EnumerateExecutions(
-        name,
+        name, kNumDesiredExecutions,
         std::bind(&WriteExecution, pl::_1, writer, stacks));
 
     writer->EndArray();

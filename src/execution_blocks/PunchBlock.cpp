@@ -17,6 +17,9 @@
  */
 #include "execution_blocks/PunchBlock.hpp"
 
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "base/BindObject.hpp"
 #include "base/CompareConstants.hpp"
 #include "base/Constants.hpp"
@@ -26,6 +29,12 @@
 
 namespace tibee {
 namespace execution_blocks {
+
+namespace
+{
+const char kUstPrefix[] = "ust/";
+const char kKernelPrefix[] = "kernel/";
+}  // namespace
 
 PunchBlock::PunchBlock()
 {
@@ -41,41 +50,24 @@ void PunchBlock::Start(const value::Value* params)
     auto execValue = params->GetField("exec");
     auto beginValue = params->GetField("begin");
     auto endValue = params->GetField("end");
-    auto typeValue = params->GetField("type");
 
     if (nameValue == nullptr || execValue == nullptr ||
-        beginValue == nullptr || endValue == nullptr ||
-        typeValue == nullptr)
+        beginValue == nullptr || endValue == nullptr)
     {
         base::tberror() << "Missing some parameters for punch block." << base::tbendl();
         return;
     }
 
-    _name = execValue->AsString();
+    _name = nameValue->AsString();
     _exec = execValue->AsString();
     _beginEvent = beginValue->AsString();
     _endEvent = endValue->AsString();
-    _isUST = typeValue->AsString() == "ust";
 }
 
 void PunchBlock::AddObservers(notification::NotificationCenter* notificationCenter)
 {
-    using notification::Token;
-
-    if (_isUST)
-    {
-        AddUstObserver(notificationCenter, Token(_beginEvent),
-                       base::BindObject(&PunchBlock::onBegin, this));
-        AddUstObserver(notificationCenter, Token(_endEvent),
-                       base::BindObject(&PunchBlock::onEnd, this));
-    }
-    else
-    {
-        AddKernelObserver(notificationCenter, Token(_beginEvent),
-                          base::BindObject(&PunchBlock::onBegin, this));
-        AddKernelObserver(notificationCenter, Token(_endEvent),
-                          base::BindObject(&PunchBlock::onEnd, this));
-    }
+    AddEventObserver(notificationCenter, _beginEvent, &PunchBlock::onBegin);
+    AddEventObserver(notificationCenter, _endEvent, &PunchBlock::onEnd);
 }
 
 void PunchBlock::onBegin(const trace::EventValue& event)
@@ -96,8 +88,33 @@ void PunchBlock::onEnd(const trace::EventValue& event)
     Executions()->EndExecution(tid);
 }
 
+void PunchBlock::AddEventObserver(notification::NotificationCenter* notificationCenter,
+                                  const std::string& name,
+                                  Observer observer)
+{
+    if (boost::starts_with(name, kUstPrefix))
+    {
+        AddUstObserver(notificationCenter,
+                       notification::Token(name.substr(strlen(kUstPrefix))),
+                       base::BindObject(observer, this));
+    }
+    else if (boost::starts_with(name, kKernelPrefix))
+    {
+        AddKernelObserver(notificationCenter,
+                          notification::Token(name.substr(strlen(kKernelPrefix))),
+                          base::BindObject(observer, this));
+    }
+    else
+    {
+        base::tberror() << "Punch block: event name is not prefixed with ust/ or kernel/."
+                        << base::tbendl();
+    }
+}
+
 bool PunchBlock::TidIsAnalyzed(uint32_t tid) const
 {
+    if (_exec.empty())
+        return true;
     auto thread_name = State()->CurrentNameForThread(tid);
     return thread_name == _exec;
 }

@@ -25,7 +25,7 @@ namespace critical
 {
 
 CriticalEdge::CriticalEdge()
-    : _type(CriticalEdgeType::kUnknown), _from(nullptr), _to(nullptr)
+    : _type(kUnknown), _from(nullptr), _to(nullptr)
 {
 }
 
@@ -39,8 +39,8 @@ timestamp_t CriticalEdge::Cost() const
     assert(from() != nullptr);
     assert(to() != nullptr);
 
-    if (type() == CriticalEdgeType::kWaitBlocked ||
-        type() == CriticalEdgeType::kTimer)
+    if (type() == kWaitBlocked ||
+        type() == kTimer)
     {
         return 0;
     }

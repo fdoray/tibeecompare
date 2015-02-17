@@ -19,10 +19,24 @@
 
 #include <algorithm>
 
+#include "base/print.hpp"
+
 namespace tibee
 {
 namespace stacks
 {
+
+namespace
+{
+
+using base::tberror;
+using base::tbendl;
+
+const uint64_t kMinSyscallDuration = 100000;  // 100 us
+
+const size_t kMaxRewind = 20;
+
+}  // namespace
 
 StacksBuilder::StacksBuilder()
     : _ts(0),
@@ -34,42 +48,113 @@ StacksBuilder::~StacksBuilder()
 {
 }
 
-void StacksBuilder::SetStack(
-    thread_t thread,
-    StackId stackId)
+void StacksBuilder::SetStack(thread_t thread, StackId stackId, bool isSyscall)
 {
     auto& stacks = _stacks[thread];
 
+    // Update end timestamp for the previous stack.
     if (!stacks.empty())
         stacks.back().endTs = _ts;
 
+    // Add the new stack, if it is different from the previous one.
     if (stacks.empty() || stacks.back().stackId != stackId)
     {
         StackWrapper wrapper;
         wrapper.stackId = stackId;
         wrapper.startTs = _ts;
         wrapper.endTs = _ts;
+        wrapper.isSyscall = isSyscall;
         stacks.push_back(wrapper);
     }
 }
 
-void StacksBuilder::SetStack(
-    thread_t thread,
-    const std::vector<std::string>& stack)
+void StacksBuilder::SetStack(thread_t thread, StackId stackId)
 {
-    // Get the stack identifier.
-    // The first element of the |stack| is the top of the stack.
-    StackId previousStackId = kEmptyStackId;
-    for (size_t i = 0; i < stack.size(); ++i)
+    SetStack(thread, stackId, false);
+}
+
+void StacksBuilder::SetStack(thread_t thread,
+                             const std::vector<std::string>& stack)
+{
+    SetStack(thread, GetStackIdentifier(stack));
+}
+
+void StacksBuilder::SetUnknownStack(thread_t thread)
+{
+    std::vector<std::string> stack({std::string("Unknown Stack")});
+    SetStack(thread, GetStackIdentifier(stack), true);
+}
+
+void StacksBuilder::StartSystemCall(thread_t thread, const std::string& syscall)
+{
+    std::vector<std::string> stack({std::string("sys:") + syscall});
+    SetStack(thread, GetStackIdentifier(stack), true);
+}
+
+void StacksBuilder::EndSytemCall(thread_t thread)
+{
+    // Get the stack from before the system call.
+    auto& stacks = _stacks[thread];
+    if (stacks.empty())
     {
-        Stack stackStep;
-        stackStep.set_bottom(previousStackId);
-        stackStep.set_function(_db->AddFunctionName(stack[stack.size() - i - 1]));
-        previousStackId = _db->AddStack(stackStep);
+        return;
     }
 
-    // Set the stack for the thread.
-    SetStack(thread, previousStackId);
+    if (!stacks.back().isSyscall)
+    {
+        tberror() << "Ending a system call on thread " << thread << ", but is "
+                  << "inside a usermode stack." << tbendl();
+        return;
+    }
+
+    if (stacks.size() == 1)
+    {
+        // If there is no stack before the system call, set an unkwnown stack.
+        SetUnknownStack(thread);
+        return;
+    }
+
+    StackId previousStack = (stacks.end() - 2)->stackId;
+    SetStack(thread, previousStack);
+}
+
+void StacksBuilder::SetLastSystemCallStack(thread_t thread, StackId stackId)
+{
+    auto& stacks = _stacks[thread];
+    if (stacks.empty())
+        return;
+
+    // Find a system call of at least 100 us.
+    auto it = stacks.end();
+    --it;
+
+    for (size_t i = 0; i < kMaxRewind; ++i)
+    {
+        if (it->isSyscall && (it->endTs - it->startTs) >= kMinSyscallDuration)
+        {
+            Stack syscallOnlyStack = _db->GetStack(it->stackId);
+
+            Stack stackStep;
+            stackStep.set_bottom(stackId);
+            stackStep.set_function(syscallOnlyStack.function());
+            StackId syscallFullStack = _db->AddStack(stackStep);
+
+            it->stackId = syscallFullStack;
+
+            return;
+        }
+
+        if (it == stacks.begin())
+            return;
+
+        --it;
+    }
+}
+
+void StacksBuilder::SetLastSystemCallStack(
+    thread_t thread, const std::vector<std::string>& stack)
+{
+    SetLastSystemCallStack(thread, GetStackIdentifier(stack));
 }
 
 void StacksBuilder::EnumerateStacks(
@@ -98,10 +183,36 @@ void StacksBuilder::EnumerateStacks(
     }
 }
 
+stacks::StackId StacksBuilder::GetStack(thread_t thread, timestamp_t ts) const
+{
+    auto look = _stacks.find(thread);
+    if (look == _stacks.end())
+      return kEmptyStackId;
+    const auto& stacks = look->second;
+
+    StacksComparator comparator;
+    auto it = std::upper_bound(
+        stacks.begin(), stacks.end(), ts, comparator);
+    if (it != stacks.begin())
+        --it;
+    if (it == stacks.end())
+        return kEmptyStackId;
+
+    if (it->startTs <= ts && it->endTs > ts)
+        return it->stackId;
+    return kEmptyStackId;
+}
+
 bool StacksBuilder::StacksComparator::operator() (
     const StackWrapper& stack, timestamp_t ts) const
 {
     return stack.startTs < ts;
+}
+
+bool StacksBuilder::StacksComparator::operator() (
+    timestamp_t ts, const StackWrapper& stack) const
+{
+    return ts < stack.startTs;
 }
 
 void StacksBuilder::Terminate()
@@ -111,6 +222,22 @@ void StacksBuilder::Terminate()
         if (!stacks.second.empty())
             stacks.second.back().endTs = _ts;
     }
+}
+
+StackId StacksBuilder::GetStackIdentifier(const std::vector<std::string>& stack)
+{
+    if (stack.empty())
+        return GetStackIdentifier({std::string("empty")});
+
+    StackId previousStackId = kEmptyStackId;
+    for (size_t i = 0; i < stack.size(); ++i)
+    {
+        Stack stackStep;
+        stackStep.set_bottom(previousStackId);
+        stackStep.set_function(_db->AddFunctionName(stack[stack.size() - i - 1]));
+        previousStackId = _db->AddStack(stackStep);
+    }
+    return previousStackId;
 }
 
 }  // namespace stacks

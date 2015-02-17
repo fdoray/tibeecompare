@@ -46,18 +46,37 @@ public:
     void SetDatabase(db::Database* db) { _db = db; }
 
     // Set the current stack for a thread.
+    void SetStack(thread_t thread, StackId stackId, bool isSyscall);
     void SetStack(thread_t thread, StackId stackId);
     void SetStack(thread_t thread, const std::vector<std::string>& stack);
+    void SetUnknownStack(thread_t thread);
+
+    // Start a system call on a thread.
+    void StartSystemCall(thread_t thread, const std::string& syscall);
+
+    // End a system call on a thread.
+    void EndSytemCall(thread_t thread);
+
+    // Set the stack for the last system call of a thread.
+    // The stack is usually set for long system calls.
+    void SetLastSystemCallStack(thread_t thread, StackId stackId);
+    void SetLastSystemCallStack(thread_t thread, const std::vector<std::string>& stack);
 
     // Enumerate the stacks encountered on a thread in
     // the specified time interval.
     void EnumerateStacks(thread_t thread, timestamp_t start, timestamp_t end,
                          const EnumerateStacksCallback& callback) const;
 
+    // Get the stack at the specified timestamp.
+    stacks::StackId GetStack(thread_t thread, timestamp_t ts) const;
+
     // Set the end timestamp of the last stack of each thread to now.
     void Terminate();
 
 private:
+    // Get the identifier for a stack.
+    StackId GetStackIdentifier(const std::vector<std::string>& stack);
+
     // Current timestamp.
     timestamp_t _ts;
 
@@ -70,6 +89,7 @@ private:
         StackId stackId;
         timestamp_t startTs;
         timestamp_t endTs;
+        bool isSyscall;
     };
     typedef std::unordered_map<thread_t, std::vector<StackWrapper>>
         StacksPerThread;
@@ -79,6 +99,7 @@ private:
     {
     public:
         bool operator() (const StackWrapper& stack, timestamp_t ts) const;
+        bool operator() (timestamp_t ts, const StackWrapper& stack) const;
     };
 };
 

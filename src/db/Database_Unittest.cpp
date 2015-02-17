@@ -163,7 +163,7 @@ TEST(Database, Execution)
     d.set_endTs(3000);
     d.set_endThread(4000);
     d.SetMetric(kDurationMetricId, 4);
-    d.SetMetric(kInterruptedMetricId, 8);
+    d.SetMetric(kDurationMetricId, 8);
     d.IncrementSample(7, 22);
     d.IncrementSample(8, 33);
 

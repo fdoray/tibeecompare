@@ -140,7 +140,7 @@ CriticalEdgeId CriticalGraph::CreateVerticalEdge(
     CriticalNode* to)
 {
     CriticalEdgeId id = _edges.size();
-    _edges.push_back(CriticalEdge(CriticalEdgeType::kVertical, from, to));
+    _edges.push_back(CriticalEdge(kVertical, from, to));
     from->set_edge(kCriticalEdgeOutVertical, id);
     to->set_edge(kCriticalEdgeInVertical, id);
     return id;

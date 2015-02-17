@@ -8,6 +8,7 @@ sources = [
     'CriticalEdge.cpp',
     'CriticalGraph.cpp',
     'CriticalNode.cpp',
+    'GetStatusString.cpp',
 ]
 
 Return('sources')

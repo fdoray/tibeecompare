@@ -37,11 +37,10 @@ enum CriticalEdgePosition {
     kCriticalEdgePositionCount = 4,
 };
 
-enum class CriticalEdgeType {
-    kUnknown,         // Unknown type.
+enum CriticalEdgeType {
+    kUnknown = 0,     // Unknown type.
     kVertical,        // Vertical edge.
-    kRunUsermode,     // Run in user mode.
-    kRunSyscall,      // Run in a syscall.
+    kRun,             // Run.
     kInterrupted,     // Interrupted.
     kWaitCpu,         // Waiting for CPU.
     kWaitBlocked,     // Waiting blocked.

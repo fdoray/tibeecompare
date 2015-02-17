@@ -38,8 +38,10 @@ const char kMinorFaults[] = "minor-faults";
 
 const char* kMetricNames[] = {
     "duration",
-    "usermode",
-    "system",
+    "timestamp",
+    "unknown",
+    "vertical",
+    "run",
     "interrupted",
     "waitcpu",
     "waitblocked",

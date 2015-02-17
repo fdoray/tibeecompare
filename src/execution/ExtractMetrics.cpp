@@ -25,10 +25,25 @@ namespace execution
 {
 
 void ExtractMetrics(
+    const critical::CriticalPath& criticalPath,
     Execution* execution)
 {
+    // Duration.
     auto duration = execution->endTs() - execution->startTs();
     execution->SetMetric(kDurationMetricId, duration);
+
+    // Timestamp.
+    execution->SetMetric(kTsMetricId, execution->startTs());
+
+    // Status.
+    for (const auto& segment : criticalPath)
+    {
+        auto metricId = kNumCustomMetrics + segment.type();
+        uint64_t segmentDuration = segment.endTs() - segment.startTs();
+        uint64_t currentValue = 0;
+        execution->GetMetric(metricId, &currentValue);
+        execution->SetMetric(metricId, currentValue + segmentDuration);
+    }
 }
 
 }  // namespace execution

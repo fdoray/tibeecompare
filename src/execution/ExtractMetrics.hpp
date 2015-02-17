@@ -18,6 +18,7 @@
 #ifndef _TIBEE_EXECUTION_EXTRACTMETRICS_HPP
 #define _TIBEE_EXECUTION_EXTRACTMETRICS_HPP
 
+#include "critical/CriticalPath.hpp"
 #include "execution/Execution.hpp"
 
 namespace tibee
@@ -26,6 +27,7 @@ namespace execution
 {
 
 void ExtractMetrics(
+    const critical::CriticalPath& criticalPath,
     Execution* execution);
 
 }  // namespace execution

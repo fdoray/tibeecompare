@@ -17,6 +17,7 @@
  */
 #include "db/Database.hpp"
 
+#include <iostream>
 #include <sstream>
 #include <vector>
 
@@ -278,8 +279,10 @@ std::string Database::GetFunctionName(stacks::FunctionNameId id) const
 
     if (!status.ok())
     {
-        throw base::ex::FatalError(
-            "Unable to retrieve a function name for the provided id.");
+        std::stringstream message;
+        message << "Unable to retrieve a function name for the provided id ("
+                << id << ").";
+        throw base::ex::FatalError(message.str());
     }
 
     return name;
@@ -347,8 +350,10 @@ stacks::Stack Database::GetStack(stacks::StackId id) const
 
     if (!status.ok())
     {
-        throw base::ex::FatalError(
-            "Unable to retrieve a function name for the provided id.");
+        std::stringstream message;
+        message << "Unable to retrieve a stack for the provided id ("
+                << id << ").";
+        throw base::ex::FatalError(message.str());
     }
 
     if (stackStr.size() != sizeof(stacks::Stack))
@@ -415,6 +420,14 @@ void Database::EnumerateExecutions(
     const std::string& name,
     const EnumerateExecutionsCallback& callback) const
 {
+    EnumerateExecutions(name, 0, callback);
+}
+
+void Database::EnumerateExecutions(
+        const std::string& name,
+        uint64_t numDesired,
+        const EnumerateExecutionsCallback& callback) const
+{
     OpenDatabase();
 
     auto executionNameId =
@@ -432,6 +445,27 @@ void Database::EnumerateExecutions(
     endKey.timestamp = -1;
     auto endKeySlice = Slice(&endKey, sizeof(endKey));
 
+    // Get the approximative number of bytes for all executions.
+    size_t numSkip = 0;
+
+    if (numDesired != 0)
+    {
+        leveldb::Range range(startKeySlice, endKeySlice);
+        uint64_t approximativeTotalSize;
+        _db->GetApproximateSizes(&range, 1, &approximativeTotalSize);
+        uint64_t approximativeExecSize = ApproxExecutionSize(executionNameId);
+
+        if (approximativeTotalSize != 0 && approximativeExecSize != 0)
+        {
+            auto approximativeExecCount =
+                approximativeTotalSize / approximativeExecSize;
+            auto desiredProportion = approximativeExecCount / numDesired;
+            if (desiredProportion >= 2)
+                numSkip = desiredProportion;
+        }
+    }
+
+    // Iterate executions.
     std::unique_ptr<leveldb::Iterator> it(
         _db->NewIterator(leveldb::ReadOptions()));
 
@@ -466,6 +500,14 @@ void Database::EnumerateExecutions(
         }
 
         callback(execution);
+
+        // Skip records.
+        for (size_t i = 1; i < numSkip; ++i)
+        {
+            it->Next();
+            if (!it->Valid())
+                return;
+        }
     }
 }
 
@@ -569,6 +611,48 @@ std::string Database::GetString(uint32_t id) const
 stacks::FunctionNameId Database::AddString(const std::string& str)
 {
     return AddFunctionName(str);
+}
+
+uint64_t Database::ApproxExecutionSize(stacks::FunctionNameId executionNameId) const
+{
+    Key startKey;
+    startKey.type = kExecutionKeyType;
+    startKey.id = executionNameId;
+    startKey.timestamp = 0;
+    auto startKeySlice = Slice(&startKey, sizeof(startKey));
+
+    Key endKey;
+    endKey.type = kExecutionKeyType;
+    endKey.id = executionNameId;
+    endKey.timestamp = -1;
+    auto endKeySlice = Slice(&endKey, sizeof(endKey));
+
+    // Find the key of the 100th execution.
+    std::unique_ptr<leveldb::Iterator> it(
+        _db->NewIterator(leveldb::ReadOptions()));
+
+    size_t i = 0;
+    for (it->Seek(startKeySlice);
+         it->Valid() && _comparator->Compare(it->key(), endKeySlice) <= 0;
+         it->Next())
+    {
+        ++i;
+        if (i == 100)
+            break;
+    }
+
+    // There is less than 100 executions: size cannot be approximated.
+    if (!it->Valid())
+        return 0;
+
+    leveldb::Range range(startKeySlice, it->key());
+    uint64_t approximativeSize = 0;
+    _db->GetApproximateSizes(&range, 1, &approximativeSize);
+
+    if (approximativeSize == 0)
+        return 0;
+    return approximativeSize / i;
+
 }
 
 }  // namespace db

@@ -49,6 +49,11 @@ private:
     void onBegin(const trace::EventValue& event);
     void onEnd(const trace::EventValue& event);
 
+    typedef void (PunchBlock::*Observer)(const trace::EventValue& event);
+    void AddEventObserver(notification::NotificationCenter* notificationCenter,
+                          const std::string& name,
+                          Observer observer);
+
     bool TidIsAnalyzed(uint32_t tid) const;
 
     // The name of the generated executions.
@@ -62,9 +67,6 @@ private:
 
     // The name of the end event;
     std::string _endEvent;
-
-    // Indicates whether the begin/end events are UST events.
-    bool _isUST;
 };
 
 }  // namespace execution_blocks

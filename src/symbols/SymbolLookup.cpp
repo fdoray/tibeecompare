@@ -21,8 +21,9 @@
 #include <cxxabi.h>
 
 #include <assert.h>
-#include <iostream>
 #include <stdlib.h>
+
+#include "base/print.hpp"
 
 namespace tibee {
 namespace symbols {
@@ -174,8 +175,8 @@ bool SymbolLookup::LookupSymbol(uint64_t address,
       auto image_cache_it = cache_.find(image.path());
       if (image_cache_it == cache_.end()) {
         if (!AddFileToCache(image.path(), &cache_[image.path()])) {
-          std::cerr << "Unable to load symbols for " << image.path()
-                    << std::endl;
+          base::tberror() << "Unable to load symbols for " << image.path()
+                          << base::tbendl();
           return false;
         }
         image_cache_it = cache_.find(image.path());
@@ -200,7 +201,8 @@ bool SymbolLookup::LookupSymbol(uint64_t address,
     }
   }
 
-  std::cerr << "No image at address " << std::hex << address << std::endl;
+  base::tberror() << "No image at address " << std::hex << address << std::dec
+                  << base::tbendl();
   return false;
 }
 
