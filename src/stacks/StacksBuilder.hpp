@@ -49,7 +49,7 @@ public:
     void SetStack(thread_t thread, StackId stackId, bool isSyscall);
     void SetStack(thread_t thread, StackId stackId);
     void SetStack(thread_t thread, const std::vector<std::string>& stack);
-    void SetUnknownStack(thread_t thread);
+    void SetNoStack(thread_t thread);
 
     // Start a system call on a thread.
     void StartSystemCall(thread_t thread, const std::string& syscall);

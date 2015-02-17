@@ -79,9 +79,9 @@ void StacksBuilder::SetStack(thread_t thread,
     SetStack(thread, GetStackIdentifier(stack));
 }
 
-void StacksBuilder::SetUnknownStack(thread_t thread)
+void StacksBuilder::SetNoStack(thread_t thread)
 {
-    std::vector<std::string> stack({std::string("Unknown Stack")});
+    std::vector<std::string> stack({std::string("No Stack")});
     SetStack(thread, GetStackIdentifier(stack), true);
 }
 
@@ -109,8 +109,9 @@ void StacksBuilder::EndSytemCall(thread_t thread)
 
     if (stacks.size() == 1)
     {
-        // If there is no stack before the system call, set an unkwnown stack.
-        SetUnknownStack(thread);
+        // If there is no stack before the system call, push "No stack"
+        // function.
+        SetNoStack(thread);
         return;
     }
 

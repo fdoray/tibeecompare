@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <deque>
+#include <iostream>
 #include <vector>
 
 #include "base/BasicTypes.hpp"
@@ -84,7 +85,6 @@ stacks::StackId ConcatenateStacks(stacks::StackId bottom,
     }
 
     return fullStack;
-
 }
 
 void SampleCallback(stacks::StackId stackId,
@@ -152,7 +152,6 @@ void ExtractStacks(
                 // This thread is on the stack of threads: remove everything
                 // that is above it.
                 threads.resize(depth + 1);
-                threads.back().stack = threads.back().cleanStack;
             }
         }
 
@@ -198,10 +197,9 @@ void ExtractStacks(
 
         // Update the stack for this thread.
         threads.back().stack = ConcatenateStacks(
-            threads.back().stack,
+            threads.back().cleanStack,
             stacks.GetStack(segment.tid(), segment.endTs()),
             db);
-
     }
 }
 
