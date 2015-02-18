@@ -31,20 +31,8 @@ install:
   - sudo apt-get install -qq boost1.55
   - sudo apt-get install -qq libboost1.55-dev
 
-  # bfd, for symbols
-  - sudo apt-get install -qq binutils-dev
-
-  # yaml-cpp
-  - sudo apt-get install cmake
-  - wget http://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz
-  - tar -xf yaml-cpp-0.5.1.tar.gz
-  - cd yaml-cpp-0.5.1
-  - mkdir build
-  - cd build
-  - cmake ..
-  - make
-  - sudo make install
-  - cd ../..
+  # libelf, for symbols
+  - sudo apt-get install -qq libelf-dev
 
 script:
   - export CXX=g++-4.8

@@ -17,7 +17,7 @@ libs = [
     'boost_regex',
     'yaml-cpp',
     'leveldb',
-    'bfd',
+    'elf',
 ]
 
 sources = [

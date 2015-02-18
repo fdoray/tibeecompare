@@ -27,7 +27,7 @@ namespace symbols {
 
 class Image {
  public:
-  Image() : base_address_(0), size_(0) {}
+  Image() : base_address_(0), size_(0), offset_(0) {}
   ~Image() {}
 
   const std::string& path() const { return path_; }
@@ -39,10 +39,30 @@ class Image {
   uint64_t size() const { return size_; }
   void set_size(uint64_t size) { size_ = size; }
 
+  uint64_t offset() const { return offset_; }
+  void set_offset(uint64_t offset) { offset_ = offset; }
+
+  bool operator<(const Image& other) const {
+	  if (base_address_ < other.base_address_)
+		  return true;
+	  if (base_address_ > other.base_address_)
+		  return false;
+	  if (size_ < other.size_)
+	  	  return true;
+	  if (size_ > other.size_)
+	      return false;
+	  if (offset_ < other.offset_)
+	      return true;
+	  if (offset_ > other.offset_)
+	      return false;
+	  return path_ < other.path_;
+  }
+
  private:
   std::string path_;
   uint64_t base_address_;
   uint64_t size_;
+  uint64_t offset_;
 };
 
 typedef std::vector<Image> ImageVector;

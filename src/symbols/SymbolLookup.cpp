@@ -17,141 +17,21 @@
  */
 #include "symbols/SymbolLookup.hpp"
 
-#include <bfd.h>
-#include <cxxabi.h>
-
 #include <assert.h>
+#include <libelf.h>
 #include <stdlib.h>
 
 #include "base/print.hpp"
+#include "symbols/Elf.hpp"
 
 namespace tibee {
 namespace symbols {
 
-namespace {
-
-const size_t kElfSymbolSizeOffset = 7;
-
-std::string Demangle(const char* name)
-{
-  int status = 0;    
-  char* ret = abi::__cxa_demangle(name, 0, 0, &status); 
-  std::string demangled;
-  if (ret != nullptr)
-    demangled = ret;
-  else
-    demangled = name;
-  free(ret);
-  return demangled;
-}
-
-bool AddSymbolToCache(bfd* file,
-                      asymbol* symbol,
-                      SymbolLookup::ImageSymbolCache* cache) {
-  symbol_info symbol_info;
-  bfd_get_symbol_info(file, symbol, &symbol_info);
-
-  Symbol new_symbol;
-  new_symbol.set_address(symbol_info.value);
-  new_symbol.set_size(0);
-  new_symbol.set_type(symbol_info.type);
-  new_symbol.set_name(Demangle(symbol_info.name));
-
-  if (bfd_get_flavour(file) == bfd_target_elf_flavour) {
-    new_symbol.set_size(
-        reinterpret_cast<uint64_t*>(symbol)[kElfSymbolSizeOffset]);
-  }
-
-  (*cache)[new_symbol.address()] = new_symbol;
-
-  return true;
-}
-
-bool AddSymbolsToCache(bfd* file,
-                       void* minisyms,
-                       size_t num_symbols,
-                       unsigned int size,
-                       SymbolLookup::ImageSymbolCache* cache) {
-  asymbol* store = bfd_make_empty_symbol(file);
-  if (store == NULL) {
-    return false;
-  }
-
-  bfd_byte* current_minisym = reinterpret_cast<bfd_byte*>(minisyms);
-  for (size_t i = 0; i < num_symbols; ++i, current_minisym += size) {
-    asymbol* symbol = bfd_minisymbol_to_symbol(
-        file, false, current_minisym, store);
-    if (symbol == NULL) {
-      return false;
-    }
-
-    if (!AddSymbolToCache(file, symbol, cache)) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-bool AddRelFileToCache(bfd* file,
-                       SymbolLookup::ImageSymbolCache* cache) {
-  assert(file);
-
-  unsigned int size = 0;
-  void* minisyms = NULL;
-  long num_symbols = bfd_read_minisymbols(file,
-                                          false,  // dynamic
-                                          &minisyms,
-                                          &size);
-  if (num_symbols < 0 && bfd_get_error() != bfd_error_no_symbols) {
-    if (bfd_get_error() == bfd_error_no_symbols) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  bool res = AddSymbolsToCache(file,
-                               minisyms,
-                               static_cast<size_t>(num_symbols),
-                               size,
-                               cache);
-
-  free(minisyms);
-
-  return res;
-}
-
-bool AddFileToCache(const std::string& filename,
-                    SymbolLookup::ImageSymbolCache* cache) {
-  assert(cache);
-
-  bfd *file = bfd_openr(filename.c_str(), NULL);
-  if (file == NULL) {
-    return false;
-  }
-
-  // Decompress sections to get line numbers.
-  file->flags |= BFD_DECOMPRESS;
-
-  char **matching = NULL;
-  if (!bfd_check_format (file, bfd_archive) &&
-      bfd_check_format_matches (file, bfd_object, &matching)) {
-    AddRelFileToCache(file, cache);
-  } else {
-    // TODO(fdoray): Support archive files.
-    return false;
-  }
-
-  if (!bfd_close(file))
-    return false;
-
-  return true;
-}
-
-}  // namespace
-
 SymbolLookup::SymbolLookup() {
+    // Initialize libelf.
+    if (elf_version(EV_CURRENT) == EV_NONE) {
+        base::tberror() << "Unable to initialize libelf." << base::tbendl();
+    }
 }
 
 SymbolLookup::~SymbolLookup() {
@@ -174,16 +54,16 @@ bool SymbolLookup::LookupSymbol(uint64_t address,
       // Load a symbol cache for the image.
       auto image_cache_it = cache_.find(image.path());
       if (image_cache_it == cache_.end()) {
-        if (!AddFileToCache(image.path(), &cache_[image.path()])) {
-          base::tberror() << "Unable to load symbols for " << image.path()
-                          << base::tbendl();
-          return false;
+        if (!ReadImageSymbols(image, &cache_[image.path()])) {
+            base::tberror() << "Unable to load symbols for " << image.path()
+                            << base::tbendl();
+            return false;
         }
         image_cache_it = cache_.find(image.path());
       }
 
       // Find the symbol in the cache.
-      uint64_t relative_address = address - image.base_address();
+      uint64_t relative_address = address - image.base_address() + image.offset();
       const auto& image_cache = image_cache_it->second;
 
       auto symbol_it = image_cache.upper_bound(relative_address);

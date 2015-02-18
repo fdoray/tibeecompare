@@ -37,7 +37,7 @@ custom_env = {
     'HOME': os.environ['HOME'],
 }
 
-root_env = Environment(CCFLAGS=ccflags,
+root_env = Environment(CXXFLAGS=ccflags,
                        CPPDEFINES=cppdefines,
                        ENV=custom_env)
 

@@ -90,16 +90,16 @@ void ProfilerBlock::OnBaddr(const trace::EventValue& event)
     std::string sopath = event.getEventField("sopath")->AsString();
     uint64_t size = event.getEventField("size")->AsULong();
 
-    if (baddr == 0x400000)
-    {
-        baddr = 0;
-        size += 0x400000;
-    }
-
     symbols::Image image;
     image.set_path(sopath);
     image.set_base_address(baddr);
     image.set_size(size);
+
+    if (baddr == 0x400000)
+    {
+        image.set_offset(0x400000);
+        image.set_base_address(0x400000);
+    }
 
     _images[pid].push_back(image);
 }

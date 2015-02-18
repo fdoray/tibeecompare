@@ -3,6 +3,7 @@ import os
 Import('env')
 
 sources = [
+	'Elf.cpp',
     'SymbolLookup.cpp',
 ]
 
