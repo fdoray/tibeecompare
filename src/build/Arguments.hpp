@@ -48,6 +48,9 @@ struct Arguments
     // Traces to analyze.
     std::vector<std::string> traces;
 
+    // Dump the stacks found in the trace, do not track executions.
+    bool dumpStacks;
+
     // Verbose flag.
     bool verbose;
 };

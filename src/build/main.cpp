@@ -51,6 +51,7 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
         ("end,e", bpo::value<std::string>())
         ("exec,x", bpo::value<std::string>())
         ("trace,t", bpo::value<std::vector<std::string>>())
+        ("dump,d", bpo::bool_switch()->default_value(false))
         ("verbose,v", bpo::bool_switch()->default_value(false))
     ;
 
@@ -78,6 +79,7 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
             "  -e, --end           end event, prepend with ust/ or kernel/" << std::endl <<
             "  -x, --exec          executable to analyze (optional)" << std::endl <<
             "  -t, --trace         path(s) of the trace(s)" << std::endl <<
+            "  -d, --dump          just dump stacks found in the trace" << std::endl <<
             "  -v, --verbose       verbose" << std::endl;
 
         return -1;
@@ -90,8 +92,21 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
         return 1;
     }
 
+    // dump
+    args.dumpStacks = vm["dump"].as<bool>();
+
     // verbose
     args.verbose = vm["verbose"].as<bool>();
+
+    // trace
+    if (vm["trace"].empty()) {
+        tberror() << "No trace specified." << tbendl();
+        return 1;
+    }
+    args.traces = vm["trace"].as<std::vector<std::string>>();
+
+    if (args.dumpStacks)
+        return 0;
 
     // name
     if (vm["name"].empty()) {
@@ -118,13 +133,6 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
     if (!vm["exec"].empty()) {
         args.exec = vm["exec"].as<std::string>();
     }
-
-    // trace
-    if (vm["trace"].empty()) {
-        tberror() << "No trace specified." << tbendl();
-        return 1;
-    }
-    args.traces = vm["trace"].as<std::vector<std::string>>();
 
     return 0;
 }

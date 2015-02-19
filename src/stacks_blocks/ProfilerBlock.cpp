@@ -37,11 +37,17 @@ const char kSyscallWithParamsPrefix[] = "syscall_entry_";
 }  // namespace
 
 ProfilerBlock::ProfilerBlock()
+    : _dumpStacks(false)
 {
 }
 
 ProfilerBlock::~ProfilerBlock()
 {
+}
+
+void ProfilerBlock::Start(const value::Value* params)
+{
+    _dumpStacks = value::BoolValue::GetValue(params->GetField("dump"));
 }
 
 void ProfilerBlock::AddObservers(
@@ -141,8 +147,6 @@ void ProfilerBlock::ReadStack(const trace::EventValue& event,
     std::vector<std::string> symbolizedStack;
     const auto* stackField = value::ArrayValue::Cast(event.getEventField("stack"));
 
-    bool first = true;
-
     for (const auto& addressValue : *stackField)
     {
         uint64_t address = addressValue.AsULong();
@@ -151,15 +155,17 @@ void ProfilerBlock::ReadStack(const trace::EventValue& event,
         uint64_t offset = 0;
         if (!_symbols.LookupSymbol(address, _images[pid], &symbol, &offset))
             symbol.set_name("Unknown Symbol");
-
-        if (first && boost::algorithm::contains(symbol.name(), "/libc"))
-            continue;
         if (boost::starts_with(symbol.name(), "lttng_profile"))
             continue;
 
         stack->push_back(symbol.name());
-        first = false;
+
+        if (_dumpStacks)
+            std::cout << symbol.name() << std::endl;
     }
+
+    if (_dumpStacks)
+        std::cout << std::endl;
 }
 
 }  // namespace stacks_blocks

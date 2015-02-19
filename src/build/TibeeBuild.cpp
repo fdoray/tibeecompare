@@ -126,25 +126,33 @@ bool TibeeBuild::run()
     runner.AddBlock(traceBlock.get(), traceParams.get());
 
     // Punch block.
-    value::StructValue::UP punchParams {new value::StructValue};
-    punchParams->AddField("name", value::MakeValue(_args.name));
-    punchParams->AddField("exec", value::MakeValue(_args.exec));
-    punchParams->AddField("begin", value::MakeValue(_args.startEvent));
-    punchParams->AddField("end", value::MakeValue(_args.endEvent));
-    block::BlockInterface::UP punchBlock(new execution_blocks::PunchBlock);
-    runner.AddBlock(punchBlock.get(), punchParams.get());
+    if (!_args.dumpStacks)
+    {
+        value::StructValue::UP punchParams {new value::StructValue};
+        punchParams->AddField("name", value::MakeValue(_args.name));
+        punchParams->AddField("exec", value::MakeValue(_args.exec));
+        punchParams->AddField("begin", value::MakeValue(_args.startEvent));
+        punchParams->AddField("end", value::MakeValue(_args.endEvent));
+        block::BlockInterface::UP punchBlock(new execution_blocks::PunchBlock);
+        runner.AddBlock(punchBlock.get(), punchParams.get());
+    }
 
     // Current state block.
     block::BlockInterface::UP currentStateBlock(new state_blocks::CurrentStateBlock);
     runner.AddBlock(currentStateBlock.get(), nullptr);
 
     // Profiler block.
+    value::StructValue::UP profilerParams {new value::StructValue};
+    profilerParams->AddField("dump", value::MakeValue(_args.dumpStacks));
     block::BlockInterface::UP profilerBlock(new stacks_blocks::ProfilerBlock);
-    runner.AddBlock(profilerBlock.get(), nullptr);
+    runner.AddBlock(profilerBlock.get(), profilerParams.get());
 
     // Critical block.
-    block::BlockInterface::UP criticalBlock(new critical_blocks::CriticalBlock);
-    runner.AddBlock(criticalBlock.get(), nullptr);
+    if (!_args.dumpStacks)
+    {
+        block::BlockInterface::UP criticalBlock(new critical_blocks::CriticalBlock);
+        runner.AddBlock(criticalBlock.get(), nullptr);
+    }
 
     // Linux sched state block.
     block::BlockInterface::UP linuxSchedStateBlock(new state_blocks::LinuxSchedStateBlock);

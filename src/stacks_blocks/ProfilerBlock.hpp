@@ -40,6 +40,7 @@ public:
     ProfilerBlock();
     ~ProfilerBlock();
 
+    virtual void Start(const value::Value* params) override;
     virtual void AddObservers(notification::NotificationCenter* notificationCenter) override;
 
 private:
@@ -50,6 +51,9 @@ private:
     void OnSyscallExit(const trace::EventValue& event);
 
     void ReadStack(const trace::EventValue& event, std::vector<std::string>* stack);
+
+    // Dump stacks to std output.
+    bool _dumpStacks;
 
     // Images loaded in each process.
     std::unordered_map<process_t, symbols::ImageVector> _images;
