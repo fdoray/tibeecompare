@@ -14,6 +14,7 @@ before_install:
 install:
   # stuff needed by us
   - sudo apt-get install -qq scons
+  - sudo apt-get install -qq libdw-dev
 
   # stuff needed by Babeltrace
   - sudo apt-get install -qq libtool

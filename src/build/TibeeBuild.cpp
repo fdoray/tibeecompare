@@ -126,14 +126,16 @@ bool TibeeBuild::run()
     runner.AddBlock(traceBlock.get(), traceParams.get());
 
     // Punch block.
+    value::StructValue::UP punchParams;
+    block::BlockInterface::UP punchBlock;
     if (!_args.dumpStacks)
     {
-        value::StructValue::UP punchParams {new value::StructValue};
+        punchParams.reset(new value::StructValue);
         punchParams->AddField("name", value::MakeValue(_args.name));
         punchParams->AddField("exec", value::MakeValue(_args.exec));
         punchParams->AddField("begin", value::MakeValue(_args.startEvent));
         punchParams->AddField("end", value::MakeValue(_args.endEvent));
-        block::BlockInterface::UP punchBlock(new execution_blocks::PunchBlock);
+        punchBlock.reset(new execution_blocks::PunchBlock);
         runner.AddBlock(punchBlock.get(), punchParams.get());
     }
 
@@ -148,9 +150,10 @@ bool TibeeBuild::run()
     runner.AddBlock(profilerBlock.get(), profilerParams.get());
 
     // Critical block.
+    block::BlockInterface::UP criticalBlock;
     if (!_args.dumpStacks)
     {
-        block::BlockInterface::UP criticalBlock(new critical_blocks::CriticalBlock);
+        criticalBlock.reset(new critical_blocks::CriticalBlock);
         runner.AddBlock(criticalBlock.get(), nullptr);
     }
 
