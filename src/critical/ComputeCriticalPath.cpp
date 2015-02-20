@@ -59,7 +59,7 @@ void ResolvedBlockedEdge(
     timestamp_t endTs,
     CriticalPath* path)
 {
-    assert(edge.type() == kWaitBlocked);
+    assert(edge.type() == kWaitBlocked || edge.type() == kNetwork);
     auto* toNode = edge.to();
     assert(toNode != nullptr);
     auto wakeUpEdgeId = toNode->edge(kCriticalEdgeInVertical);
@@ -69,7 +69,7 @@ void ResolvedBlockedEdge(
     if (wakeUpEdgeId == kInvalidCriticalEdgeId)
     {
         InsertCriticalPathSegment(CriticalPathSegment(
-            startTs, endTs, toNode->tid(), kWaitBlocked), path);
+            startTs, endTs, toNode->tid(), edge.type()), path);
         return;
     }
 
@@ -112,7 +112,6 @@ void ComputeCriticalPathRecursive(
         }
     }
 
-
     // Traverse all nodes of the thread |tid| that are between |startTs|
     // and |endTs|.
     while (node != nullptr &&
@@ -128,7 +127,7 @@ void ComputeCriticalPathRecursive(
         timestamp_t edgeStartTs = std::max(startTs, node->ts());
         timestamp_t edgeEndTs = std::min(endTs, nextNode->ts());
 
-        if (edge.type() == kWaitBlocked)
+        if (edge.type() == kWaitBlocked || edge.type() == kNetwork)
         {
             ResolvedBlockedEdge(graph, edge, edgeStartTs, edgeEndTs, path);
         }

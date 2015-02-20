@@ -77,6 +77,12 @@ public:
         return _edges[id];
     }
 
+    // Maximum tid value.
+    static const thread_t kMaxTid = 32768;
+
+    // Special thread for network operations.
+    static const thread_t kNetworkThread = kMaxTid + 1;
+
 private:
     // Timestamp.
     timestamp_t _ts;

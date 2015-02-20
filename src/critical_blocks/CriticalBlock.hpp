@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "critical/CriticalGraph.hpp"
+#include "critical_blocks/PacketKey.hpp"
 #include "build_blocks/AbstractBuildBlock.hpp"
 #include "quark/Quark.hpp"
 #include "state/CurrentState.hpp"
@@ -46,6 +47,16 @@ public:
     virtual void AddObservers(notification::NotificationCenter* notificationCenter) override;
 
 private:
+    struct InterruptContext
+    {
+        InterruptContext() : type(critical::kUnknown), node(nullptr) {}
+        InterruptContext(critical::CriticalEdgeType type,
+                         critical::CriticalNode* node)
+            : type(type), node(node) {}
+        critical::CriticalEdgeType type;
+        critical::CriticalNode* node;
+    };
+
     void OnTTWU(const trace::EventValue& event);
     void OnIrqHandlerEntry(const trace::EventValue& event);
     void OnIrqHandlerExit(const trace::EventValue& event);
@@ -53,19 +64,26 @@ private:
     void OnSoftIrqExit(const trace::EventValue& event);
     void OnHrtimerExpireEntry(const trace::EventValue& event);
     void OnHrtimerExpireExit(const trace::EventValue& event);
+    void OnInetSockLocalIn(const trace::EventValue& event);
+    void OnInetSockLocalOut(const trace::EventValue& event);
     void OnThreadStatus(uint32_t tid, const notification::Path& path, const value::Value* value);
 
     void OnTTWUBetweenThreads(uint32_t source_tid, uint32_t target_tid);
-    void OnWakeupFromInterrupt(critical::CriticalEdgeType type, uint32_t target_tid);
+    void OnWakeupFromInterrupt(InterruptContext* context, uint32_t target_tid);
+
+    critical::CriticalNode* CutThread(thread_t tid, const char* msg);
 
     // Thread for an event.
     uint32_t ThreadForCPU(uint32_t cpu) const;
 
     // Stack of interrupt contexts per CPU.
-    std::unordered_map<uint32_t, std::stack<critical::CriticalEdgeType>> _context;
+    std::unordered_map<uint32_t, std::stack<InterruptContext>> _context;
 
     // Last state per thread.
     std::unordered_map<uint32_t, critical::CriticalEdgeType> _lastEdgeTypePerThread;
+
+    // Nodes for network dependencies.
+    std::unordered_map<PacketKey, critical::CriticalNode*> _networkNodes;
 
     // Constant quarks.
     quark::Quark Q_RUN_USERMODE;

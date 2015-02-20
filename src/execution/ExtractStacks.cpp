@@ -180,6 +180,15 @@ void ExtractStacks(
                  segment.type() == critical::kUserInput ||
                  segment.type() == critical::kBlockDevice)
         {
+            // Update the stack for this thread.
+            if (threads.back().stack == threads.back().cleanStack)
+            {
+                threads.back().stack = ConcatenateStacks(
+                    threads.back().cleanStack,
+                    stacks.GetStack(segment.tid(), segment.startTs()),
+                    db);
+            }
+
             auto stackId = PushOnStack(
                 threads.back().stack,
                 critical::GetStatusString(segment.type()),

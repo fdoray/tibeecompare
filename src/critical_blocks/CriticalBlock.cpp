@@ -84,6 +84,14 @@ uint32_t GetEventCPU(const trace::EventValue& event)
     return event.getStreamPacketContext()->GetField("cpu_id")->AsUInteger();
 }
 
+PacketKey GetPacketKey(const trace::EventValue& event)
+{
+    auto seq = event.getEventField("seq")->AsULong();
+    auto ack_seq = event.getEventField("ack_seq")->AsULong();
+    auto flags = event.getEventField("flags")->AsUInteger();
+    return PacketKey(seq, ack_seq, flags);
+}
+
 }  // namespace
 
 CriticalBlock::CriticalBlock()
@@ -115,6 +123,8 @@ void CriticalBlock::AddObservers(notification::NotificationCenter* notificationC
     AddKernelObserver(notificationCenter, Token("irq_handler_exit"), base::BindObject(&CriticalBlock::OnIrqHandlerExit, this));
     AddKernelObserver(notificationCenter, Token("hrtimer_expire_entry"), base::BindObject(&CriticalBlock::OnHrtimerExpireEntry, this));
     AddKernelObserver(notificationCenter, Token("hrtimer_expire_exit"), base::BindObject(&CriticalBlock::OnHrtimerExpireExit, this));
+    AddKernelObserver(notificationCenter, Token("inet_sock_local_in"), base::BindObject(&CriticalBlock::OnInetSockLocalIn, this));
+    AddKernelObserver(notificationCenter, Token("inet_sock_local_out"), base::BindObject(&CriticalBlock::OnInetSockLocalOut, this));
     AddThreadStateObserver(notificationCenter, Token(kStateStatus), base::BindObject(&CriticalBlock::OnThreadStatus, this));
 }
 
@@ -128,7 +138,7 @@ void CriticalBlock::OnTTWU(const trace::EventValue& event)
 
     if (!source_cpu_context.empty())
     {
-        OnWakeupFromInterrupt(source_cpu_context.top(), target_tid);
+        OnWakeupFromInterrupt(&source_cpu_context.top(), target_tid);
     }
     else if (source_tid != kInvalidThread && target_tid != kInvalidThread)
     {
@@ -139,7 +149,9 @@ void CriticalBlock::OnTTWU(const trace::EventValue& event)
 void CriticalBlock::OnSoftIrqEntry(const trace::EventValue& event)
 {
     uint32_t cpu = GetEventCPU(event);
-    auto context = ResolveSoftIRQ(event.getEventField("vec")->AsUInteger());
+    InterruptContext context(
+        ResolveSoftIRQ(event.getEventField("vec")->AsUInteger()),
+        nullptr);
     _context[cpu].push(context);
 }
 
@@ -149,7 +161,7 @@ void CriticalBlock::OnSoftIrqExit(const trace::EventValue& event)
     auto context = ResolveSoftIRQ(event.getEventField("vec")->AsUInteger());
 
     auto& cpu_context_stack = _context[cpu];
-    if (cpu_context_stack.empty() || cpu_context_stack.top() != context)
+    if (cpu_context_stack.empty() || cpu_context_stack.top().type != context)
     {
         tberror() << "Unexpected soft irq exit." << tbendl();
         return;
@@ -161,7 +173,9 @@ void CriticalBlock::OnSoftIrqExit(const trace::EventValue& event)
 void CriticalBlock::OnIrqHandlerEntry(const trace::EventValue& event)
 {
     uint32_t cpu = GetEventCPU(event);
-    auto context = ResolveIRQ(event.getEventField("irq")->AsUInteger());
+    InterruptContext context(
+        ResolveIRQ(event.getEventField("irq")->AsUInteger()),
+        nullptr);
     _context[cpu].push(context);
 }
 
@@ -171,7 +185,7 @@ void CriticalBlock::OnIrqHandlerExit(const trace::EventValue& event)
     auto context = ResolveIRQ(event.getEventField("irq")->AsUInteger());
 
     auto& cpu_context_stack = _context[cpu];
-    if (cpu_context_stack.empty() || cpu_context_stack.top() != context)
+    if (cpu_context_stack.empty() || cpu_context_stack.top().type != context)
     {
         tberror() << "Unexpected irq handler exit." << tbendl();
         return;
@@ -183,7 +197,8 @@ void CriticalBlock::OnIrqHandlerExit(const trace::EventValue& event)
 void CriticalBlock::OnHrtimerExpireEntry(const trace::EventValue& event)
 {
     uint32_t cpu = GetEventCPU(event);
-    _context[cpu].push(critical::kTimer);
+    InterruptContext context(critical::kTimer, nullptr);
+    _context[cpu].push(context);
 }
 
 void CriticalBlock::OnHrtimerExpireExit(const trace::EventValue& event)
@@ -191,7 +206,7 @@ void CriticalBlock::OnHrtimerExpireExit(const trace::EventValue& event)
     uint32_t cpu = GetEventCPU(event);
 
     auto& cpu_context_stack = _context[cpu];
-    if (cpu_context_stack.empty() || cpu_context_stack.top() != critical::kTimer)
+    if (cpu_context_stack.empty() || cpu_context_stack.top().type != critical::kTimer)
     {
         tberror() << "Unexpected hr timer expire exit." << tbendl();
         return;
@@ -200,60 +215,80 @@ void CriticalBlock::OnHrtimerExpireExit(const trace::EventValue& event)
     cpu_context_stack.pop();
 }
 
+void CriticalBlock::OnInetSockLocalIn(const trace::EventValue& event)
+{
+    auto key = GetPacketKey(event);
+
+    // Check whether a node was generated when this packet was sent.
+    auto look = _networkNodes.find(key);
+    if (look == _networkNodes.end())
+        return;
+
+    auto* networkNode = look->second;
+
+    // Remember that the TTWU emitted from this interrupt will need to be linked
+    // with the network node.
+    auto cpu = GetEventCPU(event);
+    auto& cpu_context_stack = _context[cpu];
+    if (cpu_context_stack.empty())
+    {
+        tberror() << "Receive a packet outside of an interrupt context."
+                  << tbendl();
+        return;
+    }
+
+    cpu_context_stack.top().node = networkNode;
+
+    // Cleanup network nodes list.
+    _networkNodes.erase(look);
+}
+
+void CriticalBlock::OnInetSockLocalOut(const trace::EventValue& event)
+{
+    auto cpu = GetEventCPU(event);
+    const auto& cpu_context = _context[cpu];
+    if (!cpu_context.empty())
+    {
+        tberror() << "Packet sent from an interrupt context." << tbendl();
+        return;
+    }
+
+    // Packet has been sent from a thread.
+    auto key = GetPacketKey(event);
+    auto tid = ThreadForCPU(cpu);
+
+    // Cut the source thread.
+    auto nextNodeSource = CutThread(tid, "inet_sock_local_out");
+    if (nextNodeSource == nullptr)
+        return;
+
+    // Create a new node on the network thread.
+    auto networkNode = CriticalGraph()->CreateNode(critical::CriticalGraph::kNetworkThread);
+
+    // Create an edge from the source thread to the network node.
+    CriticalGraph()->CreateVerticalEdge(nextNodeSource, networkNode);
+
+    // Keep track of the network node.
+    _networkNodes[key] = networkNode;
+}
+
 void CriticalBlock::OnTTWUBetweenThreads(uint32_t source_tid, uint32_t target_tid)
 {
     // Cut the source thread.
-    auto prevNodeSource = CriticalGraph()->GetLastNodeForThread(source_tid);
-    if (prevNodeSource == nullptr)
-    {
-        tberror() << "There should be a node on the source thread of a TTWU ("
-            << source_tid << " > " << target_tid << ")." << tbendl();
+    auto nextNodeSource = CutThread(source_tid, "ttwu_source");
+    if (nextNodeSource == nullptr)
         return;
-    }
-    auto prevTypeSourceIt = _lastEdgeTypePerThread.find(source_tid);
-
-    if (prevTypeSourceIt == _lastEdgeTypePerThread.end() &&
-        prevTypeSourceIt->second != critical::kRun)
-    {
-        tberror() << "Unexpected edge type for source of TTWU ("
-            << source_tid << " > " << target_tid << ")." << tbendl();
-        return;
-    }
-
-    auto nextNodeSource = CriticalGraph()->CreateNode(source_tid);
-    CriticalGraph()->CreateHorizontalEdge(prevTypeSourceIt->second, prevNodeSource, nextNodeSource);
 
     // Cut the target thread.
-    auto prevNodeTarget = CriticalGraph()->GetLastNodeForThread(target_tid);
-    if (prevNodeTarget == nullptr)
-    {
-        // It's possible that we haven't seen the target of the TTWU
-        // in the state dump yet.
+    auto nextNodeTarget = CutThread(target_tid, "ttwu_target");
+    if (nextNodeTarget == nullptr)
         return;
-    }
-
-    auto prevTypeTargetIt = _lastEdgeTypePerThread.find(target_tid);
-    if (prevTypeTargetIt == _lastEdgeTypePerThread.end())
-    {
-        tberror() << "There should be a prev type for target of TTWU ("
-            << source_tid << " > " << target_tid << ")." << tbendl();
-        return;
-    }
-    if (prevTypeTargetIt->second == critical::kRun)
-    {
-        // TODO: Determine whether this is normal.
-        //tberror() << "Waking up a thread that is already running ("
-        //    << source_tid << " > " << target_tid << ")." << tbendl();
-    }
-
-    auto nextNodeTarget = CriticalGraph()->CreateNode(target_tid);
-    CriticalGraph()->CreateHorizontalEdge(prevTypeTargetIt->second, prevNodeTarget, nextNodeTarget);
 
     // Create the wake-up edge.
     CriticalGraph()->CreateVerticalEdge(nextNodeSource, nextNodeTarget);
 }
 
-void CriticalBlock::OnWakeupFromInterrupt(critical::CriticalEdgeType type, uint32_t target_tid)
+void CriticalBlock::OnWakeupFromInterrupt(InterruptContext* context, uint32_t target_tid)
 {
     auto look = _lastEdgeTypePerThread.find(target_tid);
     if (look == _lastEdgeTypePerThread.end() ||
@@ -262,7 +297,28 @@ void CriticalBlock::OnWakeupFromInterrupt(critical::CriticalEdgeType type, uint3
         return;
     }
 
-    _lastEdgeTypePerThread[target_tid] = type;
+    // Network wake-up.
+    if (context->node != nullptr)
+    {
+        // Create the horizontal network edge.
+        auto* nextNetworkNode = CriticalGraph()->CreateNode(
+            critical::CriticalGraph::kNetworkThread);
+        CriticalGraph()->CreateHorizontalEdge(
+            critical::kRun, context->node, nextNetworkNode);
+
+        // Cut the target thread.
+        auto* nextThreadNode = CutThread(target_tid, "wakeup_network");
+
+        // TODO: Change last edge type to "scheduling".
+
+        // Create the wake-up edge.
+        CriticalGraph()->CreateVerticalEdge(nextNetworkNode, nextThreadNode);
+
+        return;
+    }
+
+    // Normal wake-up.
+    _lastEdgeTypePerThread[target_tid] = context->type;
 }
 
 void CriticalBlock::OnThreadStatus(
@@ -313,6 +369,35 @@ void CriticalBlock::OnThreadStatus(
         // When the status is null, it means that the thread exited.
         _lastEdgeTypePerThread.erase(tid);
     }
+}
+
+critical::CriticalNode* CriticalBlock::CutThread(thread_t tid, const char* msg)
+{
+    auto prevNode = CriticalGraph()->GetLastNodeForThread(tid);
+    if (prevNode == nullptr)
+    {
+        if (std::string(msg) != "ttwu_target")
+        {
+            // It is possible to wakeup a thread that we haven't seen in the
+            // statedump yet.
+
+            tberror() << "Tried to cut a thread that doesn't exist (" << tid
+                      << ", " << msg << ")." << tbendl();
+        }
+        return nullptr;
+    }
+    auto prevTypeIt = _lastEdgeTypePerThread.find(tid);
+
+    if (prevTypeIt == _lastEdgeTypePerThread.end())
+    {
+        tberror() << "Thread cut without a previous type." << tbendl();
+        return nullptr;
+    }
+
+    auto nextNode = CriticalGraph()->CreateNode(tid);
+    CriticalGraph()->CreateHorizontalEdge(prevTypeIt->second, prevNode, nextNode);
+
+    return nextNode;
 }
 
 uint32_t CriticalBlock::ThreadForCPU(uint32_t cpu) const
