@@ -19,6 +19,8 @@
 
 #include <algorithm>
 
+
+#include <iostream>
 namespace tibee
 {
 namespace state
@@ -72,6 +74,38 @@ bool StateHistory::GetUIntegerValue(AttributeKey key, timestamp_t ts, uint32_t* 
         return true;
     }
     return false;
+}
+
+void StateHistory::EnumerateUIntegerValues(
+    AttributeKey key, timestamp_t start, timestamp_t end,
+    const EnumerateUIntegerValuesCallback& callback) const
+{
+    auto look = _uIntegerHistory.find(key);
+    if (look == _uIntegerHistory.end())
+        return;
+
+    const auto& keyHistory = look->second;
+
+    UIntegerEntryComparator comparator;
+    auto it = std::upper_bound(keyHistory.begin(), keyHistory.end(), start,
+            comparator);
+    if (it != keyHistory.begin())
+        --it;
+    while (it != keyHistory.end())
+    {
+        if (it->ts >= end)
+            return;
+
+        timestamp_t intervalStart = std::max(it->ts, start);
+        timestamp_t intervalEnd = end;
+        auto next = it + 1;
+        if (next != keyHistory.end())
+            intervalEnd = std::min(next->ts, end);
+
+        callback(it->value, intervalStart, intervalEnd);
+
+        ++it;
+    }
 }
 
 }  // namespace state

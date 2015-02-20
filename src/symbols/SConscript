@@ -1,14 +1,8 @@
-import os
-
 Import('env')
 
 sources = [
 	'Elf.cpp',
     'SymbolLookup.cpp',
 ]
-
-libs = ['bfd']
-
-env.Append(LIBS=libs)
 
 Return(['sources'])

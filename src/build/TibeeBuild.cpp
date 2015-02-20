@@ -134,7 +134,7 @@ bool TibeeBuild::run()
         punchParams.reset(new value::StructValue);
         punchParams->AddField("name", value::MakeValue(_args.name));
         punchParams->AddField("exec", value::MakeValue(_args.exec));
-        punchParams->AddField("begin", value::MakeValue(_args.startEvent));
+        punchParams->AddField("begin", value::MakeValue(_args.beginEvent));
         punchParams->AddField("end", value::MakeValue(_args.endEvent));
         punchBlock.reset(new execution_blocks::PunchBlock);
         runner.AddBlock(punchBlock.get(), punchParams.get());

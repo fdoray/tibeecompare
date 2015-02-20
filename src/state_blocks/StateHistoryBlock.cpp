@@ -61,10 +61,11 @@ void StateHistoryBlock::AddObservers(notification::NotificationCenter* notificat
 void StateHistoryBlock::OnState(const notification::Path& path, const value::Value* value)
 {
     auto valuePtr = value->GetField(kCurrentStateAttributeValueField);
-    if (valuePtr == nullptr)
-        return;
+    uint32_t valueUInt = -1;
+    if (valuePtr != nullptr)
+        valueUInt = valuePtr->AsUInteger();
     auto key = value->GetField(kCurrentStateAttributeKeyField)->AsUInteger();
-    StateHistory()->SetUIntegerValue(state::AttributeKey(key), valuePtr->AsUInteger());
+    StateHistory()->SetUIntegerValue(state::AttributeKey(key), valueUInt);
 }
 
 }  // namespace state_blocks

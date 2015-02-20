@@ -27,6 +27,7 @@
 #include "notification/Path.hpp"
 #include "quark/StringQuarkDatabase.hpp"
 #include "stacks/StacksBuilder.hpp"
+#include "state/CurrentState.hpp"
 #include "state/StateHistory.hpp"
 
 namespace tibee {
@@ -63,6 +64,9 @@ private:
 
     // The quarks database.
     quark::StringQuarkDatabase* _quarks;
+
+    // The current state.
+    state::CurrentState* _currentState;
 
     // Trace identifier.
     std::string _traceId;

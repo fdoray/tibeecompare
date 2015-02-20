@@ -18,6 +18,7 @@
 #ifndef TIBEE_STATE_STATEHISTORY_HPP_
 #define TIBEE_STATE_STATEHISTORY_HPP_
 
+#include <functional>
 #include <unordered_map>
 #include <vector>
 
@@ -31,6 +32,9 @@ namespace state
 
 class StateHistory {
 public:
+    typedef std::function<void (
+        uint32_t value, timestamp_t start, timestamp_t end)> EnumerateUIntegerValuesCallback;
+
     StateHistory();
     ~StateHistory();
 
@@ -42,6 +46,11 @@ public:
 
     // Get the value for an unsigned integer entry.
     bool GetUIntegerValue(AttributeKey key, timestamp_t ts, uint32_t* value) const;
+
+    // Enumerate the values of a state in the specified interval.
+    void EnumerateUIntegerValues(
+        AttributeKey key, timestamp_t start, timestamp_t end,
+        const EnumerateUIntegerValuesCallback& callback) const;
 
 private:
     // Current timestamp.

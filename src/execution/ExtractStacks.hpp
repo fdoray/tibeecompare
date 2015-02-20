@@ -18,10 +18,13 @@
 #ifndef _TIBEE_EXECUTION_EXTRACTSTACKS_HPP
 #define _TIBEE_EXECUTION_EXTRACTSTACKS_HPP
 
+#include "critical/CriticalGraph.hpp"
 #include "critical/CriticalPath.hpp"
 #include "db/Database.hpp"
 #include "execution/Execution.hpp"
 #include "stacks/StacksBuilder.hpp"
+#include "state/CurrentState.hpp"
+#include "state/StateHistory.hpp"
 
 namespace tibee
 {
@@ -29,8 +32,11 @@ namespace execution
 {
 
 void ExtractStacks(
-    const stacks::StacksBuilder& stacks,
     const critical::CriticalPath& criticalPath,
+    const stacks::StacksBuilder& stacks,
+    const critical::CriticalGraph& graph,
+    const state::StateHistory& stateHistory,
+    state::CurrentState* currentState,
     db::Database* db,
     Execution* execution);
 

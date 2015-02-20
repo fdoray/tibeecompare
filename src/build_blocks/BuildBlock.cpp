@@ -50,7 +50,7 @@ using notification::Token;
 }  // namespace
 
 BuildBlock::BuildBlock()
-    : _quarks(nullptr)
+    : _quarks(nullptr), _currentState(nullptr)
 {
     _traceId = boost::lexical_cast<std::string>(
         boost::uuids::uuid(boost::uuids::random_generator()()));
@@ -74,6 +74,8 @@ void BuildBlock::LoadServices(const block::ServiceList& serviceList)
 {
     serviceList.QueryService(kQuarksServiceName,
                              reinterpret_cast<void**>(&_quarks));
+    serviceList.QueryService(kCurrentStateServiceName,
+                             reinterpret_cast<void**>(&_currentState));
 }
 
 void BuildBlock::AddObservers(notification::NotificationCenter* notificationCenter)
@@ -92,6 +94,7 @@ void BuildBlock::onTimestamp(const notification::Path& path, const value::Value*
     _executionsBuilder.SetTimestamp(ts);
     _stacksBuilder.SetTimestamp(ts);
     _criticalGraph.SetTimestamp(ts);
+    _stateHistory.SetTimestamp(ts);
 }
 
 void BuildBlock::onEnd(const notification::Path& path, const value::Value* value)
@@ -114,7 +117,8 @@ void BuildBlock::onEnd(const notification::Path& path, const value::Value* value
 
         // Extract the stacks that belong to the execution.
         execution::ExtractStacks(
-            _stacksBuilder, criticalPath, &_db, execution.get());
+            criticalPath, _stacksBuilder, _criticalGraph, _stateHistory,
+            _currentState, &_db, execution.get());
 
         // Extract execution metrics.
         execution::ExtractMetrics(criticalPath, execution.get());

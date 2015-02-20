@@ -47,7 +47,7 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
     desc.add_options()
         ("help,h", "help")
         ("name,n", bpo::value<std::string>())
-        ("start,s", bpo::value<std::string>())
+        ("begin,b", bpo::value<std::string>())
         ("end,e", bpo::value<std::string>())
         ("exec,x", bpo::value<std::string>())
         ("trace,t", bpo::value<std::vector<std::string>>())
@@ -75,7 +75,7 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
             std::endl <<
             "  -h, --help          print this help message" << std::endl <<
             "  -n, --name          name of the executions" << std::endl <<
-            "  -s, --start         start event, prepend with ust/ or kernel/" << std::endl <<
+            "  -b, --begin         start event, prepend with ust/ or kernel/" << std::endl <<
             "  -e, --end           end event, prepend with ust/ or kernel/" << std::endl <<
             "  -x, --exec          executable to analyze (optional)" << std::endl <<
             "  -t, --trace         path(s) of the trace(s)" << std::endl <<
@@ -115,21 +115,21 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
     }
     args.name = vm["name"].as<std::string>();
 
-    // name
-    if (vm["start"].empty()) {
-        tberror() << "No start event specified." << tbendl();
+    // begin
+    if (vm["begin"].empty()) {
+        tberror() << "No begin event specified." << tbendl();
         return 1;
     }
-    args.startEvent = vm["start"].as<std::string>();
+    args.beginEvent = vm["begin"].as<std::string>();
 
-    // name
+    // end
     if (vm["end"].empty()) {
         tberror() << "No end event specified." << tbendl();
         return 1;
     }
     args.endEvent = vm["end"].as<std::string>();
 
-    // name
+    // exec
     if (!vm["exec"].empty()) {
         args.exec = vm["exec"].as<std::string>();
     }

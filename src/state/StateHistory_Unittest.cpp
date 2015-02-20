@@ -17,7 +17,7 @@
  */
 #include "gtest/gtest.h"
 
-#include <utility>
+#include <vector>
 
 #include "state/StateHistory.hpp"
 
@@ -29,8 +29,33 @@ namespace state
 namespace
 {
 
+struct V {
+    V() : value(0), start(0), end(0) {}
+    V(uint32_t value, timestamp_t start, timestamp_t end)
+        : value(value), start(start), end(end) {}
+
+    uint32_t value;
+    timestamp_t start;
+    timestamp_t end;
+
+    bool operator==(const V& other) const {
+        return value == other.value &&
+               start == other.start &&
+               end == other.end;
+    }
+};
+
+void Callback(uint32_t value, timestamp_t start, timestamp_t end, std::vector<V>* vec)
+{
+    vec->push_back(V(value, start, end));
+}
+
+}  // namespace
+
 TEST(StateHistory, StateHistory)
 {
+    namespace pl = std::placeholders;
+
     StateHistory history;
 
     history.SetTimestamp(10);
@@ -100,7 +125,16 @@ TEST(StateHistory, StateHistory)
     EXPECT_EQ(103, val);
     EXPECT_TRUE(history.GetUIntegerValue(2, 55, &val));
     EXPECT_EQ(103, val);
-}
+
+    std::vector<V> vec;
+    history.EnumerateUIntegerValues(1, 0, 60, std::bind(&Callback, pl::_1, pl::_2, pl::_3, &vec));
+    std::vector<V> expectedVec({{5, 10, 20}, {7, 20, 40}, {101, 40, 50}, {102, 50, 60}});
+    EXPECT_EQ(expectedVec, vec);
+
+    vec.clear();
+    history.EnumerateUIntegerValues(1, 25, 50, std::bind(&Callback, pl::_1, pl::_2, pl::_3, &vec));
+    expectedVec = {{7, 25, 40}, {101, 40, 50}};
+    EXPECT_EQ(expectedVec, vec);
 }
 
 }  // namespace stacks

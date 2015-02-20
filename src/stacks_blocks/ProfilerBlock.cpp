@@ -161,7 +161,7 @@ void ProfilerBlock::ReadStack(const trace::EventValue& event,
         stack->push_back(symbol.name());
 
         if (_dumpStacks)
-            std::cout << symbol.name() << std::endl;
+            std::cout << symbol.name() << " - " << address << std::endl;
     }
 
     if (_dumpStacks)

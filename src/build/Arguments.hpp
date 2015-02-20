@@ -36,8 +36,8 @@ struct Arguments
     // Name of the executions.
     std::string name;
 
-    // Event starting an execution. Prepend with ust/ or kernel/.
-    std::string startEvent;
+    // Event beginning an execution. Prepend with ust/ or kernel/.
+    std::string beginEvent;
 
     // Event ending an execution. Prepend with ust/ or kernel/.
     std::string endEvent;
