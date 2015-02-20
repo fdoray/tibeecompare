@@ -67,6 +67,7 @@ void BuildBlock::RegisterServices(block::ServiceList* serviceList)
     serviceList->AddService(kExecutionsBuilderServiceName, &_executionsBuilder);
     serviceList->AddService(kStacksBuilderServiceName, &_stacksBuilder);
     serviceList->AddService(kCriticalGraphServiceName, &_criticalGraph);
+    serviceList->AddService(kStateHistoryServiceName, &_stateHistory);
 }
 
 void BuildBlock::LoadServices(const block::ServiceList& serviceList)

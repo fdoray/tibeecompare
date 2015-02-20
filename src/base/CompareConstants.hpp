@@ -29,6 +29,7 @@ namespace tibee
 extern const char kExecutionsBuilderServiceName[];
 extern const char kStacksBuilderServiceName[];
 extern const char kCriticalGraphServiceName[];
+extern const char kStateHistoryServiceName[];
 
 // Metrics.
 typedef uint32_t MetricId;

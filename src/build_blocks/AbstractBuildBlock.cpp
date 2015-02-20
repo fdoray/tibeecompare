@@ -29,7 +29,8 @@ AbstractBuildBlock::AbstractBuildBlock()
       _quarks(nullptr),
       _executionsBuilder(nullptr),
       _stacksBuilder(nullptr),
-      _criticalGraph(nullptr)
+      _criticalGraph(nullptr),
+      _stateHistory(nullptr)
 {
 }
 
@@ -49,6 +50,9 @@ void AbstractBuildBlock::LoadServices(const block::ServiceList& serviceList)
 
     serviceList.QueryService(kCriticalGraphServiceName,
                              reinterpret_cast<void**>(&_criticalGraph));
+
+    serviceList.QueryService(kStateHistoryServiceName,
+                             reinterpret_cast<void**>(&_stateHistory));
 }
 
 uint32_t AbstractBuildBlock::CpuForEvent(const trace::EventValue& event) const

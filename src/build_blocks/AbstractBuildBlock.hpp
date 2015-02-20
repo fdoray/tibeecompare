@@ -23,6 +23,7 @@
 #include "execution/ExecutionsBuilder.hpp"
 #include "stacks/StacksBuilder.hpp"
 #include "state/CurrentState.hpp"
+#include "state/StateHistory.hpp"
 
 namespace tibee {
 namespace build_blocks {
@@ -55,6 +56,9 @@ protected:
     // Critical graph.
     critical::CriticalGraph* CriticalGraph() const { return _criticalGraph; }
 
+    // State history.
+    state::StateHistory* StateHistory() const { return _stateHistory; }
+
     // CPU for an event.
     uint32_t CpuForEvent(const trace::EventValue& event) const;
 
@@ -79,6 +83,9 @@ private:
 
     // Critical graph.
     critical::CriticalGraph* _criticalGraph;
+
+    // State history.
+    state::StateHistory* _stateHistory;
 };
 
 }  // namespace build_blocks

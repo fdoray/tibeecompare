@@ -1,0 +1,7 @@
+Import('env')
+
+sources = [
+    'StateHistoryBlock.cpp',
+]
+
+Return(['sources'])

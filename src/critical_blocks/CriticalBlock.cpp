@@ -249,7 +249,7 @@ void CriticalBlock::OnInetSockLocalOut(const trace::EventValue& event)
     const auto& cpu_context = _context[cpu];
     if (!cpu_context.empty())
     {
-        tberror() << "Packet sent from an interrupt context." << tbendl();
+        tberror() << "Packet sent from an interrupt context at " << State()->timestamp() << "." << tbendl();
         return;
     }
 

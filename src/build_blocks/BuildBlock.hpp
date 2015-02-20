@@ -27,6 +27,7 @@
 #include "notification/Path.hpp"
 #include "quark/StringQuarkDatabase.hpp"
 #include "stacks/StacksBuilder.hpp"
+#include "state/StateHistory.hpp"
 
 namespace tibee {
 namespace build_blocks {
@@ -56,6 +57,9 @@ private:
 
     // The critical graph.
     critical::CriticalGraph _criticalGraph;
+
+    // The state history.
+    state::StateHistory _stateHistory;
 
     // The quarks database.
     quark::StringQuarkDatabase* _quarks;

@@ -33,6 +33,7 @@
 #include "stacks_blocks/ProfilerBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
+#include "state_blocks/StateHistoryBlock.hpp"
 #include "trace_blocks/TraceBlock.hpp"
 
 #define THIS_MODULE "tibeebuild"
@@ -160,6 +161,14 @@ bool TibeeBuild::run()
     // Linux sched state block.
     block::BlockInterface::UP linuxSchedStateBlock(new state_blocks::LinuxSchedStateBlock);
     runner.AddBlock(linuxSchedStateBlock.get(), nullptr);
+
+    // State history block.
+    block::BlockInterface::UP stateHistoryBlock;
+    if (!_args.dumpStacks)
+    {
+        stateHistoryBlock.reset(new state_blocks::StateHistoryBlock);
+        runner.AddBlock(stateHistoryBlock.get(), nullptr);
+    }
 
     // Build block.
     block::BlockInterface::UP buildBlock(new build_blocks::BuildBlock);
