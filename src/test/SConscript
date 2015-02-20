@@ -14,6 +14,7 @@ sources_unittests = [
     'execution/Execution_Unittest.cpp',
     'execution/ExecutionsBuilder_Unittest.cpp',
     'stacks/StacksBuilder_Unittest.cpp',
+    'state/StateHistory_Unittest.cpp',
 ]
 
 sources_contrib = [

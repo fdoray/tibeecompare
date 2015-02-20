@@ -17,6 +17,7 @@ execution = SConscript(os.path.join('execution', 'SConscript'), exports=['env'])
 execution_blocks = SConscript(os.path.join('execution_blocks', 'SConscript'), exports=['env'])
 stacks = SConscript(os.path.join('stacks', 'SConscript'), exports=['env'])
 stacks_blocks = SConscript(os.path.join('stacks_blocks', 'SConscript'), exports=['env'])
+state = SConscript(os.path.join('state', 'SConscript'), exports=['env'])
 symbols = SConscript(os.path.join('symbols', 'SConscript'), exports=['env'])
 
 subs = [
@@ -29,6 +30,7 @@ subs = [
     ('execution_blocks', execution_blocks),
     ('stacks', stacks),
     ('stacks_blocks', stacks_blocks),
+    ('state', state),
     ('symbols', symbols),
 ]
 
