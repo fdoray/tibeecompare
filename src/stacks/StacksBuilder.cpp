@@ -64,6 +64,7 @@ void StacksBuilder::SetStack(thread_t thread, StackId stackId, bool isSyscall)
         wrapper.startTs = _ts;
         wrapper.endTs = _ts;
         wrapper.isSyscall = isSyscall;
+        wrapper.isResolved = false;
         stacks.push_back(wrapper);
     }
 }
@@ -133,6 +134,9 @@ void StacksBuilder::SetLastSystemCallStack(thread_t thread, StackId stackId)
     {
         if (it->isSyscall && (it->endTs - it->startTs) >= kMinSyscallDuration)
         {
+            if (it->isResolved)
+                return;
+
             Stack syscallOnlyStack = _db->GetStack(it->stackId);
 
             Stack stackStep;
@@ -141,6 +145,7 @@ void StacksBuilder::SetLastSystemCallStack(thread_t thread, StackId stackId)
             StackId syscallFullStack = _db->AddStack(stackStep);
 
             it->stackId = syscallFullStack;
+            it->isResolved = true;
 
             return;
         }

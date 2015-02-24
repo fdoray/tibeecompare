@@ -102,7 +102,7 @@ uint64_t WriteSamples(
     uint64_t inclusiveCountMicroseconds = inclusiveCount / 1000;
 
     // Write the count to the JSon file.
-    if (/*stackId != stacks::kEmptyStackId && */ inclusiveCountMicroseconds != 0) {
+    if (stackId != stacks::kEmptyStackId && inclusiveCountMicroseconds != 0) {
         writer->KeyValue(std::to_string(stackId), inclusiveCountMicroseconds);
     }
 

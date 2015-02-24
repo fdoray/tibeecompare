@@ -90,6 +90,7 @@ private:
         timestamp_t startTs;
         timestamp_t endTs;
         bool isSyscall;
+        bool isResolved;
     };
     typedef std::unordered_map<thread_t, std::vector<StackWrapper>>
         StacksPerThread;
