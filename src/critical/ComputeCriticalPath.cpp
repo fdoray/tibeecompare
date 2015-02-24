@@ -33,6 +33,7 @@ void InsertCriticalPathSegment(
     CriticalPath* path)
 {
     assert(path != nullptr);
+
     if (!path->empty() &&
         path->back().type() == segment.type() &&
         path->back().tid() == segment.tid())
@@ -73,10 +74,37 @@ void ResolvedBlockedEdge(
         return;
     }
 
-    // There is a wake-up edge: compute the critical path on the source thread.
+    // There is a wake-up edge.
     auto& wakeUpEdge = graph.GetEdge(wakeUpEdgeId);
     thread_t sourceThread = wakeUpEdge.from()->tid();
-    ComputeCriticalPathRecursive(graph, startTs, endTs, sourceThread, path);
+
+    // Special case for the network thread.
+    if (sourceThread == critical::CriticalGraph::kNetworkThread)
+    {
+        // Get the edge spent on the network thread.
+        auto* networkEndNode = wakeUpEdge.from();
+        auto& networkEdge = graph.GetEdge(
+            networkEndNode->edge(kCriticalEdgeInHorizontal));
+        auto* networkStartNode = networkEdge.from();
+
+        // Compute the critical path on the thread that sent network data.
+        auto networkWakeUpEdgeId = networkStartNode->edge(kCriticalEdgeInVertical);
+        auto& networkWakeUpEdge = graph.GetEdge(networkWakeUpEdgeId);
+        thread_t networkSourceThread = networkWakeUpEdge.from()->tid();
+
+        ComputeCriticalPathRecursive(
+            graph, startTs, networkStartNode->ts(), networkSourceThread, path);
+
+        // Add a segment for the time spent waiting on the network thread.
+        InsertCriticalPathSegment(CriticalPathSegment(
+            networkStartNode->ts(), networkEndNode->ts(),
+            networkStartNode->tid(), networkEdge.type()), path);
+    }
+    else
+    {
+        // Compute the critical path on the source thread.
+        ComputeCriticalPathRecursive(graph, startTs, endTs, sourceThread, path);
+    }
 }
 
 void ComputeCriticalPathRecursive(
@@ -86,6 +114,9 @@ void ComputeCriticalPathRecursive(
     thread_t tid,
     CriticalPath* path)
 {
+    if (endTs <= startTs)
+        return;
+
     // Find a node on thread |tid| that is at timestamp |startTs| or that has
     // an outgoing edge that overlaps this timestamp.
     auto* node = graph.GetNodeIntersecting(startTs, tid);

@@ -108,6 +108,10 @@ void ProfilerBlock::OnOnCpuSample(const trace::EventValue& event)
 {
     thread_t tid = ThreadForEvent(event);
     std::vector<std::string> stack;
+
+    if (_dumpStacks)
+        std::cout << "[on-cpu] Thread " << tid << std::endl;
+
     ReadStack(event, &stack);
 
     Stacks()->SetStack(tid, stack);
@@ -117,6 +121,10 @@ void ProfilerBlock::OnOffCpuSample(const trace::EventValue& event)
 {
     thread_t tid = ThreadForEvent(event);
     std::vector<std::string> stack;
+
+    if (_dumpStacks)
+        std::cout << "[off-cpu] Thread " << tid << std::endl;
+
     ReadStack(event, &stack);
 
     Stacks()->SetLastSystemCallStack(tid, stack);

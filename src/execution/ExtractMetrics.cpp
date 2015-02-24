@@ -18,6 +18,7 @@
 #include "execution/ExtractMetrics.hpp"
 
 #include "base/CompareConstants.hpp"
+#include "base/print.hpp"
 
 namespace tibee
 {
@@ -36,6 +37,7 @@ void ExtractMetrics(
     execution->SetMetric(kTsMetricId, execution->startTs());
 
     // Status.
+    uint64_t criticalPathDuration = 0;
     for (const auto& segment : criticalPath)
     {
         auto metricId = kNumCustomMetrics + segment.type();
@@ -43,6 +45,13 @@ void ExtractMetrics(
         uint64_t currentValue = 0;
         execution->GetMetric(metricId, &currentValue);
         execution->SetMetric(metricId, currentValue + segmentDuration);
+        criticalPathDuration += segmentDuration;
+    }
+
+    if (duration != criticalPathDuration)
+    {
+        base::tberror() << "Critical path is not the same duration as the "
+                           "execution..." << base::tbendl();
     }
 }
 

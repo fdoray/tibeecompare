@@ -18,7 +18,7 @@
 #include "report/TibeeReport.hpp"
 
 #include <boost/filesystem.hpp>
-#include <set>
+#include <map>
 
 #include "base/JsonWriter.hpp"
 #include "base/print.hpp"
@@ -26,6 +26,7 @@
 #include "report/WriteExecutions.hpp"
 #include "report/WriteStacks.hpp"
 #include "stacks/Identifiers.hpp"
+#include "stacks/Stack.hpp"
 
 #define THIS_MODULE "tibeereport"
 
@@ -71,7 +72,7 @@ bool TibeeReport::run()
     if (_verbose)
         tbmsg(THIS_MODULE) << "writing executions" << tbendl();
 
-    std::set<stacks::StackId> stacks;
+    std::map<stacks::StackId, stacks::Stack> stacks;
     WriteExecutions(_name, db, &stacks, &writer);
 
     if (_verbose)

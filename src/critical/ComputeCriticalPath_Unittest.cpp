@@ -424,5 +424,148 @@ TEST(ComputeCriticalPath, Stair)
     EXPECT_EQ(expectedPath, path);
 }
 
+TEST(ComputeCriticalPath, Network)
+{
+    // 123456789012
+    // ==-------===
+    //  |     |
+    //  ==   ==  (network thread)
+    //   |   |
+    //   =====
+
+    // Create the graph.
+    CriticalGraph graph;
+
+    std::vector<CriticalNode*> nodes;
+
+    graph.SetTimestamp(1);
+    nodes.push_back(graph.CreateNode(1));  // 0
+
+    graph.SetTimestamp(2);
+    nodes.push_back(graph.CreateNode(1));  // 1
+    nodes.push_back(graph.CreateNode(CriticalGraph::kNetworkThread));  // 2
+
+    graph.SetTimestamp(3);
+    nodes.push_back(graph.CreateNode(CriticalGraph::kNetworkThread));  // 3
+    nodes.push_back(graph.CreateNode(3));  // 4
+
+    graph.SetTimestamp(7);
+    nodes.push_back(graph.CreateNode(CriticalGraph::kNetworkThread));  // 5
+    nodes.push_back(graph.CreateNode(3));  // 6
+
+    graph.SetTimestamp(8);
+    nodes.push_back(graph.CreateNode(1));  // 7
+    nodes.push_back(graph.CreateNode(CriticalGraph::kNetworkThread));  // 8
+
+    graph.SetTimestamp(10);
+    nodes.push_back(graph.CreateNode(1));  // 9
+
+    graph.SetTimestamp(12);
+    nodes.push_back(graph.CreateNode(1));  // 10
+
+    graph.CreateHorizontalEdge(kRun, nodes[0], nodes[1]);
+    graph.CreateHorizontalEdge(kWaitBlocked, nodes[1], nodes[7]);
+    graph.CreateHorizontalEdge(kWaitBlocked, nodes[7], nodes[9]);
+    graph.CreateHorizontalEdge(kRun, nodes[9], nodes[10]);
+
+    graph.CreateHorizontalEdge(kRun, nodes[2], nodes[3]);
+    graph.CreateHorizontalEdge(kRun, nodes[5], nodes[8]);
+
+    graph.CreateHorizontalEdge(kRun, nodes[4], nodes[6]);
+
+    graph.CreateVerticalEdge(nodes[1], nodes[2]);
+    graph.CreateVerticalEdge(nodes[3], nodes[4]);
+
+    graph.CreateVerticalEdge(nodes[6], nodes[5]);
+    graph.CreateVerticalEdge(nodes[8], nodes[7]);
+
+    CriticalPath path;
+    ComputeCriticalPath(graph, 1, 12, 1, &path);
+
+    CriticalPath expectedPath = {
+        CriticalPathSegment(1, 2, 1, kRun),
+        CriticalPathSegment(2, 3, CriticalGraph::kNetworkThread, kRun),
+        CriticalPathSegment(3, 7, 3, kRun),
+        CriticalPathSegment(7, 8, CriticalGraph::kNetworkThread, kRun),
+        CriticalPathSegment(8, 10, 1, kWaitBlocked),
+        CriticalPathSegment(10, 12, 1, kRun),
+    };
+
+    EXPECT_EQ(expectedPath, path);
+}
+
+TEST(ComputeCriticalPath, NetworkAsync)
+{
+    // 123456789012
+    // ====-----===
+    //  |     |
+    //  ==   ==  (network thread)
+    //   |   |
+    //   =====
+
+    // Create the graph.
+    CriticalGraph graph;
+
+    std::vector<CriticalNode*> nodes;
+
+    graph.SetTimestamp(1);
+    nodes.push_back(graph.CreateNode(1));  // 0
+
+    graph.SetTimestamp(2);
+    nodes.push_back(graph.CreateNode(1));  // 1
+    nodes.push_back(graph.CreateNode(CriticalGraph::kNetworkThread));  // 2
+
+    graph.SetTimestamp(3);
+    nodes.push_back(graph.CreateNode(CriticalGraph::kNetworkThread));  // 3
+    nodes.push_back(graph.CreateNode(3));  // 4
+
+    graph.SetTimestamp(5);
+    CriticalNode* asyncNode = graph.CreateNode(1);
+
+    graph.SetTimestamp(7);
+    nodes.push_back(graph.CreateNode(CriticalGraph::kNetworkThread));  // 5
+    nodes.push_back(graph.CreateNode(3));  // 6
+
+    graph.SetTimestamp(8);
+    nodes.push_back(graph.CreateNode(1));  // 7
+    nodes.push_back(graph.CreateNode(CriticalGraph::kNetworkThread));  // 8
+
+    graph.SetTimestamp(10);
+    nodes.push_back(graph.CreateNode(1));  // 9
+
+    graph.SetTimestamp(12);
+    nodes.push_back(graph.CreateNode(1));  // 10
+
+    graph.CreateHorizontalEdge(kRun, nodes[0], nodes[1]);
+    graph.CreateHorizontalEdge(kRun, nodes[1], asyncNode);
+    graph.CreateHorizontalEdge(kWaitBlocked, asyncNode, nodes[7]);
+    graph.CreateHorizontalEdge(kWaitBlocked, nodes[7], nodes[9]);
+    graph.CreateHorizontalEdge(kRun, nodes[9], nodes[10]);
+
+    graph.CreateHorizontalEdge(kRun, nodes[2], nodes[3]);
+    graph.CreateHorizontalEdge(kRun, nodes[5], nodes[8]);
+
+    graph.CreateHorizontalEdge(kRun, nodes[4], nodes[6]);
+
+    graph.CreateVerticalEdge(nodes[1], nodes[2]);
+    graph.CreateVerticalEdge(nodes[3], nodes[4]);
+
+    graph.CreateVerticalEdge(nodes[6], nodes[5]);
+    graph.CreateVerticalEdge(nodes[8], nodes[7]);
+
+    CriticalPath path;
+    ComputeCriticalPath(graph, 1, 12, 1, &path);
+
+    CriticalPath expectedPath = {
+        CriticalPathSegment(1, 5, 1, kRun),
+        CriticalPathSegment(5, 7, 3, kRun),
+        CriticalPathSegment(7, 8, CriticalGraph::kNetworkThread, kRun),
+        CriticalPathSegment(8, 10, 1, kWaitBlocked),
+        CriticalPathSegment(10, 12, 1, kRun),
+    };
+
+    EXPECT_EQ(expectedPath, path);
+}
+
 }    // namespace critical
 }    // namespace tibee

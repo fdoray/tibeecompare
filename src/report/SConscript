@@ -15,7 +15,6 @@ libs = [
     'boost_thread',
     'boost_system',
     'boost_regex',
-    'yaml-cpp',
     'leveldb',
 ]
 

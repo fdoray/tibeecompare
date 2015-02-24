@@ -18,12 +18,13 @@
 #ifndef _TIBEE_REPORT_WRITESTACKS_HPP
 #define _TIBEE_REPORT_WRITESTACKS_HPP
 
-#include <set>
+#include <map>
 #include <string>
 
 #include "base/JsonWriter.hpp"
 #include "db/Database.hpp"
 #include "stacks/Identifiers.hpp"
+#include "stacks/Stack.hpp"
 
 namespace tibee
 {
@@ -32,7 +33,7 @@ namespace report
 
 void WriteStacks(
     const db::Database& db,
-    const std::set<stacks::StackId>& stacks,
+    const std::map<stacks::StackId, stacks::Stack>& stacks,
     base::JsonWriter* writer);
 
 }  // namespace report

@@ -20,20 +20,24 @@
 
 #include <set>
 #include <string>
+#include <map>
 
 #include "base/JsonWriter.hpp"
 #include "db/Database.hpp"
 #include "stacks/Identifiers.hpp"
+#include "stacks/Stack.hpp"
 
 namespace tibee
 {
 namespace report
 {
 
+typedef std::map<stacks::StackId, stacks::Stack> StacksMap;
+
 void WriteExecutions(
     const std::string& name,
     const db::Database& db,
-    std::set<stacks::StackId>* stacks,
+    StacksMap* stacks,
     base::JsonWriter* writer);
 
 }  // namespace report

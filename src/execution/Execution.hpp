@@ -102,6 +102,12 @@ public:
     void IncrementSample(stacks::StackId stackId, uint64_t value) {
         _samples[stackId] += value;
     }
+    uint64_t GetSample(stacks::StackId stackId) const {
+        auto look = _samples.find(stackId);
+        if (look == _samples.end())
+            return 0;
+        return look->second;
+    }
 
     // Equal operator.
     bool operator==(const Execution& other) const {

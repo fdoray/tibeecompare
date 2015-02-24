@@ -26,34 +26,18 @@ namespace report
 
 void WriteStacks(
     const db::Database& db,
-    const std::set<stacks::StackId>& stacks,
+    const std::map<stacks::StackId, stacks::Stack>& stacks,
     base::JsonWriter* writer)
 {
     writer->KeyDictValue("stacks");
 
-    std::vector<stacks::StackId> stacksVec(
-        stacks.begin(), stacks.end());
-    std::set<stacks::StackId> stacksDone;
-
-    for (size_t i = 0; i < stacksVec.size(); ++i)
+    for (const auto& stack : stacks)
     {
-        auto stackId = stacksVec[i];
-        if (stacksDone.find(stackId) != stacksDone.end())
-            continue;
-        stacksDone.insert(stackId);
+        writer->KeyDictValue(std::to_string(stack.first));
 
-        // Read the stack and function name from database.
-        auto stack = db.GetStack(stackId);
-        auto functionName = db.GetFunctionName(stack.function());
-
-        writer->KeyDictValue(std::to_string(stackId));
-
-        writer->KeyValue("b", stack.bottom());
-        writer->KeyValue("f", functionName);
+        writer->KeyValue("b", stack.second.bottom());
+        writer->KeyValue("f", db.GetFunctionName(stack.second.function()));
         writer->EndDict();
-
-        if (stack.bottom() != stacks::kEmptyStackId)
-            stacksVec.push_back(stack.bottom());
     }
 
     writer->EndDict();
