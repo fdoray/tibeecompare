@@ -41,10 +41,8 @@ public:
     // Set the current timestamp.
     void SetTimestamp(timestamp_t ts) { _ts = ts; }
 
-    // Set the current value for an unsigned integer entry.
+    // Set/get the current value for an unsigned integer entry.
     void SetUIntegerValue(AttributeKey key, uint32_t value);
-
-    // Get the value for an unsigned integer entry.
     bool GetUIntegerValue(AttributeKey key, timestamp_t ts, uint32_t* value) const;
 
     // Enumerate the values of a state in the specified interval.
@@ -52,32 +50,68 @@ public:
         AttributeKey key, timestamp_t start, timestamp_t end,
         const EnumerateUIntegerValuesCallback& callback) const;
 
+    // Set/get the current value for an unsigned integer entry.
+    void SetULongValue(AttributeKey key, uint64_t value);
+    bool GetULongValue(AttributeKey key, timestamp_t ts, uint64_t* value) const;
+
+    // Helpers for performance counters.
+    void SetPerfCounterCpuBaseValue(AttributeKey key, uint64_t value);
+    void SetPerfCounterCpuValue(AttributeKey key, uint64_t value);
+    void SetPerfCounterThreadValue(AttributeKey key, uint64_t value);
+
 private:
+    uint64_t GetULongLastValue(AttributeKey key) const;
+
     // Current timestamp.
     timestamp_t _ts;
 
-    // History of unsigned integer values.
-    struct UIntegerEntry
+    // Entry.
+    struct Entry
     {
-        UIntegerEntry() : ts(0), value(0) {}
+        Entry() : ts(0) {}
         timestamp_t ts;
+    };
+    class EntryComparator {
+    public:
+        bool operator()(const Entry& stack, timestamp_t ts) const {
+            return stack.ts < ts;
+        }
+        bool operator()(timestamp_t ts, const Entry& stack) const {
+            return ts < stack.ts;
+        }
+    };
+
+    // History of unsigned integer values.
+    struct UIntegerEntry : Entry
+    {
+        UIntegerEntry() : value(0) {}
         uint32_t value;
     };
     typedef std::unordered_map<AttributeKey, std::vector<UIntegerEntry>> UIntegerHistory;
     UIntegerHistory _uIntegerHistory;
 
-    class UIntegerEntryComparator
-    {
-    public:
-        bool operator() (const UIntegerEntry& stack, timestamp_t ts) const
-        {
-            return stack.ts < ts;
-        }
-        bool operator() (timestamp_t ts, const UIntegerEntry& stack) const
-        {
-            return ts < stack.ts;
-        }
+    // History of long unsigned values.
+    struct ULongEntry : Entry {
+        ULongEntry() : value(0) {}
+        uint64_t value;
     };
+    typedef std::unordered_map<AttributeKey, std::vector<ULongEntry>> ULongHistory;
+    ULongHistory _uLongHistory;
+
+    // Previous values for performance counters.
+    static const uint64_t kInvalid = -1;
+    struct PerfCounterState
+    {
+        PerfCounterState()
+            : cpuAbsolute(kInvalid), cpuReal(kInvalid),
+              threadAbsolute(kInvalid), threadReal(kInvalid) {}
+        uint64_t cpuAbsolute;
+        uint64_t cpuReal;
+        uint64_t threadAbsolute;
+        uint64_t threadReal;
+    };
+    typedef std::unordered_map<AttributeKey, PerfCounterState> PerfCounterStates;
+    PerfCounterStates _perfCounterStates;
 };
 
 }  // namespace state

@@ -60,7 +60,7 @@ bool StateHistory::GetUIntegerValue(AttributeKey key, timestamp_t ts, uint32_t* 
 
     const auto& keyHistory = look->second;
 
-    UIntegerEntryComparator comparator;
+    EntryComparator comparator;
     auto it = std::upper_bound(
         keyHistory.begin(), keyHistory.end(), ts, comparator);
     if (it != keyHistory.begin())
@@ -86,7 +86,7 @@ void StateHistory::EnumerateUIntegerValues(
 
     const auto& keyHistory = look->second;
 
-    UIntegerEntryComparator comparator;
+    EntryComparator comparator;
     auto it = std::upper_bound(keyHistory.begin(), keyHistory.end(), start,
             comparator);
     if (it != keyHistory.begin())
@@ -106,6 +106,112 @@ void StateHistory::EnumerateUIntegerValues(
 
         ++it;
     }
+}
+
+void StateHistory::SetULongValue(AttributeKey key, uint64_t value)
+{
+    auto& keyHistory = _uIntegerHistory[key];
+    if (!keyHistory.empty() && keyHistory.back().value == value)
+        return;
+
+    UIntegerEntry entry;
+    entry.ts = _ts;
+    entry.value = value;
+    keyHistory.push_back(entry);
+}
+
+bool StateHistory::GetULongValue(AttributeKey key, timestamp_t ts, uint64_t* value) const
+{
+    auto look = _uIntegerHistory.find(key);
+    if (look == _uIntegerHistory.end())
+        return false;
+
+    const auto& keyHistory = look->second;
+
+    EntryComparator comparator;
+    auto it = std::upper_bound(
+        keyHistory.begin(), keyHistory.end(), ts, comparator);
+    if (it != keyHistory.begin())
+        --it;
+    if (it == keyHistory.end())
+        return false;
+
+    if (it->ts <= ts)
+    {
+        *value = it->value;
+        return true;
+    }
+    return false;
+}
+
+void StateHistory::SetPerfCounterCpuBaseValue(AttributeKey key, uint64_t value)
+{
+    auto& state = _perfCounterStates[key];
+    state.cpuAbsolute = value;
+    state.cpuReal = GetULongLastValue(key);
+}
+
+void StateHistory::SetPerfCounterCpuValue(AttributeKey key, uint64_t value)
+{
+    // Make sure that this is not the first value we get for this attribute.
+    auto& state = _perfCounterStates[key];
+    if (state.cpuAbsolute == kInvalid || state.cpuAbsolute > value)
+    {
+        SetPerfCounterCpuBaseValue(key, value);
+        return;
+    }
+
+    // Compute the minimum value that the thread perf counter must have now.
+    auto minDiff = value - state.cpuAbsolute;
+    auto minReal = state.cpuReal + minDiff;
+
+    // Find the current value of the performance counter.
+    uint64_t last = GetULongLastValue(key);
+
+    // Set the new value of the performance counter.
+    auto real = std::max(last, minReal);
+    SetULongValue(key, real);
+
+    // Keep track of the state.
+    state.cpuAbsolute = value;
+    state.cpuReal = real;
+}
+
+void StateHistory::SetPerfCounterThreadValue(AttributeKey key, uint64_t value)
+{
+    auto& state = _perfCounterStates[key];
+
+    if (state.threadAbsolute == kInvalid)
+    {
+        // This is the first thread value we got. Keep track of it.
+        state.threadAbsolute = value;
+        state.threadReal = GetULongLastValue(key);
+        return;
+    }
+
+    // Compute the minimum value that the thread perf counter must have now.
+    auto minDiff = value - state.threadAbsolute;
+    auto minReal = state.threadReal + minDiff;
+
+    // Find the current value of the performance counter.
+    uint64_t last = GetULongLastValue(key);
+
+    // Set the new value of the performance counter.
+    auto real = std::max(last, minReal);
+    SetULongValue(key, real);
+
+    // Keep track of the state.
+    state.threadAbsolute = value;
+    state.threadReal = real;
+}
+
+uint64_t StateHistory::GetULongLastValue(AttributeKey key) const
+{
+    uint64_t last = 0;
+    auto look = _uLongHistory.find(key);
+    if (look != _uLongHistory.end() && !look->second.empty())
+        last = look->second.back().value;
+    return last;
 }
 
 }  // namespace state
