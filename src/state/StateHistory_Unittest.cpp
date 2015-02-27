@@ -137,5 +137,54 @@ TEST(StateHistory, StateHistory)
     EXPECT_EQ(expectedVec, vec);
 }
 
+TEST(StateHistory, Clean)
+{
+	StateHistory history;
+
+	history.SetTimestamp(1);
+	history.SetUIntegerValue(AttributeKey(1), 1);
+	history.SetTimestamp(2);
+	history.SetUIntegerValue(AttributeKey(1), 2);
+	history.SetTimestamp(3);
+	history.SetUIntegerValue(AttributeKey(1), 3);
+	history.SetTimestamp(4);
+	history.SetUIntegerValue(AttributeKey(1), 4);
+	history.SetTimestamp(5);
+	history.SetUIntegerValue(AttributeKey(1), 5);
+
+	uint32_t val = 0;
+	EXPECT_TRUE(history.GetUIntegerValue(1, 1, &val));
+	EXPECT_EQ(1u, val);
+	EXPECT_TRUE(history.GetUIntegerValue(1, 2, &val));
+	EXPECT_EQ(2u, val);
+	EXPECT_TRUE(history.GetUIntegerValue(1, 3, &val));
+	EXPECT_EQ(3u, val);
+	EXPECT_TRUE(history.GetUIntegerValue(1, 4, &val));
+	EXPECT_EQ(4u, val);
+	EXPECT_TRUE(history.GetUIntegerValue(1, 5, &val));
+	EXPECT_EQ(5u, val);
+
+	history.Cleanup(3);
+	EXPECT_FALSE(history.GetUIntegerValue(1, 1, &val));
+	EXPECT_TRUE(history.GetUIntegerValue(1, 2, &val));
+	EXPECT_EQ(2u, val);
+	EXPECT_TRUE(history.GetUIntegerValue(1, 3, &val));
+	EXPECT_EQ(3u, val);
+	EXPECT_TRUE(history.GetUIntegerValue(1, 4, &val));
+	EXPECT_EQ(4u, val);
+	EXPECT_TRUE(history.GetUIntegerValue(1, 5, &val));
+	EXPECT_EQ(5u, val);
+
+	history.Cleanup(4);
+	EXPECT_FALSE(history.GetUIntegerValue(1, 1, &val));
+	EXPECT_FALSE(history.GetUIntegerValue(1, 2, &val));
+	EXPECT_TRUE(history.GetUIntegerValue(1, 3, &val));
+	EXPECT_EQ(3u, val);
+	EXPECT_TRUE(history.GetUIntegerValue(1, 4, &val));
+	EXPECT_EQ(4u, val);
+	EXPECT_TRUE(history.GetUIntegerValue(1, 5, &val));
+	EXPECT_EQ(5u, val);
+}
+
 }  // namespace stacks
 }  // namespace tibee

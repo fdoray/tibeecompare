@@ -136,6 +136,7 @@ bool TibeeBuild::run()
         punchParams->AddField("exec", value::MakeValue(_args.exec));
         punchParams->AddField("begin", value::MakeValue(_args.beginEvent));
         punchParams->AddField("end", value::MakeValue(_args.endEvent));
+        punchParams->AddField("stats", value::MakeValue(_args.stats));
         punchBlock.reset(new execution_blocks::PunchBlock);
         runner.AddBlock(punchBlock.get(), punchParams.get());
     }
@@ -152,7 +153,7 @@ bool TibeeBuild::run()
 
     // Critical block.
     block::BlockInterface::UP criticalBlock;
-    if (!_args.dumpStacks)
+    if (!_args.dumpStacks && !_args.stats)
     {
         criticalBlock.reset(new critical_blocks::CriticalBlock);
         runner.AddBlock(criticalBlock.get(), nullptr);
@@ -164,14 +165,14 @@ bool TibeeBuild::run()
 
     // State history block.
     block::BlockInterface::UP stateHistoryBlock;
-    if (!_args.dumpStacks)
+    if (!_args.dumpStacks && !_args.stats)
     {
         stateHistoryBlock.reset(new state_blocks::StateHistoryBlock);
         runner.AddBlock(stateHistoryBlock.get(), nullptr);
     }
 
     // Build block.
-    block::BlockInterface::UP buildBlock(new build_blocks::BuildBlock);
+    block::BlockInterface::UP buildBlock(new build_blocks::BuildBlock(_args.stats));
     runner.AddBlock(buildBlock.get(), nullptr);
 
     // Run the blocks.

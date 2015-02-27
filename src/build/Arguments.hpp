@@ -51,6 +51,9 @@ struct Arguments
     // Dump the stacks found in the trace, do not track executions.
     bool dumpStacks;
 
+    // Show execution duration statistics, do not track executions.
+    bool stats;
+
     // Verbose flag.
     bool verbose;
 };

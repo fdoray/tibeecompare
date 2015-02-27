@@ -52,17 +52,20 @@ bool ExecutionsBuilder::StartExecution(
     return true;
 }
 
-void ExecutionsBuilder::EndExecution(thread_t thread)
+timestamp_t ExecutionsBuilder::EndExecution(thread_t thread)
 {
     auto look = _activeExecutions.find(thread);
     if (look == _activeExecutions.end())
-        return;
+        return 0;
 
+    timestamp_t start = look->second->startTs();
     look->second->set_endTs(_ts);
     look->second->set_endThread(thread);
     _completedExecutions.push_back(std::move(look->second));
 
     _activeExecutions.erase(look);
+
+    return _ts - start;
 }
 
 void ExecutionsBuilder::Terminate()

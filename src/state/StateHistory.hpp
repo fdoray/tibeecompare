@@ -41,6 +41,9 @@ public:
     // Set the current timestamp.
     void SetTimestamp(timestamp_t ts) { _ts = ts; }
 
+    // Removes everything that is before the specified timestamp.
+    void Cleanup(timestamp_t ts);
+
     // Set/get the current value for an unsigned integer entry.
     void SetUIntegerValue(AttributeKey key, uint32_t value);
     bool GetUIntegerValue(AttributeKey key, timestamp_t ts, uint32_t* value) const;

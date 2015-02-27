@@ -47,7 +47,7 @@ public:
         bool needsToEnd);
 
     // End an execution.
-    void EndExecution(thread_t thread);
+    timestamp_t EndExecution(thread_t thread);
 
     // Complete active executions that don't need to end.
     void Terminate();

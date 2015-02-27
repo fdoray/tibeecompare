@@ -67,6 +67,9 @@ private:
 
     // The name of the end event;
     std::string _endEvent;
+
+    // Just show statistics of execution duration.
+    bool _stats;
 };
 
 }  // namespace execution_blocks

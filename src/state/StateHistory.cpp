@@ -18,9 +18,10 @@
 #include "state/StateHistory.hpp"
 
 #include <algorithm>
-
-
 #include <iostream>
+
+#include "base/CleanContainer.hpp"
+
 namespace tibee
 {
 namespace state
@@ -38,6 +39,29 @@ StateHistory::StateHistory()
 
 StateHistory::~StateHistory()
 {
+}
+
+void StateHistory::Cleanup(timestamp_t ts)
+{
+	for (auto& keyHistory : _uIntegerHistory)
+	{
+		EntryComparator comparator;
+		auto it = std::upper_bound(
+		    keyHistory.second.begin(), keyHistory.second.end(), ts, comparator);
+		if (keyHistory.second.begin() + 2 > it)
+			continue;
+		base::CleanVector(it - 2, keyHistory.second.end(), &keyHistory.second);
+	}
+
+	for (auto& keyHistory : _uLongHistory)
+	{
+	    EntryComparator comparator;
+		auto it = std::upper_bound(
+		    keyHistory.second.begin(), keyHistory.second.end(), ts, comparator);
+		if (keyHistory.second.begin() + 2 > it)
+			continue;
+		base::CleanVector(it - 2, keyHistory.second.end(), &keyHistory.second);
+	}
 }
 
 void StateHistory::SetUIntegerValue(AttributeKey key, uint32_t value)

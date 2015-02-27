@@ -37,6 +37,7 @@ const char kKernelPrefix[] = "kernel/";
 }  // namespace
 
 PunchBlock::PunchBlock()
+    : _stats(false)
 {
 }
 
@@ -50,9 +51,11 @@ void PunchBlock::Start(const value::Value* params)
     auto execValue = params->GetField("exec");
     auto beginValue = params->GetField("begin");
     auto endValue = params->GetField("end");
+    auto statsValue = params->GetField("stats");
 
     if (nameValue == nullptr || execValue == nullptr ||
-        beginValue == nullptr || endValue == nullptr)
+        beginValue == nullptr || endValue == nullptr ||
+        statsValue == nullptr)
     {
         base::tberror() << "Missing some parameters for punch block." << base::tbendl();
         return;
@@ -62,6 +65,12 @@ void PunchBlock::Start(const value::Value* params)
     _exec = execValue->AsString();
     _beginEvent = beginValue->AsString();
     _endEvent = endValue->AsString();
+    _stats = value::BoolValue::Cast(statsValue)->GetValue();
+
+    if (_stats)
+    {
+        std::cout << "duration_us" << std::endl;
+    }
 }
 
 void PunchBlock::AddObservers(notification::NotificationCenter* notificationCenter)
@@ -85,7 +94,11 @@ void PunchBlock::onEnd(const trace::EventValue& event)
     if (!TidIsAnalyzed(tid))
         return;
 
-    Executions()->EndExecution(tid);
+    timestamp_t duration = Executions()->EndExecution(tid);
+    if (_stats && duration != 0 && duration > 5000000)
+    {
+        std::cout << (duration / 1000) << "," << State()->timestamp() << std::endl;
+    }
 }
 
 void PunchBlock::AddEventObserver(notification::NotificationCenter* notificationCenter,

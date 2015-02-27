@@ -81,8 +81,10 @@ bool SymbolLookup::LookupSymbol(uint64_t address,
     }
   }
 
+  /*
   base::tberror() << "No image at address " << std::hex << address << std::dec
                   << base::tbendl();
+  */
   return false;
 }
 

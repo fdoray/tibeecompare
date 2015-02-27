@@ -49,8 +49,8 @@ using notification::Token;
 
 }  // namespace
 
-BuildBlock::BuildBlock()
-    : _quarks(nullptr), _currentState(nullptr)
+BuildBlock::BuildBlock(bool stats)
+    : _quarks(nullptr), _currentState(nullptr), _stats(stats)
 {
     _traceId = boost::lexical_cast<std::string>(
         boost::uuids::uuid(boost::uuids::random_generator()()));
@@ -99,6 +99,9 @@ void BuildBlock::onTimestamp(const notification::Path& path, const value::Value*
 
 void BuildBlock::onEnd(const notification::Path& path, const value::Value* value)
 {  
+    if (_stats)
+        return;
+
     tbinfo() << "Completed reading the trace." << tbendl();
 
     // Notify the executions and stacks builder that we reached

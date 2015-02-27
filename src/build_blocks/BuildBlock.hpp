@@ -36,7 +36,7 @@ namespace build_blocks {
 class BuildBlock : public block::AbstractBlock
 {
 public:
-    BuildBlock();
+    BuildBlock(bool stats);
     ~BuildBlock();
 
 private:
@@ -70,6 +70,9 @@ private:
 
     // Trace identifier.
     std::string _traceId;
+
+    // Indicates that we are just showing stats.
+    bool _stats;
 };
 
 }  // namespace build_blocks
