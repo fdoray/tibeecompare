@@ -43,7 +43,20 @@ for directory, files in subs:
 lib_env = env.Clone()
 lib_env.ParseConfig('pkg-config --cflags glib-2.0')
 
-tibeecomparelib = lib_env.StaticLibrary(target='tibeecomparelib', source=sources)
+libs = [
+    'delorean',
+    'tigerbeetle',
+    'boost_program_options',
+    'boost_filesystem',
+    'boost_thread',
+    'boost_system',
+    'boost_regex',
+    'leveldb',
+    'elf',
+]
+lib_env.Append(LIBS=libs)
+
+tibeecomparelib = lib_env.SharedLibrary(target='tibeecomparelib', source=sources)
 
 # Generate the executables.
 build = SConscript(os.path.join('build', 'SConscript'),

@@ -196,6 +196,12 @@ private:
         if (top == stacks::kEmptyStackId)
             return bottom;
 
+        // Look in the cache.
+        auto key = std::make_pair(bottom, top);
+        auto look = concatenationCache.find(key);
+        if (look != concatenationCache.end())
+            return look->second;
+
         // Get the functions from the top stack.
         std::deque<stacks::FunctionNameId> topStackFunctions;
         while (top != stacks::kEmptyStackId)
@@ -214,6 +220,9 @@ private:
             step.set_function(function);
             fullStack = db->AddStack(step);
         }
+
+        // Insert concatenation in the cache.
+        concatenationCache[key] = fullStack;
 
         return fullStack;
     }
@@ -241,7 +250,7 @@ private:
                            stacks::StackId baseStackId,
                            uint64_t* total)
     {
-        if (tid == static_cast<uint32_t>(-1))
+        if (tid == static_cast<uint32_t>(-1) || tid == 0)
             return;
 
         // We were preempted by a thread |tid|.
@@ -320,7 +329,22 @@ private:
     quark::Quark currentCpuQuark;
     state::AttributeKey cpusPathKey;
     quark::Quark currentThreadQuark;
+
+    // Cash for stacks concatenation.
+    struct PairHash {
+    public:
+      template <typename T, typename U>
+      std::size_t operator()(const std::pair<T, U> &x) const
+      {
+        return std::hash<T>()(x.first) ^ std::hash<U>()(x.second);
+      }
+    };
+    static std::unordered_map<std::pair<stacks::StackId, stacks::StackId>, stacks::StackId, PairHash>
+        concatenationCache;
 };
+
+std::unordered_map<std::pair<stacks::StackId, stacks::StackId>, stacks::StackId, StacksExtractor::PairHash>
+    StacksExtractor::concatenationCache;
 
 }  // namespace
 

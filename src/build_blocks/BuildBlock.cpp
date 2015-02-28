@@ -54,7 +54,7 @@ const timestamp_t kSaveInterval = 10000000000;  // 10 seconds
 
 BuildBlock::BuildBlock(bool stats)
     : _quarks(nullptr), _currentState(nullptr), _stats(stats),
-	  _saveTs(0), _lastCleanupTs(0)
+	  _saveTs(0), _lastCleanupTs(0), _numExecutions(0)
 {
     _traceId = boost::lexical_cast<std::string>(
         boost::uuids::uuid(boost::uuids::random_generator()()));
@@ -94,6 +94,9 @@ void BuildBlock::AddObservers(notification::NotificationCenter* notificationCent
 
 void BuildBlock::onTimestamp(const notification::Path& path, const value::Value* value)
 {
+    if (_stats)
+        return;
+
     auto ts = value->AsULong();
     _executionsBuilder.SetTimestamp(ts);
     _stacksBuilder.SetTimestamp(ts);
@@ -123,16 +126,16 @@ void BuildBlock::onTimestamp(const notification::Path& path, const value::Value*
 
 void BuildBlock::onEnd(const notification::Path& path, const value::Value* value)
 {
+    if (_stats)
+        return;
+
 	tbinfo() << "Completed reading the trace." << tbendl();
 	SaveExecutions();
-	tbinfo() << "Completed saving executions to the database." << tbendl();
+	tbinfo() << "A total of " << _numExecutions << " executions were added to the database." << tbendl();
 }
 
 void BuildBlock::SaveExecutions()
 {
-	if (_stats)
-        return;
-
     tbinfo() << "Saving current executions to the database." << tbendl();
 
     // Notify the executions and stacks builder that we reached
@@ -165,6 +168,8 @@ void BuildBlock::SaveExecutions()
 
         // Add the execution to the database.
         _db.AddExecution(*execution);
+
+        ++_numExecutions;
     }
 
     // Flush saved executions.

@@ -16,7 +16,9 @@
  * along with tibeecompare.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/program_options.hpp>
+#include <execinfo.h>
 #include <iostream>
+#include <signal.h>
 
 #include "base/print.hpp"
 #include "base/ex/InvalidArgument.hpp"
@@ -144,10 +146,28 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
     return 0;
 }
 
+void CrashHandler(int sig)
+{
+  void* stack[60];
+  size_t size;
+
+  // get void*'s for all entries on the stack
+  size = backtrace(stack, 60);
+
+  // print out all the frames to stderr
+  fprintf(stderr, "Error: signal %d:\n", sig);
+  backtrace_symbols_fd(stack, size, STDERR_FILENO);
+  exit(1);
+}
+
 }
 
 int main(int argc, char* argv[])
 {
+    // install a crash handler.
+    signal(SIGSEGV, CrashHandler);
+
+    // read arguments
     tibee::build::Arguments args;
 
     int ret = parseOptions(argc, argv, args);

@@ -81,6 +81,9 @@ private:
 
     // Timestamp of the last cleanup.
     timestamp_t _lastCleanupTs;
+
+    // Number of executions.
+    size_t _numExecutions;
 };
 
 }  // namespace build_blocks
