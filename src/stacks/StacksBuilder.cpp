@@ -19,6 +19,7 @@
 
 #include <algorithm>
 
+#include "base/CleanContainer.hpp"
 #include "base/print.hpp"
 
 namespace tibee
@@ -46,6 +47,23 @@ StacksBuilder::StacksBuilder()
 
 StacksBuilder::~StacksBuilder()
 {
+}
+
+void StacksBuilder::Cleanup(timestamp_t ts)
+{
+	for (auto& threadHistory : _stacks)
+	{
+		if (threadHistory.second.empty())
+			continue;
+
+		StacksComparator comparator;
+		auto it = std::lower_bound(
+		    threadHistory.second.begin(), threadHistory.second.end(), ts, comparator);
+		if (it == threadHistory.second.begin())
+			continue;
+		--it;
+		base::CleanVector(it, threadHistory.second.end(), &threadHistory.second);
+	}
 }
 
 void StacksBuilder::SetStack(thread_t thread, StackId stackId, bool isSyscall)

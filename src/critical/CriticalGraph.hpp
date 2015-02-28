@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "base/print.hpp"
 #include "critical/CriticalEdge.hpp"
 #include "critical/CriticalNode.hpp"
 
@@ -39,7 +40,7 @@ class CriticalGraph :
     boost::noncopyable
 {
 public:
-    typedef std::vector<CriticalNode*> OrderedNodes;
+    typedef std::vector<CriticalNode::UP> OrderedNodes;
     typedef std::unordered_map<uint32_t, std::unique_ptr<OrderedNodes>> TidToNodesMap;
 
     CriticalGraph();
@@ -47,6 +48,9 @@ public:
 
     // Set the current timestamp.
     void SetTimestamp(timestamp_t ts) { _ts = ts; }
+
+    // Removes everything that is before the specified timestamp.
+    void Cleanup(timestamp_t ts);
 
     // Create a node.
     // The node is not linked to any other node.
@@ -74,7 +78,13 @@ public:
 
     // Get an edge by id.
     const CriticalEdge& GetEdge(CriticalEdgeId id) const {
-        return _edges[id];
+        auto look = _edges.find(id);
+        if (look == _edges.end())
+        {
+            base::tberror() << "Request for invalid edge " << id << "."  << base::tbendl();
+            exit(1);
+        }
+        return look->second;
     }
 
     // Maximum tid value.
@@ -87,14 +97,15 @@ private:
     // Timestamp.
     timestamp_t _ts;
 
-    // Nodes.
-    std::vector<CriticalNode::UP> _nodes;
-
     // Nodes, organized by tid and timestamp.
     TidToNodesMap _tid_to_nodes;
 
     // Edges.
-    std::vector<CriticalEdge> _edges;
+    typedef std::unordered_map<CriticalEdgeId, CriticalEdge> EdgesMap;
+    EdgesMap _edges;
+
+    // Id of the next edge.
+    CriticalEdgeId _nextEdgeId;
 };
 
 }  // namespace critical

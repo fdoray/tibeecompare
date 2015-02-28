@@ -20,9 +20,11 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <iostream>
 #include <queue>
 #include <unordered_set>
 
+#include "base/CleanContainer.hpp"
 #include "base/print.hpp"
 
 namespace tibee
@@ -36,9 +38,9 @@ namespace
 using base::tbendl;
 using base::tberror;
 
-struct NodeTsComparatorReverse
+struct NodeTsComparator
 {
-    bool operator() (timestamp_t ts, const CriticalNode* node) const
+    bool operator() (timestamp_t ts, const CriticalNode::UP& node) const
     {
         return ts < node->ts();
     }
@@ -47,7 +49,7 @@ struct NodeTsComparatorReverse
 }  // namespace
 
 CriticalGraph::CriticalGraph()
-    : _ts(0)
+    : _ts(0), _nextEdgeId(0)
 {
 }
 
@@ -55,12 +57,43 @@ CriticalGraph::~CriticalGraph()
 {
 }
 
+void CriticalGraph::Cleanup(timestamp_t ts)
+{
+    /*
+	// Clean the threads histories.
+	for (auto& threadHistory : _tid_to_nodes)
+	{
+	    if (threadHistory.second->size() < 2)
+	        continue;
+
+		NodeTsComparator comparator;
+		auto it = std::upper_bound(
+		    threadHistory.second->begin(), threadHistory.second->end(), ts, comparator);
+		if (threadHistory.second->begin() + 2 > it)
+			continue;
+		base::CleanVector(it - 2, threadHistory.second->end(), threadHistory.second.get());
+	}
+
+	// Clean the edges.
+	auto edgeIt = _edges.begin();
+	for (; edgeIt != _edges.end(); ++edgeIt)
+	{
+		if (edgeIt->to()->ts() >= ts)
+			break;
+
+		if (edgeIt->type() != kVertical)
+			const_cast<CriticalNode*>(edgeIt->to())->set_edge(kCriticalEdgeInHorizontal, kInvalidCriticalEdgeId);
+	}
+	_edgesOffset += std::distance(_edges.begin(), edgeIt);
+	base::CleanVector(edgeIt, _edges.end(), &_edges);
+	*/
+}
+
 CriticalNode* CriticalGraph::CreateNode(uint32_t tid)
 {
     // Create node.
     CriticalNode::UP node(new CriticalNode(_ts, tid));
-    auto node_ptr = node.get();
-    _nodes.push_back(std::move(node));
+    CriticalNode* node_ptr = node.get();
 
     // Keep track of nodes per thread.
     auto look = _tid_to_nodes.find(tid);
@@ -72,7 +105,7 @@ CriticalNode* CriticalGraph::CreateNode(uint32_t tid)
         assert(res.second == true);
         look = res.first;
     }
-    look->second->push_back(node_ptr);
+    look->second->push_back(std::move(node));
 
     return node_ptr;
 }
@@ -83,7 +116,7 @@ const CriticalNode* CriticalGraph::GetNodeIntersecting(timestamp_t ts, thread_t 
     if (thread_nodes_it == _tid_to_nodes.end())
         return nullptr;
     const auto& thread_nodes = thread_nodes_it->second;
-    NodeTsComparatorReverse comparator;
+    NodeTsComparator comparator;
     auto node_it = std::upper_bound(thread_nodes->begin(), thread_nodes->end(), ts, comparator);
 
     --node_it;
@@ -93,11 +126,11 @@ const CriticalNode* CriticalGraph::GetNodeIntersecting(timestamp_t ts, thread_t 
 
     auto edgeId = (*node_it)->edge(kCriticalEdgeOutHorizontal);
     if (edgeId == kInvalidCriticalEdgeId)
-        return (*node_it)->ts() == ts ? (*node_it) : nullptr;
+        return (*node_it)->ts() == ts ? (node_it->get()) : nullptr;
     if (GetEdge(edgeId).to()->ts() < ts)
         return nullptr;
 
-    return *node_it;
+    return node_it->get();
 }
 
 const CriticalNode* CriticalGraph::GetNodeStartingAfter(timestamp_t ts, thread_t tid) const
@@ -106,13 +139,13 @@ const CriticalNode* CriticalGraph::GetNodeStartingAfter(timestamp_t ts, thread_t
     if (thread_nodes_it == _tid_to_nodes.end())
         return nullptr;
     const auto& thread_nodes = thread_nodes_it->second;
-    NodeTsComparatorReverse comparator;
+    NodeTsComparator comparator;
     auto node_it = std::upper_bound(thread_nodes->begin(), thread_nodes->end(), ts, comparator);
 
     if (node_it == thread_nodes->end())
       return nullptr;
 
-    return *node_it;
+    return node_it->get();
 }
 
 CriticalNode* CriticalGraph::GetLastNodeForThread(uint32_t tid)
@@ -120,7 +153,7 @@ CriticalNode* CriticalGraph::GetLastNodeForThread(uint32_t tid)
     auto thread_nodes_it = _tid_to_nodes.find(tid);
     if (thread_nodes_it == _tid_to_nodes.end() || thread_nodes_it->second->empty())
         return nullptr;
-    return thread_nodes_it->second->back();
+    return thread_nodes_it->second->back().get();
 }
 
 CriticalEdgeId CriticalGraph::CreateHorizontalEdge(
@@ -128,8 +161,9 @@ CriticalEdgeId CriticalGraph::CreateHorizontalEdge(
     CriticalNode* from,
     CriticalNode* to)
 {
-    CriticalEdgeId id = _edges.size();
-    _edges.push_back(CriticalEdge(type, from, to));
+    CriticalEdgeId id = _nextEdgeId;
+    ++_nextEdgeId;
+    _edges.insert(EdgesMap::value_type {id, CriticalEdge(type, from, to)});
     from->set_edge(kCriticalEdgeOutHorizontal, id);
     to->set_edge(kCriticalEdgeInHorizontal, id);
     return id;
@@ -139,8 +173,9 @@ CriticalEdgeId CriticalGraph::CreateVerticalEdge(
     CriticalNode* from,
     CriticalNode* to)
 {
-    CriticalEdgeId id = _edges.size();
-    _edges.push_back(CriticalEdge(kVertical, from, to));
+    CriticalEdgeId id = _nextEdgeId;
+    ++_nextEdgeId;
+    _edges.insert(EdgesMap::value_type {id, CriticalEdge(kVertical, from, to)});
     from->set_edge(kCriticalEdgeOutVertical, id);
     to->set_edge(kCriticalEdgeInVertical, id);
     return id;

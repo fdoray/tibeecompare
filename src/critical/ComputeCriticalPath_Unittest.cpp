@@ -77,6 +77,7 @@ TEST(ComputeCriticalPath, Simple)
 
     CriticalPath expectedPath = {
         CriticalPathSegment(1, 6, 1, kRun),
+        CriticalPathSegment(6, 6, 2, kEpsilon),
         CriticalPathSegment(6, 9, 2, kRun),
         CriticalPathSegment(9, 11, 1, kWaitBlocked),
         CriticalPathSegment(11, 12, 1, kRun),
@@ -84,6 +85,79 @@ TEST(ComputeCriticalPath, Simple)
 
     EXPECT_EQ(expectedPath, path);
 }
+
+TEST(ComputeCriticalPath, SimpleWithCleanup)
+{
+    // 123456789012
+    // =====-----==
+    //    |    |
+    // ---=========
+
+    // Create the graph.
+    CriticalGraph graph;
+
+    std::vector<CriticalNode*> uselessNodes;
+
+    graph.SetTimestamp(10);
+    uselessNodes.push_back(graph.CreateNode(1));
+    graph.SetTimestamp(11);
+    uselessNodes.push_back(graph.CreateNode(1));
+
+
+	std::vector<CriticalNode*> nodes;
+
+    graph.SetTimestamp(101);
+    nodes.push_back(graph.CreateNode(1));  // 0
+    nodes.push_back(graph.CreateNode(2));  // 1
+
+    graph.SetTimestamp(104);
+    nodes.push_back(graph.CreateNode(1));  // 2
+    nodes.push_back(graph.CreateNode(2));  // 3
+
+    graph.SetTimestamp(106);
+    nodes.push_back(graph.CreateNode(1));  // 4
+
+    graph.SetTimestamp(109);
+    nodes.push_back(graph.CreateNode(1));  // 5
+    nodes.push_back(graph.CreateNode(2));  // 6
+
+    graph.SetTimestamp(111);
+    nodes.push_back(graph.CreateNode(1));  // 7
+
+    graph.SetTimestamp(113);
+    nodes.push_back(graph.CreateNode(1));  // 8
+    nodes.push_back(graph.CreateNode(2));  // 9
+
+    graph.CreateHorizontalEdge(kRun, uselessNodes[0], uselessNodes[1]);
+    graph.CreateHorizontalEdge(kRun, uselessNodes[1], nodes[0]);
+
+    graph.CreateHorizontalEdge(kRun, nodes[0], nodes[2]);
+    graph.CreateHorizontalEdge(kWaitBlocked, nodes[1], nodes[3]);
+    graph.CreateHorizontalEdge(kRun, nodes[2], nodes[4]);
+    graph.CreateVerticalEdge(nodes[2], nodes[3]);
+    graph.CreateHorizontalEdge(kRun, nodes[3], nodes[6]);
+    graph.CreateHorizontalEdge(kWaitBlocked, nodes[4], nodes[5]);
+    graph.CreateHorizontalEdge(kWaitBlocked, nodes[5], nodes[7]);
+    graph.CreateHorizontalEdge(kRun, nodes[6], nodes[9]);
+    graph.CreateVerticalEdge(nodes[6], nodes[5]);
+    graph.CreateHorizontalEdge(kRun, nodes[7], nodes[8]);
+
+    graph.Cleanup(101);
+
+    CriticalPath path;
+    ComputeCriticalPath(graph, 101, 112, 1, &path);
+
+    CriticalPath expectedPath = {
+        CriticalPathSegment(101, 106, 1, kRun),
+        CriticalPathSegment(106, 106, 2, kEpsilon),
+        CriticalPathSegment(106, 109, 2, kRun),
+        CriticalPathSegment(109, 111, 1, kWaitBlocked),
+        CriticalPathSegment(111, 112, 1, kRun),
+    };
+
+    EXPECT_EQ(expectedPath, path);
+}
+
 
 TEST(ComputeCriticalPath, MultipleSegments)
 {
@@ -153,9 +227,11 @@ TEST(ComputeCriticalPath, MultipleSegments)
     ComputeCriticalPath(graph, 1, 20, 1, &path);
     CriticalPath expectedPath = {
         CriticalPathSegment(1, 6, 1, kRun),
+        CriticalPathSegment(6, 6, 2, kEpsilon),
         CriticalPathSegment(6, 9, 2, kRun),
         CriticalPathSegment(9, 11, 1, kWaitBlocked),
         CriticalPathSegment(11, 14, 1, kRun),
+        CriticalPathSegment(14, 14, 2, kEpsilon),
         CriticalPathSegment(14, 16, 2, kRun),
         CriticalPathSegment(16, 18, 1, kWaitBlocked),
         CriticalPathSegment(18, 20, 1, kRun),
@@ -166,6 +242,7 @@ TEST(ComputeCriticalPath, MultipleSegments)
     ComputeCriticalPath(graph, 2, 12, 1, &otherPath);
     CriticalPath otherExpectedPath = {
         CriticalPathSegment(2, 6, 1, kRun),
+        CriticalPathSegment(6, 6, 2, kEpsilon),
         CriticalPathSegment(6, 9, 2, kRun),
         CriticalPathSegment(9, 11, 1, kWaitBlocked),
         CriticalPathSegment(11, 12, 1, kRun),
@@ -277,8 +354,11 @@ TEST(ComputeCriticalPath, MultipleLevels)
 
     CriticalPath expectedPath = {
         CriticalPathSegment(1, 5, 1, kRun),
+        CriticalPathSegment(5, 5, 2, kEpsilon),
         CriticalPathSegment(5, 7, 2, kRun),
+        CriticalPathSegment(7, 7, 3, kEpsilon),
         CriticalPathSegment(7, 9, 3, kRun),
+        CriticalPathSegment(9, 9, 4, kEpsilon),
         CriticalPathSegment(9, 11, 4, kRun),
         CriticalPathSegment(11, 13, 3, kWaitBlocked),
         CriticalPathSegment(13, 14, 3, kRun),
@@ -351,6 +431,7 @@ TEST(ComputeCriticalPath, UnresolvedBlock)
 
     CriticalPath expectedPath = {
         CriticalPathSegment(1, 6, 1, kRun),
+        CriticalPathSegment(6, 6, 2, kEpsilon),
         CriticalPathSegment(6, 7, 2, kRun),
         CriticalPathSegment(7, 8, 2, kWaitBlocked),
         CriticalPathSegment(8, 9, 2, kRun),
@@ -415,6 +496,7 @@ TEST(ComputeCriticalPath, Stair)
 
     CriticalPath expectedPath = {
         CriticalPathSegment(1, 3, 1, kRun),
+        CriticalPathSegment(3, 3, 2, kEpsilon),
         CriticalPathSegment(3, 9, 3, kRun),
         CriticalPathSegment(9, 13, 2, kRun),
         CriticalPathSegment(13, 15, 1, kWaitBlocked),

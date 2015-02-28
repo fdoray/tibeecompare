@@ -83,28 +83,50 @@ void ResolvedBlockedEdge(
     {
         // Get the edge spent on the network thread.
         auto* networkEndNode = wakeUpEdge.from();
-        auto& networkEdge = graph.GetEdge(
-            networkEndNode->edge(kCriticalEdgeInHorizontal));
-        auto* networkStartNode = networkEdge.from();
+        auto networkEdgeId = networkEndNode->edge(kCriticalEdgeInHorizontal);
+        if (networkEdgeId != kInvalidCriticalEdgeId)
+        {
+            auto& networkEdge = graph.GetEdge(
+                networkEndNode->edge(kCriticalEdgeInHorizontal));
+            auto* networkStartNode = networkEdge.from();
 
-        // Compute the critical path on the thread that sent network data.
-        auto networkWakeUpEdgeId = networkStartNode->edge(kCriticalEdgeInVertical);
-        auto& networkWakeUpEdge = graph.GetEdge(networkWakeUpEdgeId);
-        thread_t networkSourceThread = networkWakeUpEdge.from()->tid();
+            // Compute the critical path on the thread that sent network data.
+            auto networkWakeUpEdgeId = networkStartNode->edge(kCriticalEdgeInVertical);
+            if (networkWakeUpEdgeId != kInvalidCriticalEdgeId)
+            {
+                auto& networkWakeUpEdge = graph.GetEdge(networkWakeUpEdgeId);
+                thread_t networkSourceThread = networkWakeUpEdge.from()->tid();
 
-        ComputeCriticalPathRecursive(
-            graph, startTs, networkStartNode->ts(), networkSourceThread, path);
+                ComputeCriticalPathRecursive(
+                    graph, startTs, networkStartNode->ts(), networkSourceThread, path);
 
-        // Add a segment for the time spent waiting on the network thread.
-        InsertCriticalPathSegment(CriticalPathSegment(
-            networkStartNode->ts(), networkEndNode->ts(),
-            networkStartNode->tid(), networkEdge.type()), path);
+                // Add a segment for the time spent waiting on the network thread.
+                InsertCriticalPathSegment(CriticalPathSegment(
+                    networkStartNode->ts(), networkEndNode->ts(),
+                    networkStartNode->tid(), networkEdge.type()), path);
+
+                return;
+            }
+            else
+            {
+                base::tberror() << "Invalid network edge (a)" << base::tbendl();
+            }
+        }
+        else
+        {
+            base::tberror() << "Invalid network edge (b)" << base::tbendl();
+        }
     }
-    else
-    {
-        // Compute the critical path on the source thread.
-        ComputeCriticalPathRecursive(graph, startTs, endTs, sourceThread, path);
-    }
+
+    // Normal case.
+
+    // Add an empty segment here to make sure that stacks will be
+    // resolved properly.
+    InsertCriticalPathSegment(CriticalPathSegment(
+        startTs, startTs, sourceThread, kEpsilon), path);
+
+    // Compute the critical path on the source thread.
+    ComputeCriticalPathRecursive(graph, startTs, endTs, sourceThread, path);
 }
 
 void ComputeCriticalPathRecursive(

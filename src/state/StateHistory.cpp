@@ -45,22 +45,30 @@ void StateHistory::Cleanup(timestamp_t ts)
 {
 	for (auto& keyHistory : _uIntegerHistory)
 	{
+	    if (keyHistory.second.empty())
+	        continue;
+
 		EntryComparator comparator;
-		auto it = std::upper_bound(
+		auto it = std::lower_bound(
 		    keyHistory.second.begin(), keyHistory.second.end(), ts, comparator);
-		if (keyHistory.second.begin() + 2 > it)
-			continue;
-		base::CleanVector(it - 2, keyHistory.second.end(), &keyHistory.second);
+		if (it == keyHistory.second.begin())
+		    continue;
+		--it;
+		base::CleanVector(it, keyHistory.second.end(), &keyHistory.second);
 	}
 
 	for (auto& keyHistory : _uLongHistory)
 	{
-	    EntryComparator comparator;
-		auto it = std::upper_bound(
-		    keyHistory.second.begin(), keyHistory.second.end(), ts, comparator);
-		if (keyHistory.second.begin() + 2 > it)
-			continue;
-		base::CleanVector(it - 2, keyHistory.second.end(), &keyHistory.second);
+        if (keyHistory.second.empty())
+            continue;
+
+        EntryComparator comparator;
+        auto it = std::lower_bound(
+            keyHistory.second.begin(), keyHistory.second.end(), ts, comparator);
+        if (it == keyHistory.second.begin())
+            continue;
+        --it;
+        base::CleanVector(it, keyHistory.second.end(), &keyHistory.second);
 	}
 }
 

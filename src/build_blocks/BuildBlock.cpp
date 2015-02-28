@@ -47,10 +47,14 @@ using base::tberror;
 using base::tbendl;
 using notification::Token;
 
+// Intervals at which executions are saved (ns).
+const timestamp_t kSaveInterval = 10000000000;  // 10 seconds
+
 }  // namespace
 
 BuildBlock::BuildBlock(bool stats)
-    : _quarks(nullptr), _currentState(nullptr), _stats(stats)
+    : _quarks(nullptr), _currentState(nullptr), _stats(stats),
+	  _saveTs(0), _lastCleanupTs(0)
 {
     _traceId = boost::lexical_cast<std::string>(
         boost::uuids::uuid(boost::uuids::random_generator()()));
@@ -95,14 +99,41 @@ void BuildBlock::onTimestamp(const notification::Path& path, const value::Value*
     _stacksBuilder.SetTimestamp(ts);
     _criticalGraph.SetTimestamp(ts);
     _stateHistory.SetTimestamp(ts);
+
+    if (_saveTs == 0)
+    {
+        _saveTs = ts;
+    }
+    else if (ts > _saveTs + kSaveInterval)
+    {
+        SaveExecutions();
+
+        // Clean everything that is |kSaveInterval| old.
+        tbinfo() << "Cleaning the history." << tbendl();
+        _stacksBuilder.Cleanup(_saveTs);
+        _criticalGraph.Cleanup(_saveTs);
+        _stateHistory.Cleanup(_saveTs);
+
+        tbinfo() << "Continuing to read the trace." << tbendl();
+
+        _lastCleanupTs = _saveTs;
+        _saveTs = ts;
+    }
 }
 
 void BuildBlock::onEnd(const notification::Path& path, const value::Value* value)
-{  
-    if (_stats)
+{
+	tbinfo() << "Completed reading the trace." << tbendl();
+	SaveExecutions();
+	tbinfo() << "Completed saving executions to the database." << tbendl();
+}
+
+void BuildBlock::SaveExecutions()
+{
+	if (_stats)
         return;
 
-    tbinfo() << "Completed reading the trace." << tbendl();
+    tbinfo() << "Saving current executions to the database." << tbendl();
 
     // Notify the executions and stacks builder that we reached
     // the end of the trace.
@@ -112,6 +143,12 @@ void BuildBlock::onEnd(const notification::Path& path, const value::Value* value
     // Save all executions in the database.
     for (auto& execution : _executionsBuilder)
     {
+        if (execution->startTs() < _lastCleanupTs) {
+            tberror() << "Skipping an execution because it starts before the last cleanup ts." << tbendl();
+            tberror() << "  Execution start ts: " << execution->startTs() << tbendl();
+            continue;
+        }
+
         // Compute the critical path of the execution.
         critical::CriticalPath criticalPath;
         critical::ComputeCriticalPath(
@@ -129,6 +166,9 @@ void BuildBlock::onEnd(const notification::Path& path, const value::Value* value
         // Add the execution to the database.
         _db.AddExecution(*execution);
     }
+
+    // Flush saved executions.
+    _executionsBuilder.Flush();
 }
 
 }  // namespace build_blocks

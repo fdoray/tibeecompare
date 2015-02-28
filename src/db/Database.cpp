@@ -68,9 +68,9 @@ public:
     int Compare(const leveldb::Slice& a, const leveldb::Slice& b) const
     {
         const Key* keyA =
-            reinterpret_cast<const Key*>(a.data());
+                reinterpret_cast<const Key*>(a.data());
         const Key* keyB =
-            reinterpret_cast<const Key*>(b.data());
+                reinterpret_cast<const Key*>(b.data());
 
         // Order by key type.
         if (keyA->type < keyB->type)
@@ -118,10 +118,10 @@ uint32_t StringToUint32(const std::string str)
 }
 
 void WriteExecutionMetadataToBuffer(
-    uint32_t nameId,
-    uint32_t traceId,
-    const execution::Execution& execution,
-    std::vector<char>* buffer)
+        uint32_t nameId,
+        uint32_t traceId,
+        const execution::Execution& execution,
+        std::vector<char>* buffer)
 {
     WriteBuffer(nameId, buffer);
     WriteBuffer(traceId, buffer);
@@ -132,14 +132,14 @@ void WriteExecutionMetadataToBuffer(
 }
 
 void WriteExecutionMetricsToBuffer(
-    const execution::Execution& execution,
-    std::vector<char>* buffer)
+        const execution::Execution& execution,
+        std::vector<char>* buffer)
 {
     WriteBuffer(execution.metrics_size(), buffer);
 
     for (auto it = execution.metrics_begin();
-         it != execution.metrics_end();
-         ++it)
+            it != execution.metrics_end();
+            ++it)
     {
         WriteBuffer(it->first, buffer);
         WriteBuffer(it->second, buffer);
@@ -147,14 +147,14 @@ void WriteExecutionMetricsToBuffer(
 }
 
 void WriteExecutionSamplesToBuffer(
-    const execution::Execution& execution,
-    std::vector<char>* buffer)
+        const execution::Execution& execution,
+        std::vector<char>* buffer)
 {
     WriteBuffer(execution.samples_size(), buffer);
 
     for (auto it = execution.samples_begin();
-         it != execution.samples_end();
-         ++it)
+            it != execution.samples_end();
+            ++it)
     {
         WriteBuffer(it->first, buffer);
         WriteBuffer(it->second, buffer);
@@ -162,11 +162,11 @@ void WriteExecutionSamplesToBuffer(
 }
 
 bool ReadExecutionMetadataFromBuffer(
-    const leveldb::Slice& buffer,
-    size_t* pos,
-    uint32_t* nameId,
-    uint32_t* traceId,
-    execution::Execution* execution)
+        const leveldb::Slice& buffer,
+        size_t* pos,
+        uint32_t* nameId,
+        uint32_t* traceId,
+        execution::Execution* execution)
 {
     timestamp_t startTs = 0;
     thread_t startThread = 0;
@@ -174,11 +174,11 @@ bool ReadExecutionMetadataFromBuffer(
     thread_t endThread = 0;
 
     if (!ReadBuffer(buffer, pos, nameId) ||
-        !ReadBuffer(buffer, pos, traceId) ||
-        !ReadBuffer(buffer, pos, &startTs) ||
-        !ReadBuffer(buffer, pos, &startThread) ||
-        !ReadBuffer(buffer, pos, &endTs) ||
-        !ReadBuffer(buffer, pos, &endThread))
+            !ReadBuffer(buffer, pos, traceId) ||
+            !ReadBuffer(buffer, pos, &startTs) ||
+            !ReadBuffer(buffer, pos, &startThread) ||
+            !ReadBuffer(buffer, pos, &endTs) ||
+            !ReadBuffer(buffer, pos, &endThread))
     {
         return false;
     }
@@ -192,9 +192,9 @@ bool ReadExecutionMetadataFromBuffer(
 }
 
 bool ReadExecutionMetricsFromBuffer(
-    const leveldb::Slice& buffer,
-    size_t* pos,
-    execution::Execution* execution)
+        const leveldb::Slice& buffer,
+        size_t* pos,
+        execution::Execution* execution)
 {
     size_t metrics_size = 0;
     if (!ReadBuffer(buffer, pos, &metrics_size))
@@ -204,9 +204,9 @@ bool ReadExecutionMetricsFromBuffer(
     {
         MetricId metricId = 0;
         uint64_t metricValue = 0;
-        
+
         if (!ReadBuffer(buffer, pos, &metricId) ||
-            !ReadBuffer(buffer, pos, &metricValue))
+                !ReadBuffer(buffer, pos, &metricValue))
         {
             return false;
         }
@@ -218,9 +218,9 @@ bool ReadExecutionMetricsFromBuffer(
 }
 
 bool ReadExecutionSamplesFromBuffer(
-    const leveldb::Slice& buffer,
-    size_t* pos,
-    execution::Execution* execution)
+        const leveldb::Slice& buffer,
+        size_t* pos,
+        execution::Execution* execution)
 {
     size_t samples_size = 0;
     if (!ReadBuffer(buffer, pos, &samples_size))
@@ -230,9 +230,9 @@ bool ReadExecutionSamplesFromBuffer(
     {
         stacks::StackId stackId = 0;
         uint64_t stackValue = 0;
-        
+
         if (!ReadBuffer(buffer, pos, &stackId) ||
-            !ReadBuffer(buffer, pos, &stackValue))
+                !ReadBuffer(buffer, pos, &stackValue))
         {
             return false;
         }
@@ -246,13 +246,13 @@ bool ReadExecutionSamplesFromBuffer(
 }  // namespace
 
 Database::Database()
-    : _isTest(false)
+: _isTest(false)
 {
     _comparator.reset(new KeyComparator);
 }
 
 Database::Database(bool isTest)
-    : _isTest(isTest)
+: _isTest(isTest)
 {
     _comparator.reset(new KeyComparator);
 }
@@ -264,9 +264,13 @@ Database::~Database()
     _comparator.reset(nullptr);
 }
 
-std::string Database::GetFunctionName(stacks::FunctionNameId id) const
+const std::string& Database::GetFunctionName(stacks::FunctionNameId id) const
 {
     OpenDatabase();
+
+    auto look = _functionNamesCache.find(id);
+    if (look != _functionNamesCache.end())
+        return look->second;
 
     Key key;
     key.type = kFunctionNameIdType;
@@ -275,7 +279,7 @@ std::string Database::GetFunctionName(stacks::FunctionNameId id) const
 
     std::string name;
     auto status = _db->Get(
-        leveldb::ReadOptions(), keySlice, &name);
+            leveldb::ReadOptions(), keySlice, &name);
 
     if (!status.ok())
     {
@@ -285,7 +289,9 @@ std::string Database::GetFunctionName(stacks::FunctionNameId id) const
         throw base::ex::FatalError(message.str());
     }
 
-    return name;
+    const_cast<Database*>(this)->_functionNamesCache[id] = name;
+
+    return const_cast<Database*>(this)->_functionNamesCache[id];
 }
 
 stacks::FunctionNameId Database::AddFunctionName(const std::string& name)
@@ -297,11 +303,11 @@ stacks::FunctionNameId Database::AddFunctionName(const std::string& name)
     WriteBuffer(kFunctionNameReverseIdType, &reverseKeyBuffer);
     WriteStringToBuffer(name, &reverseKeyBuffer);
     leveldb::Slice reverseKey(
-        reverseKeyBuffer.data(), reverseKeyBuffer.size());
+            reverseKeyBuffer.data(), reverseKeyBuffer.size());
 
     std::string idStr;
     auto status = _db->Get(leveldb::ReadOptions(), reverseKey, &idStr);
-    
+
     if (status.ok())
     {
         // The function name is already in the database.
@@ -332,12 +338,18 @@ stacks::FunctionNameId Database::AddFunctionName(const std::string& name)
     if (!status.ok())
         throw base::ex::FatalError("Unable to add function name in database.");
 
+    _functionNamesCache[id] = name;
+
     return id;
 }
 
-stacks::Stack Database::GetStack(stacks::StackId id) const
+const stacks::Stack& Database::GetStack(stacks::StackId id) const
 {
     OpenDatabase();
+
+    auto look = _stacksCache.find(id);
+    if (look != _stacksCache.end())
+        return look->second;
 
     Key key;
     key.type = kStackIdType;
@@ -346,7 +358,7 @@ stacks::Stack Database::GetStack(stacks::StackId id) const
 
     std::string stackStr;
     auto status = _db->Get(
-        leveldb::ReadOptions(), keySlice, &stackStr);
+            leveldb::ReadOptions(), keySlice, &stackStr);
 
     if (!status.ok())
     {
@@ -359,13 +371,15 @@ stacks::Stack Database::GetStack(stacks::StackId id) const
     if (stackStr.size() != sizeof(stacks::Stack))
     {
         throw base::ex::FatalError(
-            "Read a stack with an incorrect size.");
+                "Read a stack with an incorrect size.");
     }
 
     stacks::Stack stack;
     memcpy(&stack, stackStr.c_str(), sizeof(stack));
 
-    return stack;
+    const_cast<Database*>(this)->_stacksCache[id] = stack;
+
+    return const_cast<Database*>(this)->_stacksCache[id];
 }
 
 stacks::StackId Database::AddStack(const stacks::Stack& stack)
@@ -377,11 +391,11 @@ stacks::StackId Database::AddStack(const stacks::Stack& stack)
     WriteBuffer(kStackReverseIdType, &reverseKeyBuffer);
     WriteBuffer(stack, &reverseKeyBuffer);
     leveldb::Slice reverseKey(
-        reverseKeyBuffer.data(), reverseKeyBuffer.size());
+            reverseKeyBuffer.data(), reverseKeyBuffer.size());
 
     std::string idStr;
     auto status = _db->Get(leveldb::ReadOptions(), reverseKey, &idStr);
-    
+
     if (status.ok())
     {
         // The stack is already in the database.
@@ -413,12 +427,14 @@ stacks::StackId Database::AddStack(const stacks::Stack& stack)
     if (!status.ok())
         throw base::ex::FatalError("Unable to add stack in database.");
 
+    _stacksCache[id] = stack;
+
     return id;
 }
 
 void Database::EnumerateExecutions(
-    const std::string& name,
-    const EnumerateExecutionsCallback& callback) const
+        const std::string& name,
+        const EnumerateExecutionsCallback& callback) const
 {
     EnumerateExecutions(name, 0, callback);
 }
@@ -431,7 +447,7 @@ void Database::EnumerateExecutions(
     OpenDatabase();
 
     auto executionNameId =
-        const_cast<Database*>(this)->AddString(name);
+            const_cast<Database*>(this)->AddString(name);
 
     Key startKey;
     startKey.type = kExecutionKeyType;
@@ -458,7 +474,7 @@ void Database::EnumerateExecutions(
         if (approximativeTotalSize != 0 && approximativeExecSize != 0)
         {
             auto approximativeExecCount =
-                approximativeTotalSize / approximativeExecSize;
+                    approximativeTotalSize / approximativeExecSize;
             auto desiredProportion = approximativeExecCount / numDesired;
             if (desiredProportion >= 2)
                 numSkip = desiredProportion;
@@ -467,11 +483,11 @@ void Database::EnumerateExecutions(
 
     // Iterate executions.
     std::unique_ptr<leveldb::Iterator> it(
-        _db->NewIterator(leveldb::ReadOptions()));
+            _db->NewIterator(leveldb::ReadOptions()));
 
     for (it->Seek(startKeySlice);
-         it->Valid() && _comparator->Compare(it->key(), endKeySlice) <= 0;
-         it->Next())
+            it->Valid() && _comparator->Compare(it->key(), endKeySlice) <= 0;
+            it->Next())
     {
         execution::Execution execution;
         size_t pos = 0;
@@ -521,22 +537,22 @@ void Database::AddExecution(const execution::Execution& execution)
     Key key;
     key.type = kExecutionKeyType;
     key.id = executionNameId,
-    key.timestamp = execution.startTs();
+            key.timestamp = execution.startTs();
 
     // Write execution to a buffer.
     std::vector<char> buffer;
     WriteExecutionMetadataToBuffer(
-        executionNameId,
-        AddString(execution.trace()),
-        execution,
-        &buffer);
+            executionNameId,
+            AddString(execution.trace()),
+            execution,
+            &buffer);
     WriteExecutionMetricsToBuffer(execution, &buffer);
     WriteExecutionSamplesToBuffer(execution, &buffer);
 
     // Insert execution in database.
     auto status = _db->Put(leveldb::WriteOptions(),
-                           Slice(&key, sizeof(key)),
-                           Slice(buffer.data(), buffer.size()));
+            Slice(&key, sizeof(key)),
+            Slice(buffer.data(), buffer.size()));
 
     if (!status.ok())
         throw base::ex::FatalError("Unable to insert execution in database.");
@@ -547,6 +563,24 @@ void Database::DestroyTestDb()
     auto status = leveldb::DestroyDB(kTestDbFile, leveldb::Options());
     if (!status.ok())
         throw base::ex::FatalError("Unable to destroy test database.");
+}
+
+void Database::PrintStack(stacks::StackId id)
+{
+    OpenDatabase();
+
+    if (id == stacks::kEmptyStackId)
+    {
+        std::cout << "<Empty>" << std::endl;
+        return;
+    }
+
+    // Get the functions from the top stack.
+    while (id != stacks::kEmptyStackId) {
+        auto step = GetStack(id);
+        std::cout << GetFunctionName(step.function()) << std::endl;
+        id = step.bottom();
+    }
 }
 
 void Database::OpenDatabase() const
@@ -562,7 +596,7 @@ void Database::OpenDatabase() const
     leveldb::Status status = leveldb::DB::Open(options, file, &db_ptr);
 
     std::unique_ptr<leveldb::DB>* db =
-        const_cast<std::unique_ptr<leveldb::DB>*>(&_db);
+            const_cast<std::unique_ptr<leveldb::DB>*>(&_db);
     db->reset(db_ptr);
 
     if (!status.ok())
@@ -575,7 +609,7 @@ void Database::OpenDatabase() const
 }
 
 uint32_t Database::GetIdentifier(
-    char* type, uint32_t* nextIdentifier, leveldb::WriteBatch* batch)
+        char* type, uint32_t* nextIdentifier, leveldb::WriteBatch* batch)
 {
     leveldb::Slice key(type, sizeof(*type));
     std::string identifierStr;
@@ -597,8 +631,8 @@ uint32_t Database::GetIdentifier(
 
     *nextIdentifier = identifier + 1;
     batch->Put(key,
-               leveldb::Slice(reinterpret_cast<const char*>(nextIdentifier),
-                              sizeof(*nextIdentifier)));
+            leveldb::Slice(reinterpret_cast<const char*>(nextIdentifier),
+                    sizeof(*nextIdentifier)));
 
     return identifier;
 }
@@ -629,12 +663,12 @@ uint64_t Database::ApproxExecutionSize(stacks::FunctionNameId executionNameId) c
 
     // Find the key of the 100th execution.
     std::unique_ptr<leveldb::Iterator> it(
-        _db->NewIterator(leveldb::ReadOptions()));
+            _db->NewIterator(leveldb::ReadOptions()));
 
     size_t i = 0;
     for (it->Seek(startKeySlice);
-         it->Valid() && _comparator->Compare(it->key(), endKeySlice) <= 0;
-         it->Next())
+            it->Valid() && _comparator->Compare(it->key(), endKeySlice) <= 0;
+            it->Next())
     {
         ++i;
         if (i == 100)

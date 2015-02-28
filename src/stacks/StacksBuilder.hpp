@@ -42,6 +42,9 @@ public:
     // Set current timestamp.
     void SetTimestamp(timestamp_t ts) { _ts = ts; }
 
+    // Removes everything that is before the specified timestamp.
+    void Cleanup(timestamp_t ts);
+
     // Set database.
     void SetDatabase(db::Database* db) { _db = db; }
 

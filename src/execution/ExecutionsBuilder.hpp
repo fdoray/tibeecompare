@@ -52,6 +52,11 @@ public:
     // Complete active executions that don't need to end.
     void Terminate();
 
+    // Clear the list of completed executions.
+    void Flush() {
+        _completedExecutions.clear();
+    }
+
     // Traverse completed executions.
     Executions::iterator begin() {
         return _completedExecutions.begin();

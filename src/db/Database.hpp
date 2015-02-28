@@ -23,6 +23,7 @@
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <memory>
+#include <unordered_map>
 
 #include "base/BasicTypes.hpp"
 #include "execution/Execution.hpp"
@@ -45,11 +46,11 @@ public:
     ~Database();
 
     // Function names.
-    std::string GetFunctionName(stacks::FunctionNameId id) const;
+    const std::string& GetFunctionName(stacks::FunctionNameId id) const;
     stacks::FunctionNameId AddFunctionName(const std::string& name);
 
     // Stacks.
-    stacks::Stack GetStack(stacks::StackId id) const;
+    const stacks::Stack& GetStack(stacks::StackId id) const;
     stacks::StackId AddStack(const stacks::Stack& stack);
 
     // Executions.
@@ -64,6 +65,9 @@ public:
 
     // Destroy test database.
     static void DestroyTestDb();
+
+    // Print a stack.
+    void PrintStack(stacks::StackId id);
 
 private:
     // Open database.
@@ -88,6 +92,12 @@ private:
 
     // Comparator for leveldb keys.
     std::unique_ptr<leveldb::Comparator> _comparator;
+
+    // Cache for function names.
+    std::unordered_map<stacks::FunctionNameId, std::string> _functionNamesCache;
+
+    // Cache for stacks.
+    std::unordered_map<stacks::StackId, stacks::Stack> _stacksCache;
 
 };
 

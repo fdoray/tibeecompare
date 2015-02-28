@@ -47,6 +47,8 @@ private:
     void onTimestamp(const notification::Path& path, const value::Value* value);
     void onEnd(const notification::Path& path, const value::Value* value);
 
+    void SaveExecutions();
+
     // Database.
     db::Database _db;
 
@@ -73,6 +75,12 @@ private:
 
     // Indicates that we are just showing stats.
     bool _stats;
+
+    // Last timestamp at which executions were saved.
+    timestamp_t _saveTs;
+
+    // Timestamp of the last cleanup.
+    timestamp_t _lastCleanupTs;
 };
 
 }  // namespace build_blocks

@@ -26,8 +26,8 @@ namespace execution
 {
 
 void ExtractMetrics(
-    const critical::CriticalPath& criticalPath,
-    Execution* execution)
+        const critical::CriticalPath& criticalPath,
+        Execution* execution)
 {
     // Duration.
     auto duration = execution->endTs() - execution->startTs();
@@ -40,6 +40,9 @@ void ExtractMetrics(
     uint64_t criticalPathDuration = 0;
     for (const auto& segment : criticalPath)
     {
+        if (segment.type() == critical::kEpsilon)
+            continue;
+
         auto metricId = kNumCustomMetrics + segment.type();
         uint64_t segmentDuration = segment.endTs() - segment.startTs();
         uint64_t currentValue = 0;
@@ -51,7 +54,7 @@ void ExtractMetrics(
     if (duration != criticalPathDuration)
     {
         base::tberror() << "Critical path is not the same duration as the "
-                           "execution..." << base::tbendl();
+                "execution..." << base::tbendl();
     }
 }
 

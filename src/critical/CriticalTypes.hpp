@@ -48,6 +48,7 @@ enum CriticalEdgeType {
     kNetwork,         // Waiting for the network.
     kBlockDevice,     // Waiting for a block device.
     kUserInput,       // Waiting for user input.
+    kEpsilon,         // Epsilon, to help stacks being resolved properly.
 };
 
 }  // namespace critical

@@ -75,6 +75,9 @@ public:
             // Make sure that the current thread is on top of the stack of threads.
             EnsureCurrentThreadIsOnThreadsStack(segment, baseStackId, &threads);
 
+            if (segment.type() == critical::kEpsilon)
+                continue;
+
             // Increment execution samples.
             if (segment.type() == critical::kRun)
             {
@@ -260,9 +263,9 @@ private:
     {
         if (threads->empty())
         {
-            threads->push_back(ThreadInfo(
-                segment.tid(),
-                PushOnStack(baseStackId, "[thread]")));
+            auto cleanStack = PushOnStack(
+                baseStackId, std::string("[thread ") + std::to_string(segment.tid()) + "]");
+            threads->push_back(ThreadInfo(segment.tid(), cleanStack));
         }
         else
         {
@@ -276,9 +279,9 @@ private:
             if (depth == threads->size())
             {
                 // This thread is not on the stack of threads yet: add it.
-                threads->push_back(ThreadInfo(
-                    segment.tid(),
-                    PushOnStack(threads->back().stack, "[thread]")));
+                auto cleanStack = PushOnStack(
+                    threads->back().stack, std::string("[thread ") + std::to_string(segment.tid()) + "]");
+                threads->push_back(ThreadInfo(segment.tid(), cleanStack));
             }
             else
             {
@@ -287,6 +290,11 @@ private:
                 threads->resize(depth + 1);
             }
         }
+
+        // Set the full stack.
+        threads->back().stack = ConcatenateStacks(
+            threads->back().cleanStack,
+            stacks.GetStack(segment.tid(), segment.endTs()));
     }
 
     // Stacks.
