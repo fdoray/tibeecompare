@@ -264,7 +264,7 @@ private:
         if (threads->empty())
         {
             auto cleanStack = PushOnStack(
-                baseStackId, std::string("[thread ") + std::to_string(segment.tid()) + "]");
+                baseStackId, "[thread]");
             threads->push_back(ThreadInfo(segment.tid(), cleanStack));
         }
         else
@@ -280,7 +280,7 @@ private:
             {
                 // This thread is not on the stack of threads yet: add it.
                 auto cleanStack = PushOnStack(
-                    threads->back().stack, std::string("[thread ") + std::to_string(segment.tid()) + "]");
+                    threads->back().stack, "[thread]");
                 threads->push_back(ThreadInfo(segment.tid(), cleanStack));
             }
             else

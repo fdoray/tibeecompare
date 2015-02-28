@@ -59,34 +59,52 @@ CriticalGraph::~CriticalGraph()
 
 void CriticalGraph::Cleanup(timestamp_t ts)
 {
-    /*
-	// Clean the threads histories.
 	for (auto& threadHistory : _tid_to_nodes)
 	{
-	    if (threadHistory.second->size() < 2)
-	        continue;
+	    auto it = threadHistory.second->begin();
+	    for (; it != threadHistory.second->end(); ++it)
+	    {
+	        if ((*it)->ts() >= ts)
+	            break;
 
-		NodeTsComparator comparator;
-		auto it = std::upper_bound(
-		    threadHistory.second->begin(), threadHistory.second->end(), ts, comparator);
-		if (threadHistory.second->begin() + 2 > it)
-			continue;
-		base::CleanVector(it - 2, threadHistory.second->end(), threadHistory.second.get());
+	        // Clean the edges connected to this node.
+	        for (size_t i = 0; i < kCriticalEdgePositionCount; ++i)
+	        {
+	            auto edgeId = (*it)->edge(static_cast<CriticalEdgePosition>(i));
+	            if (edgeId == kInvalidCriticalEdgeId)
+	                continue;
+	            auto& edge = GetEdge(edgeId);
+
+	            if (i == kCriticalEdgeOutVertical)
+	            {
+	                const_cast<CriticalNode*>(edge.to())->set_edge(kCriticalEdgeInVertical, kInvalidCriticalEdgeId);
+	            }
+	            else if (i == kCriticalEdgeInVertical)
+	            {
+	                const_cast<CriticalNode*>(edge.from())->set_edge(kCriticalEdgeOutVertical, kInvalidCriticalEdgeId);
+	            }
+	            else if (i == kCriticalEdgeOutHorizontal)
+	            {
+	                const_cast<CriticalNode*>(edge.to())->set_edge(kCriticalEdgeInHorizontal, kInvalidCriticalEdgeId);
+	            }
+	            else
+	            {
+	                assert(i == kCriticalEdgeInHorizontal);
+	                const_cast<CriticalNode*>(edge.from())->set_edge(kCriticalEdgeOutHorizontal, kInvalidCriticalEdgeId);
+	            }
+
+	            _edges.erase(edgeId);
+	        }
+	    }
+
+	    // Clean the nodes.
+	    OrderedNodes tmpThreadHistory;
+	    tmpThreadHistory.reserve(std::distance(it, threadHistory.second->end()));
+	    for (; it != threadHistory.second->end(); ++it)
+	        tmpThreadHistory.push_back(std::move(*it));
+
+	    threadHistory.second->swap(tmpThreadHistory);
 	}
-
-	// Clean the edges.
-	auto edgeIt = _edges.begin();
-	for (; edgeIt != _edges.end(); ++edgeIt)
-	{
-		if (edgeIt->to()->ts() >= ts)
-			break;
-
-		if (edgeIt->type() != kVertical)
-			const_cast<CriticalNode*>(edgeIt->to())->set_edge(kCriticalEdgeInHorizontal, kInvalidCriticalEdgeId);
-	}
-	_edgesOffset += std::distance(_edges.begin(), edgeIt);
-	base::CleanVector(edgeIt, _edges.end(), &_edges);
-	*/
 }
 
 CriticalNode* CriticalGraph::CreateNode(uint32_t tid)
