@@ -28,14 +28,13 @@ install:
   # stuff needed by tigerbeetle
   - sudo apt-get install -qq pkg-config
   - sudo apt-get install -qq libcppunit-dev
-  - sudo apt-get install -qq boost1.55
-  - sudo apt-get install -qq libboost1.55-dev
+  - sudo apt-get install -qq libboost-all-dev
 
   # libelf, for symbols
   - sudo apt-get install -qq libelf-dev
+  - sudo apt-get install -qq libdw-dev
 
 script:
-  - export CXX=g++-4.8
   - ./bootstrap.sh
   - source ./setenv.sh
   - scons mode=$BUILD_MODE
