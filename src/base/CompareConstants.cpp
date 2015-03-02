@@ -53,6 +53,7 @@ const char* kMetricNames[] = {
 };
 const size_t kNumMetrics = sizeof(kMetricNames) / sizeof(char*);
 
+uint32_t kPerformanceCounterFirstMetricId = kNumMetrics;
 const char* kPerformanceCounters[] = {
     "instructions",
     "cache-references",

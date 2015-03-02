@@ -22,6 +22,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "base/CompareConstants.hpp"
 #include "base/JsonWriter.hpp"
 
 namespace tibee
@@ -123,9 +124,19 @@ void WriteExecution(
          it != execution.metrics_end();
          ++it)
     {
-        uint64_t microsecondsValue = it->second / 1000;
-        std::string key(1, static_cast<char>(it->first) + 'a');
-        writer->KeyValue(key, microsecondsValue);
+        // Timing metric.
+        if (it->first < kPerformanceCounterFirstMetricId)
+        {
+            uint64_t microsecondsValue = it->second / 1000;
+            std::string key(1, static_cast<char>(it->first) + 'a');
+            writer->KeyValue(key, microsecondsValue);
+        }
+        else
+        {
+            std::string key = std::string("p") +
+                std::to_string(it->first - kPerformanceCounterFirstMetricId);
+            writer->KeyValue(key, it->second);
+        }
     }
 
     // Make sure that all stacks of this execution are in |stacks| and

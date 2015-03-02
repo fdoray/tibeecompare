@@ -164,7 +164,9 @@ void BuildBlock::SaveExecutions()
             _currentState, &_db, execution.get());
 
         // Extract execution metrics.
-        execution::ExtractMetrics(criticalPath, execution.get());
+        execution::ExtractMetrics(
+            criticalPath, _stateHistory, _currentState, _quarks,
+            execution.get());
 
         // Add the execution to the database.
         _db.AddExecution(*execution);

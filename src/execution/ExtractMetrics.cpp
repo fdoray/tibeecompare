@@ -18,6 +18,7 @@
 #include "execution/ExtractMetrics.hpp"
 
 #include "base/CompareConstants.hpp"
+#include "base/Constants.hpp"
 #include "base/print.hpp"
 
 namespace tibee
@@ -25,9 +26,12 @@ namespace tibee
 namespace execution
 {
 
-void ExtractMetrics(
-        const critical::CriticalPath& criticalPath,
-        Execution* execution)
+namespace
+{
+
+void ExtractTimingMetrics(
+    const critical::CriticalPath& criticalPath,
+    Execution* execution)
 {
     // Duration.
     auto duration = execution->endTs() - execution->startTs();
@@ -56,6 +60,64 @@ void ExtractMetrics(
         base::tberror() << "Critical path is not the same duration as the "
                 "execution..." << base::tbendl();
     }
+}
+
+void ExtractPerformanceCounterMetrics(
+    const critical::CriticalPath& criticalPath,
+    const state::StateHistory& stateHistory,
+    state::CurrentState* currentState,
+    quark::StringQuarkDatabase* quarks,
+    Execution* execution)
+{
+    // Path for thread state.
+    state::AttributePathStr threadStatePath {kStateLinux, kStateThreads};
+    auto threadStateKey = currentState->GetAttributeKeyStr(threadStatePath);
+
+    // Traverse all performance counters.
+    for (size_t i = 0; i < kNumPerformanceCounters; ++i)
+    {
+        quark::Quark counterQuark = quarks->StrQuark(kPerformanceCounters[i]);
+        MetricId metricId = kPerformanceCounterFirstMetricId + i;
+
+        for (const auto& segment : criticalPath)
+        {
+            if (segment.type() != critical::kRun)
+                continue;
+
+            auto counterKey = currentState->GetAttributeKey(
+                threadStateKey, {currentState->IntQuark(segment.tid()), counterQuark});
+
+            uint64_t beginValue = 0;
+            uint64_t endValue = 0;
+            if (!stateHistory.GetULongValue(counterKey, segment.startTs(), &beginValue) ||
+                !stateHistory.GetULongValue(counterKey, segment.endTs(), &endValue))
+            {
+                continue;
+            }
+
+            uint64_t segmentValue = endValue - beginValue;
+            if (segmentValue != 0)
+            {
+                uint64_t currentValue = 0;
+                execution->GetMetric(metricId, &currentValue);
+                execution->SetMetric(metricId, currentValue + segmentValue);
+            }
+        }
+    }
+}
+
+}  // namespace
+
+void ExtractMetrics(
+        const critical::CriticalPath& criticalPath,
+        const state::StateHistory& stateHistory,
+        state::CurrentState* currentState,
+        quark::StringQuarkDatabase* quarks,
+        Execution* execution)
+{
+    ExtractTimingMetrics(criticalPath, execution);
+    ExtractPerformanceCounterMetrics(
+        criticalPath, stateHistory, currentState, quarks, execution);
 }
 
 }  // namespace execution

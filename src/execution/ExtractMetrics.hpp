@@ -20,6 +20,9 @@
 
 #include "critical/CriticalPath.hpp"
 #include "execution/Execution.hpp"
+#include "quark/StringQuarkDatabase.hpp"
+#include "state/CurrentState.hpp"
+#include "state/StateHistory.hpp"
 
 namespace tibee
 {
@@ -28,6 +31,9 @@ namespace execution
 
 void ExtractMetrics(
     const critical::CriticalPath& criticalPath,
+    const state::StateHistory& stateHistory,
+    state::CurrentState* currentState,
+    quark::StringQuarkDatabase* quarks,
     Execution* execution);
 
 }  // namespace execution

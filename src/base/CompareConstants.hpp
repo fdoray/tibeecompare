@@ -40,6 +40,7 @@ const uint32_t kTsMetricId = 1;
 const uint32_t kNumCustomMetrics = 2;
 
 // Performance counters.
+extern uint32_t kPerformanceCounterFirstMetricId;
 extern const char* kPerformanceCounters[];
 extern const size_t kNumPerformanceCounters;
 
