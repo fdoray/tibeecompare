@@ -186,5 +186,68 @@ TEST(StateHistory, Clean)
 	EXPECT_EQ(5u, val);
 }
 
+TEST(StateHistory, PerfCounters)
+{
+    uint64_t val1 = 0;
+    uint64_t val2 = 0;
+    uint64_t val3 = 0;
+    uint64_t val4 = 0;
+
+    AttributeKey key1(1);
+
+    // History 1.
+    StateHistory history1;
+    history1.SetTimestamp(10);
+    history1.SetPerfCounterCpuBaseValue(key1, 1000);
+    history1.SetTimestamp(20);
+    history1.SetPerfCounterCpuValue(key1, 2000);
+    history1.SetTimestamp(30);
+    history1.SetPerfCounterCpuBaseValue(key1, 10000);
+    history1.SetTimestamp(40);
+    history1.SetPerfCounterCpuValue(key1, 11000);
+
+    EXPECT_TRUE(history1.GetULongValue(key1, 10, &val1));
+    EXPECT_TRUE(history1.GetULongValue(key1, 20, &val2));
+    EXPECT_EQ(1000u, val2 - val1);
+
+    EXPECT_TRUE(history1.GetULongValue(key1, 40, &val2));
+    EXPECT_EQ(2000u, val2 - val1);
+
+    // History 2.
+    StateHistory history2;
+    history2.SetTimestamp(10);
+    history2.SetPerfCounterThreadValue(key1, 1000);
+    history2.SetTimestamp(20);
+    history2.SetPerfCounterThreadValue(key1, 2200);
+    history2.SetTimestamp(30);
+    history2.SetPerfCounterThreadValue(key1, 3000);
+
+    EXPECT_TRUE(history2.GetULongValue(key1, 10, &val1));
+    EXPECT_TRUE(history2.GetULongValue(key1, 20, &val2));
+    EXPECT_TRUE(history2.GetULongValue(key1, 30, &val3));
+    EXPECT_EQ(1200u, val2 - val1);
+    EXPECT_EQ(800u, val3 - val2);
+
+    // History 3.
+    StateHistory history3;
+    history3.SetTimestamp(10);
+    history3.SetPerfCounterCpuBaseValue(key1, 1000);
+    history3.SetTimestamp(20);
+    history3.SetPerfCounterThreadValue(key1, 500);
+    history3.SetTimestamp(30);
+    history3.SetPerfCounterCpuValue(key1, 2000);
+    history3.SetTimestamp(40);
+    history3.SetPerfCounterThreadValue(key1, 3000);
+
+    EXPECT_TRUE(history3.GetULongValue(key1, 10, &val1));
+    EXPECT_TRUE(history3.GetULongValue(key1, 20, &val2));
+    EXPECT_TRUE(history3.GetULongValue(key1, 30, &val3));
+    EXPECT_TRUE(history3.GetULongValue(key1, 40, &val4));
+
+    EXPECT_EQ(0u, val2 - val1);
+    EXPECT_EQ(1000u, val3 - val2);
+    EXPECT_EQ(1500u, val4 - val3);
+}
+
 }  // namespace stacks
 }  // namespace tibee

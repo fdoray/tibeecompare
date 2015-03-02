@@ -142,11 +142,11 @@ void StateHistory::EnumerateUIntegerValues(
 
 void StateHistory::SetULongValue(AttributeKey key, uint64_t value)
 {
-    auto& keyHistory = _uIntegerHistory[key];
+    auto& keyHistory = _uLongHistory[key];
     if (!keyHistory.empty() && keyHistory.back().value == value)
         return;
 
-    UIntegerEntry entry;
+    ULongEntry entry;
     entry.ts = _ts;
     entry.value = value;
     keyHistory.push_back(entry);
@@ -154,8 +154,8 @@ void StateHistory::SetULongValue(AttributeKey key, uint64_t value)
 
 bool StateHistory::GetULongValue(AttributeKey key, timestamp_t ts, uint64_t* value) const
 {
-    auto look = _uIntegerHistory.find(key);
-    if (look == _uIntegerHistory.end())
+    auto look = _uLongHistory.find(key);
+    if (look == _uLongHistory.end())
         return false;
 
     const auto& keyHistory = look->second;
@@ -181,6 +181,10 @@ void StateHistory::SetPerfCounterCpuBaseValue(AttributeKey key, uint64_t value)
     auto& state = _perfCounterStates[key];
     state.cpuAbsolute = value;
     state.cpuReal = GetULongLastValue(key);
+
+    auto look = _uLongHistory.find(key);
+    if (look == _uLongHistory.end())
+        SetPerfCounterCpuValue(key, value);
 }
 
 void StateHistory::SetPerfCounterCpuValue(AttributeKey key, uint64_t value)
@@ -218,6 +222,12 @@ void StateHistory::SetPerfCounterThreadValue(AttributeKey key, uint64_t value)
         // This is the first thread value we got. Keep track of it.
         state.threadAbsolute = value;
         state.threadReal = GetULongLastValue(key);
+
+        // If there is no value for the thread yet, set it to zero.
+        auto look = _uLongHistory.find(key);
+        if (look == _uLongHistory.end())
+            SetULongValue(key, 0);
+
         return;
     }
 
@@ -241,8 +251,9 @@ uint64_t StateHistory::GetULongLastValue(AttributeKey key) const
 {
     uint64_t last = 0;
     auto look = _uLongHistory.find(key);
-    if (look != _uLongHistory.end() && !look->second.empty())
+    if (look != _uLongHistory.end() && !look->second.empty()) {
         last = look->second.back().value;
+    }
     return last;
 }
 
