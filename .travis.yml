@@ -8,6 +8,9 @@ env:
   - BUILD_MODE=release
 
 before_install:
+  # support c++11
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
   # update everything now
   - sudo apt-get update -qq
 
@@ -26,6 +29,7 @@ install:
   - sudo apt-get install -qq libpopt-dev
 
   # stuff needed by tigerbeetle
+  - sudo apt-get install --force-yes -qq g++-4.8
   - sudo apt-get install -qq pkg-config
   - sudo apt-get install -qq libcppunit-dev
   - sudo apt-get install -qq libboost-all-dev
@@ -35,6 +39,7 @@ install:
   - sudo apt-get install -qq libdw-dev
 
 script:
+  - export CXX=g++-4.8
   - ./bootstrap.sh
   - source ./setenv.sh
   - scons mode=$BUILD_MODE

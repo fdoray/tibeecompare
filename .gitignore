@@ -39,3 +39,4 @@ prod-db
 test-db
 .*
 *.json
+lttng
