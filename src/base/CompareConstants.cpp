@@ -53,4 +53,55 @@ const char* kMetricNames[] = {
 };
 const size_t kNumMetrics = sizeof(kMetricNames) / sizeof(char*);
 
+const char* kPerformanceCounters[] = {
+    "instructions",
+    "cache-references",
+    "cache-misses",
+    "branch-instructions",
+    "branches",
+    "branch-misses",
+    "L1-dcache-loads",
+    "L1-dcache-load-misses",
+    "L1-dcache-stores",
+    "L1-dcache-store-misses",
+    "L1-dcache-prefetches",
+    "L1-dcache-prefetch-misses",
+    "L1-icache-loads",
+    "L1-icache-load-misses",
+    "L1-icache-stores",
+    "L1-icache-store-misses",
+    "L1-icache-prefetches",
+    "L1-icache-prefetch-misses",
+    "LLC-loads",
+    "LLC-load-misses",
+    "LLC-stores",
+    "LLC-store-misses",
+    "LLC-prefetches",
+    "LLC-prefetch-misses",
+    "dTLB-loads",
+    "perf:thread:dTLB-load-misses",
+    "dTLB-stores",
+    "dTLB-store-misses",
+    "dTLB-prefetches",
+    "dTLB-prefetch-misses",
+    "iTLB-loads",
+    "iTLB-load-misses",
+    "branch-loads",
+    "branch-load-misses",
+    "cpu-clock",
+    "task-clock",
+    "page-fault",
+    "faults",
+    "major-faults",
+    "minor-faults",
+    "context-switches",
+    "cs",
+    "cpu-migrations",
+    "migrations",
+    "alignment-faults",
+    "emulation-faults"
+};
+const size_t kNumPerformanceCounters =
+        sizeof(kPerformanceCounters) / sizeof(char*);
+
 }

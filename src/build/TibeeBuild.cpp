@@ -33,6 +33,7 @@
 #include "stacks_blocks/ProfilerBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
+#include "state_blocks/PerfCountersBlock.hpp"
 #include "state_blocks/StateHistoryBlock.hpp"
 #include "trace_blocks/TraceBlock.hpp"
 
@@ -169,6 +170,14 @@ bool TibeeBuild::run()
     {
         stateHistoryBlock.reset(new state_blocks::StateHistoryBlock);
         runner.AddBlock(stateHistoryBlock.get(), nullptr);
+    }
+
+    // Perf counters block.
+    block::BlockInterface::UP perfCountersBlock;
+    if (!_args.dumpStacks && !_args.stats)
+    {
+        perfCountersBlock.reset(new state_blocks::PerfCountersBlock);
+        runner.AddBlock(perfCountersBlock.get(), nullptr);
     }
 
     // Build block.

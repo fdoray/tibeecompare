@@ -39,6 +39,10 @@ const uint32_t kDurationMetricId = 0;
 const uint32_t kTsMetricId = 1;
 const uint32_t kNumCustomMetrics = 2;
 
+// Performance counters.
+extern const char* kPerformanceCounters[];
+extern const size_t kNumPerformanceCounters;
+
 }  // namespace tibee
 
 #endif // _TIBEE_BASE_COMPARECONSTANTS_HPP

@@ -1,6 +1,7 @@
 Import('env')
 
 sources = [
+    'PerfCountersBlock.cpp',
     'StateHistoryBlock.cpp',
 ]
 
