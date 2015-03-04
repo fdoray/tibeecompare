@@ -150,6 +150,7 @@ void ComputeCriticalPathRecursive(
         // Look for the first node of the thread that has a timestamp > |startTs|
         // and that has an input edge.
         node = graph.GetNodeStartingAfter(startTs, tid);
+        bool foundSomething = false;
         while (node != nullptr && node->ts() <= endTs)
         {
             auto wakeUpEdgeId = node->edge(kCriticalEdgeInVertical);
@@ -160,8 +161,26 @@ void ComputeCriticalPathRecursive(
                 auto& wakeUpEdge = graph.GetEdge(wakeUpEdgeId);
                 ComputeCriticalPathRecursive(
                     graph, startTs, node->ts(), wakeUpEdge.from()->tid(), path);
+                foundSomething = true;
                 break;
             }
+
+            auto horizontalEdgeId = node->edge(kCriticalEdgeOutHorizontal);
+            if (horizontalEdgeId != kInvalidCriticalEdgeId)
+                node = graph.GetEdge(horizontalEdgeId).to();
+            else
+                break;
+        }
+
+        // This thread has no wake-up edge... it's really suspicious.
+        if (!foundSomething)
+        {
+            base::tberror() << "Thread with no wake-up edge found while computing critical path." << base::tbendl();
+            node = graph.GetNodeStartingAfter(startTs, tid);
+
+            // Fill the critical path with a blocked edge.
+            InsertCriticalPathSegment(CriticalPathSegment(
+                startTs, node->ts(), tid, kWaitBlocked), path);
         }
     }
 
