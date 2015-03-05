@@ -55,6 +55,7 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
         ("trace,t", bpo::value<std::vector<std::string>>())
         ("dump,d", bpo::bool_switch()->default_value(false))
         ("stats,s", bpo::bool_switch()->default_value(false))
+        ("special,z", bpo::bool_switch()->default_value(false))
         ("verbose,v", bpo::bool_switch()->default_value(false))
     ;
 
@@ -101,6 +102,9 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
     // stats
     args.stats = vm["stats"].as<bool>();
 
+    // special
+    args.special = vm["special"].as<bool>();
+
     // verbose
     args.verbose = vm["verbose"].as<bool>();
 
@@ -111,7 +115,7 @@ int parseOptions(int argc, char* argv[], tibee::build::Arguments& args)
     }
     args.traces = vm["trace"].as<std::vector<std::string>>();
 
-    if (args.dumpStacks)
+    if (args.dumpStacks || args.special)
         return 0;
 
     // name

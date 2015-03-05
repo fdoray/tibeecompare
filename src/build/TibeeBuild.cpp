@@ -30,6 +30,7 @@
 #include "build_blocks/BuildBlock.hpp"
 #include "critical_blocks/CriticalBlock.hpp"
 #include "execution_blocks/PunchBlock.hpp"
+#include "execution_blocks/SpecialBlock.hpp"
 #include "stacks_blocks/ProfilerBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
@@ -130,7 +131,7 @@ bool TibeeBuild::run()
     // Punch block.
     value::StructValue::UP punchParams;
     block::BlockInterface::UP punchBlock;
-    if (!_args.dumpStacks)
+    if (!_args.dumpStacks && !_args.special)
     {
         punchParams.reset(new value::StructValue);
         punchParams->AddField("name", value::MakeValue(_args.name));
@@ -154,7 +155,7 @@ bool TibeeBuild::run()
 
     // Critical block.
     block::BlockInterface::UP criticalBlock;
-    if (!_args.dumpStacks && !_args.stats)
+    if (!_args.dumpStacks && !_args.stats && !_args.special)
     {
         criticalBlock.reset(new critical_blocks::CriticalBlock);
         runner.AddBlock(criticalBlock.get(), nullptr);
@@ -166,7 +167,7 @@ bool TibeeBuild::run()
 
     // State history block.
     block::BlockInterface::UP stateHistoryBlock;
-    if (!_args.dumpStacks && !_args.stats)
+    if (!_args.dumpStacks && !_args.stats && !_args.special)
     {
         stateHistoryBlock.reset(new state_blocks::StateHistoryBlock);
         runner.AddBlock(stateHistoryBlock.get(), nullptr);
@@ -174,14 +175,23 @@ bool TibeeBuild::run()
 
     // Perf counters block.
     block::BlockInterface::UP perfCountersBlock;
-    if (!_args.dumpStacks && !_args.stats)
+    if (!_args.dumpStacks && !_args.stats && !_args.special)
     {
         perfCountersBlock.reset(new state_blocks::PerfCountersBlock);
         runner.AddBlock(perfCountersBlock.get(), nullptr);
     }
 
+    // Special block.
+    block::BlockInterface::UP specialBlock;
+    if (_args.special)
+    {
+        specialBlock.reset(new execution_blocks::SpecialBlock);
+        runner.AddBlock(specialBlock.get(), nullptr);
+    }
+
     // Build block.
-    block::BlockInterface::UP buildBlock(new build_blocks::BuildBlock(_args.stats));
+    block::BlockInterface::UP buildBlock(new build_blocks::BuildBlock(
+        _args.dumpStacks || _args.stats || _args.special));
     runner.AddBlock(buildBlock.get(), nullptr);
 
     // Run the blocks.

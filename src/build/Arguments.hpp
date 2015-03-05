@@ -54,6 +54,9 @@ struct Arguments
     // Show execution duration statistics, do not track executions.
     bool stats;
 
+    // Execute the special block!
+    bool special;
+
     // Verbose flag.
     bool verbose;
 };

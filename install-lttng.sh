@@ -101,7 +101,7 @@ popd
 # install libunwind
 pushd libunwind-per_thread_cache
 ./autogen.sh
-./configure --enable-block-signals=false  --enable-conservative-checks=false
+./configure --enable-block-signals=false
 make -j4
 sudo make install
 popd
