@@ -94,14 +94,16 @@ void BuildBlock::AddObservers(notification::NotificationCenter* notificationCent
 
 void BuildBlock::onTimestamp(const notification::Path& path, const value::Value* value)
 {
-    if (_stats)
-        return;
-
     auto ts = value->AsULong();
     _executionsBuilder.SetTimestamp(ts);
     _stacksBuilder.SetTimestamp(ts);
     _criticalGraph.SetTimestamp(ts);
     _stateHistory.SetTimestamp(ts);
+
+    if (_stats)
+        return;
+
+    return;
 
     if (_saveTs == 0)
     {
@@ -170,6 +172,8 @@ void BuildBlock::SaveExecutions()
 
         // Add the execution to the database.
         _db.AddExecution(*execution);
+
+        std::cout << execution->startTs() << " to " << execution->endTs() << std::endl;
 
         ++_numExecutions;
     }

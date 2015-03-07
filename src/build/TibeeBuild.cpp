@@ -31,6 +31,7 @@
 #include "critical_blocks/CriticalBlock.hpp"
 #include "execution_blocks/PunchBlock.hpp"
 #include "execution_blocks/SpecialBlock.hpp"
+#include "execution_blocks/ThreadBlock.hpp"
 #include "stacks_blocks/ProfilerBlock.hpp"
 #include "state_blocks/CurrentStateBlock.hpp"
 #include "state_blocks/LinuxSchedStateBlock.hpp"
@@ -129,6 +130,7 @@ bool TibeeBuild::run()
     runner.AddBlock(traceBlock.get(), traceParams.get());
 
     // Punch block.
+    /*
     value::StructValue::UP punchParams;
     block::BlockInterface::UP punchBlock;
     if (!_args.dumpStacks && !_args.special)
@@ -142,6 +144,7 @@ bool TibeeBuild::run()
         punchBlock.reset(new execution_blocks::PunchBlock);
         runner.AddBlock(punchBlock.get(), punchParams.get());
     }
+    //*/
 
     // Current state block.
     block::BlockInterface::UP currentStateBlock(new state_blocks::CurrentStateBlock);
@@ -193,6 +196,11 @@ bool TibeeBuild::run()
     block::BlockInterface::UP buildBlock(new build_blocks::BuildBlock(
         _args.dumpStacks || _args.stats || _args.special));
     runner.AddBlock(buildBlock.get(), nullptr);
+
+    // Thread block.
+    block::BlockInterface::UP threadBlock;
+    threadBlock.reset(new execution_blocks::ThreadBlock);
+    runner.AddBlock(threadBlock.get(), nullptr);
 
     // Run the blocks.
     runner.Run();

@@ -169,7 +169,7 @@ void CrashHandler(int sig)
 int main(int argc, char* argv[])
 {
     // install a crash handler.
-    signal(SIGSEGV, CrashHandler);
+    // signal(SIGSEGV, CrashHandler);
 
     // read arguments
     tibee::build::Arguments args;

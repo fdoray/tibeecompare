@@ -78,9 +78,42 @@ void EnsureStacksInMap(
     }
 }
 
+bool WantStack(const std::vector<std::string>& stack)
+{
+    bool hasExecUpdate = false;
+    for (const auto& s : stack)
+    {
+        auto look = s.find("execUpdate");
+        if (look != std::string::npos) {
+            hasExecUpdate = true;
+        }
+    }
+    if (!hasExecUpdate)
+        return false;
+
+    for (const auto& s : stack)
+    {
+        auto look = s.find("lttng");
+        if (look != std::string::npos)
+            return false;
+        look = s.find("Lock::DBWrite");
+        if (look != std::string::npos)
+            return false;
+        look = s.find("lockComplete");
+        if (look != std::string::npos)
+            return false;
+        look = s.find("tp_rcu_read_lock_bp");
+        if (look != std::string::npos)
+            return false;
+    }
+
+    return true;
+}
+
 uint64_t WriteSamples(
     stacks::StackId stackId,
     const execution::Execution& execution,
+    const db::Database& db,
     base::JsonWriter* writer,
     ReverseStacksMap* reverseStacks)
 {
@@ -94,13 +127,25 @@ uint64_t WriteSamples(
         for (stacks::StackId childStackId : children)
         {
             childrenCount += WriteSamples(
-                childStackId, execution, writer, reverseStacks);
+                childStackId, execution, db, writer, reverseStacks);
         }
     }
 
+    // Check whether we want this stack.
+    uint64_t exclusiveCount = execution.GetSample(stackId);
+    std::vector<std::string> stack;
+    db.GetStackContent(stackId, &stack);
+    if (!WantStack(stack))
+        exclusiveCount = 0;
+
     // Compute the count for this stack, including its children.
-    uint64_t inclusiveCount = execution.GetSample(stackId) + childrenCount;
-    uint64_t inclusiveCountMicroseconds = inclusiveCount / 1000;
+    uint64_t inclusiveCount = exclusiveCount + childrenCount;
+    uint64_t inclusiveCountMicroseconds = inclusiveCount;
+
+    if (execution.startTs() == 1425585886041384938)
+        inclusiveCountMicroseconds /= 35524;
+    else
+        inclusiveCountMicroseconds /= 52936;
 
     // Write the count to the JSon file.
     if (stackId != stacks::kEmptyStackId && inclusiveCountMicroseconds != 0) {
@@ -145,7 +190,7 @@ void WriteExecution(
 
     // Write samples.
     writer->KeyDictValue("samples");
-    WriteSamples(stacks::kEmptyStackId, execution, writer, reverseStacks);
+    WriteSamples(stacks::kEmptyStackId, execution, db, writer, reverseStacks);
     writer->EndDict();
 
     writer->EndDict();

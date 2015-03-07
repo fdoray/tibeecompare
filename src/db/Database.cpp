@@ -565,6 +565,17 @@ void Database::DestroyTestDb()
         throw base::ex::FatalError("Unable to destroy test database.");
 }
 
+void Database::GetStackContent(stacks::StackId id, std::vector<std::string>* stack) const
+{
+    OpenDatabase();
+
+    while (id != stacks::kEmptyStackId) {
+        auto step = GetStack(id);
+        stack->push_back(GetFunctionName(step.function()));
+        id = step.bottom();
+    }
+}
+
 void Database::PrintStack(stacks::StackId id)
 {
     OpenDatabase();

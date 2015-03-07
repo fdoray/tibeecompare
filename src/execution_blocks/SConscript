@@ -6,6 +6,7 @@ Import(['env',])
 sources = [
     'PunchBlock.cpp',
     'SpecialBlock.cpp',
+    'ThreadBlock.cpp',
 ]
 
 Return('sources')

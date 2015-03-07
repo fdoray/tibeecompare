@@ -23,7 +23,9 @@
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <memory>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "base/BasicTypes.hpp"
 #include "execution/Execution.hpp"
@@ -65,6 +67,9 @@ public:
 
     // Destroy test database.
     static void DestroyTestDb();
+
+    // Get the content of a stack.
+    void GetStackContent(stacks::StackId id, std::vector<std::string>* stack) const;
 
     // Print a stack.
     void PrintStack(stacks::StackId id);

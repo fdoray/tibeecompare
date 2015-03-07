@@ -30,12 +30,13 @@ namespace tibee {
 namespace execution_blocks {
 
 SpecialBlock::SpecialBlock()
-    : _numPrinted(0)
+    : _numPrinted(0), _numTotal(0)
 {
 }
 
 SpecialBlock::~SpecialBlock()
 {
+    base::tbinfo() << "A total of " << _numTotal << " executions were found." << base::tbendl();
 }
 
 void SpecialBlock::Start(const value::Value* params)
@@ -63,7 +64,7 @@ void SpecialBlock::onExecutionBegin(const trace::EventValue& event)
     stats.executionBegin = 0;
     stats.executionEnd = 0;
 
-    if (type == "update")
+    if (thread == 17882)
         stats.executionBegin = State()->timestamp();
 
     _threadStats[thread] = stats;
@@ -77,9 +78,7 @@ void SpecialBlock::onExecutionEnd(const trace::EventValue& event)
     if (stats.executionBegin == 0)
         return;
 
-    ++_numPrinted;
-    if (_numPrinted != 10)
-        return;
+    ++_numTotal;
 
     stats.executionEnd = State()->timestamp();
 
@@ -89,7 +88,6 @@ void SpecialBlock::onExecutionEnd(const trace::EventValue& event)
     std::cout << execution << "," << lock << "," << plan << "," << std::endl;
 
     stats.executionBegin = 0;
-    _numPrinted = 0;
 }
 
 void SpecialBlock::onStepBegin(const trace::EventValue& event) {

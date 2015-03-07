@@ -15,11 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with tigerbeetle.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _TIBEE_BUILDERBLOCKS_SPECIALBLOCK_HPP
-#define _TIBEE_BUILDERBLOCKS_SPECIALBLOCK_HPP
+#ifndef _TIBEE_BUILDERBLOCKS_THREADBLOCK_HPP
+#define _TIBEE_BUILDERBLOCKS_THREADBLOCK_HPP
 
 #include <string>
-#include <unordered_map>
 
 #include "build_blocks/AbstractBuildBlock.hpp"
 #include "notification/NotificationCenter.hpp"
@@ -32,41 +31,27 @@ namespace tibee {
 namespace execution_blocks {
 
 /**
- * Special block!
+ * Block that makes an execution for a full thread.
  *
  * @author Francois Doray
  */
-class SpecialBlock : public build_blocks::AbstractBuildBlock
+class ThreadBlock : public build_blocks::AbstractBuildBlock
 {
 public:
-    SpecialBlock();
-    ~SpecialBlock();
+    ThreadBlock();
+    ~ThreadBlock();
 
     virtual void Start(const value::Value* params) override;
     virtual void AddObservers(notification::NotificationCenter* notificationCenter) override;
 
 private:
-    void onExecutionBegin(const trace::EventValue& event);
-    void onExecutionEnd(const trace::EventValue& event);
+    void onTimestamp(const notification::Path& path, const value::Value* value);
+    void onSchedProcessExit(const trace::EventValue& event);
 
-    void onStepBegin(const trace::EventValue& event);
-    void onStepEnd(const trace::EventValue& event);
-
-    struct ThreadStats
-    {
-        timestamp_t executionBegin;
-        timestamp_t executionEnd;
-
-        std::unordered_map<std::string, timestamp_t> stepBegin;
-        std::unordered_map<std::string, timestamp_t> stepEnd;
-    };
-    std::unordered_map<thread_t, ThreadStats> _threadStats;
-
-    uint64_t _numPrinted;
-    uint64_t _numTotal;
+    bool _started;
 };
 
 }  // namespace execution_blocks
 }  // namespace tibee
 
-#endif // _TIBEE_BUILDERBLOCKS_SPECIALBLOCK_HPP
+#endif // _TIBEE_BUILDERBLOCKS_THREADBLOCK_HPP

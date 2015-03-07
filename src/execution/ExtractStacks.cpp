@@ -72,6 +72,9 @@ public:
         {
             uint64_t segmentDuration = segment.endTs() - segment.startTs();
 
+            if (segment.tid() != 17882)
+                continue;
+
             // Make sure that the current thread is on top of the stack of threads.
             EnsureCurrentThreadIsOnThreadsStack(segment, baseStackId, &threads);
 
@@ -273,7 +276,7 @@ private:
         if (threads->empty())
         {
             auto cleanStack = PushOnStack(
-                baseStackId, "[thread]");
+                baseStackId, std::string("[thread ") + std::to_string(segment.tid()) + "]");
             threads->push_back(ThreadInfo(segment.tid(), cleanStack));
         }
         else
@@ -289,7 +292,7 @@ private:
             {
                 // This thread is not on the stack of threads yet: add it.
                 auto cleanStack = PushOnStack(
-                    threads->back().stack, "[thread]");
+                    threads->back().stack, std::string("[thread ") + std::to_string(segment.tid()) + "]");
                 threads->push_back(ThreadInfo(segment.tid(), cleanStack));
             }
             else

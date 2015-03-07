@@ -178,6 +178,12 @@ void ComputeCriticalPathRecursive(
             base::tberror() << "Thread with no wake-up edge found while computing critical path." << base::tbendl();
             node = graph.GetNodeStartingAfter(startTs, tid);
 
+            if (node == nullptr)
+            {
+                base::tberror() << "No node on thread " << tid << "." << base::tbendl();
+                return;
+            }
+
             // Fill the critical path with a blocked edge.
             InsertCriticalPathSegment(CriticalPathSegment(
                 startTs, node->ts(), tid, kWaitBlocked), path);
