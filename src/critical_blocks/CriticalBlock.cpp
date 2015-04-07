@@ -309,6 +309,8 @@ void CriticalBlock::OnWakeupFromInterrupt(InterruptContext* context, uint32_t ta
 
         // Cut the target thread.
         auto* nextThreadNode = CutThread(target_tid, "wakeup_network");
+        if (nextThreadNode == nullptr)
+            return;
 
         // TODO: Change last edge type to "scheduling".
 
