@@ -20,6 +20,7 @@
 
 #include <stack>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "critical/CriticalGraph.hpp"
 #include "critical_blocks/PacketKey.hpp"
@@ -67,6 +68,7 @@ private:
     void OnInetSockLocalIn(const trace::EventValue& event);
     void OnInetSockLocalOut(const trace::EventValue& event);
     void OnThreadStatus(uint32_t tid, const notification::Path& path, const value::Value* value);
+    void OnThreadName(uint32_t tid, const notification::Path& path, const value::Value* value);
 
     void OnTTWUBetweenThreads(uint32_t source_tid, uint32_t target_tid);
     void OnWakeupFromInterrupt(InterruptContext* context, uint32_t target_tid);
@@ -84,6 +86,9 @@ private:
 
     // Nodes for network dependencies.
     std::unordered_map<PacketKey, critical::CriticalNode*> _networkNodes;
+
+    // Disk journaling threads.
+    std::unordered_set<thread_t> _diskThreads;
 
     // Constant quarks.
     quark::Quark Q_RUN_USERMODE;

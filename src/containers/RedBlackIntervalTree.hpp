@@ -45,6 +45,9 @@ class RedBlackIntervalTree : boost::noncopyable {
   // Destructor.
   ~RedBlackIntervalTree();
 
+  // Move  assignment.
+  RedBlackIntervalTree<T>& operator=(RedBlackIntervalTree<T>&& other);
+
   // Insert an element in the tree.
   // @param interval Interval of the element to insert.
   // @param value Value of the element to insert.
@@ -206,6 +209,16 @@ RedBlackIntervalTree<T>::RedBlackIntervalTree() : root_(NULL), size_(0) {
 template<typename T>
 RedBlackIntervalTree<T>::~RedBlackIntervalTree() {
   delete root_;
+}
+
+template <typename T>
+RedBlackIntervalTree<T>& RedBlackIntervalTree<T>::operator=(RedBlackIntervalTree<T>&& other) {
+  delete root_;
+  root_ = other.root_;
+  size_ = other.size_;
+  other.root_ = nullptr;
+  other.size_ = 0;
+  return *this;
 }
 
 template<typename T>

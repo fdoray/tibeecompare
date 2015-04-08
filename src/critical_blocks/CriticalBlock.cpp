@@ -21,6 +21,7 @@
 #include "base/CompareConstants.hpp"
 #include "base/Constants.hpp"
 #include "base/print.hpp"
+#include "base/String.hpp"
 #include "block/ServiceList.hpp"
 #include "critical/CriticalTypes.hpp"
 #include "notification/NotificationCenter.hpp"
@@ -126,6 +127,7 @@ void CriticalBlock::AddObservers(notification::NotificationCenter* notificationC
     AddKernelObserver(notificationCenter, Token("inet_sock_local_in"), base::BindObject(&CriticalBlock::OnInetSockLocalIn, this));
     AddKernelObserver(notificationCenter, Token("inet_sock_local_out"), base::BindObject(&CriticalBlock::OnInetSockLocalOut, this));
     AddThreadStateObserver(notificationCenter, Token(kStateStatus), base::BindObject(&CriticalBlock::OnThreadStatus, this));
+    AddThreadStateObserver(notificationCenter, Token(kStateExecName), base::BindObject(&CriticalBlock::OnThreadName, this));
 }
 
 void CriticalBlock::OnTTWU(const trace::EventValue& event)
@@ -275,6 +277,15 @@ void CriticalBlock::OnInetSockLocalOut(const trace::EventValue& event)
 
 void CriticalBlock::OnTTWUBetweenThreads(uint32_t source_tid, uint32_t target_tid)
 {
+    // If the thread is waked up by a disk journalization thread, we need to
+    // create a disk request entry.
+    if (_diskThreads.find(source_tid) != _diskThreads.end())
+    {
+        auto diskNode = CriticalGraph()->GetLastNodeForThread(target_tid);
+        if (diskNode != nullptr)
+            DiskRequests()->AddInterval(diskNode->ts(), State()->timestamp(), target_tid);
+    }
+
     // Cut the source thread.
     auto nextNodeSource = CutThread(source_tid, "ttwu_source");
     if (nextNodeSource == nullptr)
@@ -318,6 +329,16 @@ void CriticalBlock::OnWakeupFromInterrupt(InterruptContext* context, uint32_t ta
         CriticalGraph()->CreateVerticalEdge(nextNetworkNode, nextThreadNode);
 
         return;
+    }
+
+    // If the thread is waked up by a block device interrupt, we need to
+    // create a disk request entry.
+    if (context->type == critical::kBlockDevice &&
+        _lastEdgeTypePerThread[target_tid] != critical::kBlockDevice)
+    {
+        auto diskNode = CriticalGraph()->GetLastNodeForThread(target_tid);
+        if (diskNode != nullptr)
+            DiskRequests()->AddInterval(diskNode->ts(), State()->timestamp(), target_tid);
     }
 
     // Normal wake-up.
@@ -372,6 +393,20 @@ void CriticalBlock::OnThreadStatus(
         // When the status is null, it means that the thread exited.
         _lastEdgeTypePerThread.erase(tid);
     }
+}
+
+void CriticalBlock::OnThreadName(uint32_t tid, const notification::Path& path, const value::Value* value)
+{
+    // Keep track of jbd2 threads.
+    if (tid == 0)
+        return;
+    auto nameValue = value->GetField(kCurrentStateAttributeValueField);
+    if (nameValue == nullptr)
+        return;
+    auto name = nameValue->AsString();
+
+    if (base::StartsWith(name, "jbd2"))
+        _diskThreads.insert(tid);
 }
 
 critical::CriticalNode* CriticalBlock::CutThread(thread_t tid, const char* msg)

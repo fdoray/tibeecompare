@@ -18,10 +18,11 @@
 #ifndef _TIBEE_DISK_DISKREQUESTS_HPP
 #define _TIBEE_DISK_DISKREQUESTS_HPP
 
+#include <functional>
 #include <vector>
 
 #include "base/BasicTypes.hpp"
-#include "disk/DiskRequest.hpp"
+#include "containers/RedBlackIntervalTree.hpp"
 
 namespace tibee {
 namespace disk {
@@ -32,6 +33,8 @@ namespace disk {
 class DiskRequests
 {
 public:
+  typedef std::function<void (const containers::Interval&, thread_t thread)> EnumerateCallback;
+
   DiskRequests();
   ~DiskRequests();
 
@@ -40,15 +43,13 @@ public:
   // Removes everything that is before the specified timestamp.
   void Cleanup(timestamp_t ts);
 
-  void AddDiskRequest(const DiskRequest& rq);
-
-  // Returns disk requests completed during the specified time range.
-  std::vector<DiskRequest> GetRequests(timestamp_t begin, timestamp_t end) const;
+  void AddInterval(timestamp_t start, timestamp_t end, thread_t tid);
+  void EnumerateIntervals(timestamp_t start, timestamp_t end, const EnumerateCallback& callback) const;
+  std::vector<std::pair<containers::Interval, thread_t>> GetIntervals(timestamp_t start, timestamp_t end) const;
 
 private:
   timestamp_t _ts;
-
-  std::vector<DiskRequest> _requests;
+  containers::RedBlackIntervalTree<thread_t> _intervals;
 };
 
 }  // namespace disk

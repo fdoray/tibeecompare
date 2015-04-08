@@ -127,37 +127,45 @@ public:
                         stacks.GetStack(segment.tid(), segment.startTs()));
                 }
 
-                auto stackId = PushOnStack(
+                auto diskStackId = PushOnStack(
                     threads.back().stack,
                     critical::GetStatusString(segment.type()));
 
-                // Find disk requests completed during this segment.
-                auto requests = diskRequests.GetRequests(segment.startTs(), segment.endTs());
+                // Find threads that waited for the disk at the same time as us.
+                auto intervals = diskRequests.GetIntervals(segment.startTs(), segment.endTs());
+                uint64_t intervalsTotalDuration = 0;
+                for (const auto& interval : intervals) {
+                    if (interval.second != segment.tid())
+                        intervalsTotalDuration += (interval.first.high() - interval.first.low());
+                }
 
-                double totalBytes = 0;
-                for (const auto& req : requests)
-                    totalBytes += req.size;
+                uint64_t criticalSegmentDuration = segment.endTs() - segment.startTs();
+                uint64_t totalIncrementedSamples = 0;
 
-                uint64_t totalDuration = 0;
-                for (const auto& req : requests)
-                {
-                    uint64_t length = (static_cast<double>(req.size) / totalBytes) * segmentDuration;
-                    totalDuration += length;
-                    if (totalDuration > segmentDuration) {
-                        length -= (totalDuration - segmentDuration);
-                        totalDuration = segmentDuration;
-                    }
+                for (const auto& interval : intervals) {
+                    if (interval.second == segment.tid())
+                        return;
 
-                    auto processName = currentState->CurrentNameForThread(req.tid);
-                    auto processStackId = PushOnStack(stackId, processName);
+                    auto intervalDuration = interval.first.high() - interval.first.low();
+                    uint64_t stackDuration =
+                        criticalSegmentDuration * intervalDuration / intervalsTotalDuration;
 
-                    execution->IncrementSample(processStackId, length);
+                    if (stackDuration > (criticalSegmentDuration - totalIncrementedSamples))
+                        stackDuration = (criticalSegmentDuration - totalIncrementedSamples);
 
-                    if (totalDuration >= segmentDuration)
+                    auto stackId = PushOnStack(
+                        diskStackId,
+                        std::string("[") + currentState->CurrentNameForThread(interval.second) + "]");
+                    stackId = ConcatenateStacks(stackId, stacks.GetStack(interval.second, interval.first.low()));
+
+                    execution->IncrementSample(stackId, criticalSegmentDuration);
+
+                    totalIncrementedSamples += stackDuration;
+                    if (totalIncrementedSamples >= criticalSegmentDuration)
                         break;
                 }
 
-                execution->IncrementSample(stackId, segmentDuration - totalDuration);
+                execution->IncrementSample(diskStackId, (criticalSegmentDuration - totalIncrementedSamples));
             }
             else if (segment.type() == critical::kWaitCpu)
             {
@@ -316,7 +324,7 @@ private:
         if (threads->empty())
         {
             auto cleanStack = PushOnStack(
-                baseStackId, "[thread]");
+                baseStackId, std::string("[thread ") + currentState->CurrentNameForThread(segment.tid())  + "]");
             threads->push_back(ThreadInfo(segment.tid(), cleanStack));
         }
         else
@@ -332,7 +340,7 @@ private:
             {
                 // This thread is not on the stack of threads yet: add it.
                 auto cleanStack = PushOnStack(
-                    threads->back().stack, "[thread]");
+                    threads->back().stack, std::string("[thread ") + currentState->CurrentNameForThread(segment.tid())  + "]");
                 threads->push_back(ThreadInfo(segment.tid(), cleanStack));
             }
             else

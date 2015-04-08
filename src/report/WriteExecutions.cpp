@@ -33,7 +33,13 @@ namespace report
 namespace
 {
 
+//#define TB_THRESHOLD 200000000
+
+#ifndef TB_THRESHOLD
 const size_t kNumDesiredExecutions = 50000;
+#else
+const size_t kNumDesiredExecutions = 0;
+#endif
 
 typedef std::vector<stacks::StackId> StacksVector;
 typedef std::unordered_map<stacks::StackId, StacksVector> ReverseStacksMap;
@@ -117,6 +123,13 @@ void WriteExecution(
     StacksMap* stacks,
     ReverseStacksMap* reverseStacks)
 {
+#ifdef TB_THRESHOLD
+    uint64_t duration = 0;
+    execution.GetMetric(kDurationMetricId, &duration);
+    if (duration < TB_THRESHOLD)
+        return;
+#endif
+
     writer->BeginDict();
 
     // Write metrics.

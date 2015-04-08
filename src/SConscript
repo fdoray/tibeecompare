@@ -14,7 +14,6 @@ critical = SConscript(os.path.join('critical', 'SConscript'), exports=['env'])
 critical_blocks = SConscript(os.path.join('critical_blocks', 'SConscript'), exports=['env'])
 db = SConscript(os.path.join('db', 'SConscript'), exports=['env'])
 disk = SConscript(os.path.join('disk', 'SConscript'), exports=['env'])
-disk_blocks = SConscript(os.path.join('disk_blocks', 'SConscript'), exports=['env'])
 execution = SConscript(os.path.join('execution', 'SConscript'), exports=['env'])
 execution_blocks = SConscript(os.path.join('execution_blocks', 'SConscript'), exports=['env'])
 stacks = SConscript(os.path.join('stacks', 'SConscript'), exports=['env'])
@@ -30,7 +29,6 @@ subs = [
     ('critical_blocks', critical_blocks),
     ('db', db),
     ('disk', disk),
-    ('disk_blocks', disk_blocks),
     ('execution', execution),
     ('execution_blocks', execution_blocks),
     ('stacks', stacks),

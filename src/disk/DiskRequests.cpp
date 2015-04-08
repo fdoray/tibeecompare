@@ -27,19 +27,27 @@ namespace disk {
 
 namespace {
 
-class DiskRequestComparator
+void CallbackWrapper(
+    const containers::RedBlackIntervalTree<thread_t>::ElementPair& pair,
+    const DiskRequests::EnumerateCallback& callback)
 {
-public:
-    bool operator() (const disk::DiskRequest& rq, timestamp_t ts) const
-    {
-      return rq.ts < ts;
-    }
+  callback(pair.first, pair.second);
+}
 
-    bool operator() (timestamp_t ts, const disk::DiskRequest& rq) const
-    {
-      return ts < rq.ts;
-    }
-};
+void CleanCallback(
+    const containers::RedBlackIntervalTree<thread_t>::ElementPair& pair,
+    containers::RedBlackIntervalTree<thread_t>* intervals)
+{
+  intervals->Insert(pair.first, pair.second);
+}
+
+void InsertCallback(
+  const containers::RedBlackIntervalTree<thread_t>::ElementPair& pair,
+  std::vector<std::pair<containers::Interval, thread_t>>* vec)
+{
+  vec->push_back(pair);
+}
+
 }  // namespace
 
 DiskRequests::DiskRequests()
@@ -54,42 +62,40 @@ DiskRequests::~DiskRequests()
 
 void DiskRequests::Cleanup(timestamp_t ts)
 {
-  if (_requests.empty())
-    return;
+  namespace pl = std::placeholders;
 
-  DiskRequestComparator comparator;
-  auto it = std::lower_bound(
-      _requests.begin(), _requests.end(), ts, comparator);
-  if (it == _requests.begin())
-    return;
-  --it;
-  base::CleanVector(it, _requests.end(), &_requests);
+  containers::RedBlackIntervalTree<thread_t> newIntervals;
+  _intervals.EnumerateIntersection(
+    containers::Interval(ts, std::numeric_limits<uint64_t>::max()),
+    std::bind(CleanCallback, pl::_1, &newIntervals)
+  );
+
+  _intervals = std::move(newIntervals);
 }
 
-void DiskRequests::AddDiskRequest(const DiskRequest& rq)
+void DiskRequests::AddInterval(timestamp_t start, timestamp_t end, thread_t tid)
 {
-  _requests.push_back(rq);
-  _requests.back().ts = _ts;
+  _intervals.Insert(containers::Interval(start, end), tid);
 }
 
-std::vector<DiskRequest> DiskRequests::GetRequests(timestamp_t begin, timestamp_t end) const
+void DiskRequests::EnumerateIntervals(timestamp_t start, timestamp_t end, const EnumerateCallback& callback) const
 {
-  std::vector<DiskRequest> res;
-  if (_requests.empty())
-    return res;
+  namespace pl = std::placeholders;
 
-  DiskRequestComparator comparator;
-  auto it = std::lower_bound(
-      _requests.begin(), _requests.end(), _ts, comparator);
+  _intervals.EnumerateIntersection(
+      containers::Interval(start, end),
+      std::bind(CallbackWrapper, pl::_1, std::ref(callback)));
+}
 
-  for (; it != _requests.end(); ++it)
-  {
-    if (it->ts > end)
-      break;
-    res.push_back(*it);
-  }
+std::vector<std::pair<containers::Interval, thread_t>> DiskRequests::GetIntervals(timestamp_t start, timestamp_t end) const
+{
+  namespace pl = std::placeholders;
 
-  return res;
+  std::vector<std::pair<containers::Interval, thread_t>> vec;
+  _intervals.EnumerateIntersection(
+      containers::Interval(start, end),
+      std::bind(InsertCallback, pl::_1, &vec));
+  return vec;
 }
 
 }  // namespace disk
