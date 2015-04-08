@@ -154,14 +154,19 @@ const CriticalNode* CriticalGraph::GetNodeIntersecting(timestamp_t ts, thread_t 
 const CriticalNode* CriticalGraph::GetNodeStartingAfter(timestamp_t ts, thread_t tid) const
 {
     auto thread_nodes_it = _tid_to_nodes.find(tid);
-    if (thread_nodes_it == _tid_to_nodes.end())
+    if (thread_nodes_it == _tid_to_nodes.end() || thread_nodes_it->second->empty()) {
+        base::tberror() << "Querying node on thread that doesn't exist." << base::tbendl();
         return nullptr;
+    }
     const auto& thread_nodes = thread_nodes_it->second;
     NodeTsComparator comparator;
     auto node_it = std::upper_bound(thread_nodes->begin(), thread_nodes->end(), ts, comparator);
 
-    if (node_it == thread_nodes->end())
+    if (node_it == thread_nodes->end()) {
+      base::tberror() << "First node on thread " << tid << ": " << thread_nodes->front()->ts() << base::tbendl();
+      base::tberror() << "Last node on thread " << tid << ": " << thread_nodes->back()->ts() << base::tbendl();
       return nullptr;
+    }
 
     return node_it->get();
 }

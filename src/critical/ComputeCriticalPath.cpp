@@ -175,12 +175,18 @@ void ComputeCriticalPathRecursive(
         // This thread has no wake-up edge... it's really suspicious.
         if (!foundSomething)
         {
-            base::tberror() << "Thread with no wake-up edge found while computing critical path." << base::tbendl();
+            base::tberror() << "Thread with no wake-up edge found while computing critical path ("
+                << tid << ", " << startTs <<")." << base::tbendl();
             node = graph.GetNodeStartingAfter(startTs, tid);
+
+            timestamp_t segmentEnd = endTs;
+            if (node != nullptr) {
+                segmentEnd = node->ts();
+            }
 
             // Fill the critical path with a blocked edge.
             InsertCriticalPathSegment(CriticalPathSegment(
-                startTs, node->ts(), tid, kWaitBlocked), path);
+                startTs, segmentEnd, tid, kWaitBlocked), path);
         }
     }
 

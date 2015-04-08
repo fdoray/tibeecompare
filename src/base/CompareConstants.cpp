@@ -23,6 +23,7 @@ const char kExecutionsBuilderServiceName[] = "executions-builder";
 const char kStacksBuilderServiceName[] = "stacks-builder";
 const char kCriticalGraphServiceName[] = "critical-graph";
 const char kStateHistoryServiceName[] = "state-history";
+const char kDiskRequestsServiceName[] = "disk-requests";
 
 const char kInstructions[] = "instructions";
 const char kCacheReferences[] = "cache-references";

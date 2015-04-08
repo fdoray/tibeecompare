@@ -21,6 +21,7 @@
 #include "critical/CriticalGraph.hpp"
 #include "critical/CriticalPath.hpp"
 #include "db/Database.hpp"
+#include "disk/DiskRequests.hpp"
 #include "execution/Execution.hpp"
 #include "stacks/StacksBuilder.hpp"
 #include "state/CurrentState.hpp"
@@ -36,6 +37,7 @@ void ExtractStacks(
     const stacks::StacksBuilder& stacks,
     const critical::CriticalGraph& graph,
     const state::StateHistory& stateHistory,
+    const disk::DiskRequests& diskRequests,
     state::CurrentState* currentState,
     db::Database* db,
     Execution* execution);

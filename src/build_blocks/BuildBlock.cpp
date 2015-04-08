@@ -48,7 +48,7 @@ using base::tbendl;
 using notification::Token;
 
 // Intervals at which executions are saved (ns).
-const timestamp_t kSaveInterval = 10000000000;  // 10 seconds
+const timestamp_t kSaveInterval = 12000000000;  // 12 seconds
 
 }  // namespace
 
@@ -72,6 +72,7 @@ void BuildBlock::RegisterServices(block::ServiceList* serviceList)
     serviceList->AddService(kStacksBuilderServiceName, &_stacksBuilder);
     serviceList->AddService(kCriticalGraphServiceName, &_criticalGraph);
     serviceList->AddService(kStateHistoryServiceName, &_stateHistory);
+    serviceList->AddService(kDiskRequestsServiceName, &_diskRequests);
 }
 
 void BuildBlock::LoadServices(const block::ServiceList& serviceList)
@@ -102,6 +103,7 @@ void BuildBlock::onTimestamp(const notification::Path& path, const value::Value*
     _stacksBuilder.SetTimestamp(ts);
     _criticalGraph.SetTimestamp(ts);
     _stateHistory.SetTimestamp(ts);
+    _diskRequests.SetTimestamp(ts);
 
     if (_saveTs == 0)
     {
@@ -116,6 +118,7 @@ void BuildBlock::onTimestamp(const notification::Path& path, const value::Value*
         _stacksBuilder.Cleanup(_saveTs);
         _criticalGraph.Cleanup(_saveTs);
         _stateHistory.Cleanup(_saveTs);
+        _diskRequests.Cleanup(_saveTs);
 
         tbinfo() << "Continuing to read the trace." << tbendl();
 
@@ -161,7 +164,7 @@ void BuildBlock::SaveExecutions()
         // Extract the stacks that belong to the execution.
         execution::ExtractStacks(
             criticalPath, _stacksBuilder, _criticalGraph, _stateHistory,
-            _currentState, &_db, execution.get());
+            _diskRequests, _currentState, &_db, execution.get());
 
         // Extract execution metrics.
         execution::ExtractMetrics(

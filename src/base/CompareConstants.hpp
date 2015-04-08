@@ -30,6 +30,7 @@ extern const char kExecutionsBuilderServiceName[];
 extern const char kStacksBuilderServiceName[];
 extern const char kCriticalGraphServiceName[];
 extern const char kStateHistoryServiceName[];
+extern const char kDiskRequestsServiceName[];
 
 // Metrics.
 typedef uint32_t MetricId;

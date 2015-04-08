@@ -20,6 +20,7 @@
 
 #include "block/AbstractBlock.hpp"
 #include "critical/CriticalGraph.hpp"
+#include "disk/DiskRequests.hpp"
 #include "execution/ExecutionsBuilder.hpp"
 #include "stacks/StacksBuilder.hpp"
 #include "state/CurrentState.hpp"
@@ -59,6 +60,9 @@ protected:
     // State history.
     state::StateHistory* StateHistory() const { return _stateHistory; }
 
+    // Disk requests.
+    disk::DiskRequests* DiskRequests() const { return _diskRequests; }
+
     // CPU for an event.
     uint32_t CpuForEvent(const trace::EventValue& event) const;
 
@@ -83,6 +87,9 @@ private:
 
     // Critical graph.
     critical::CriticalGraph* _criticalGraph;
+
+    // Disk requests.
+    disk::DiskRequests* _diskRequests;
 
     // State history.
     state::StateHistory* _stateHistory;

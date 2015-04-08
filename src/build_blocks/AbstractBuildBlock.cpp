@@ -30,6 +30,7 @@ AbstractBuildBlock::AbstractBuildBlock()
       _executionsBuilder(nullptr),
       _stacksBuilder(nullptr),
       _criticalGraph(nullptr),
+      _diskRequests(nullptr),
       _stateHistory(nullptr)
 {
 }
@@ -53,6 +54,9 @@ void AbstractBuildBlock::LoadServices(const block::ServiceList& serviceList)
 
     serviceList.QueryService(kStateHistoryServiceName,
                              reinterpret_cast<void**>(&_stateHistory));
+
+    serviceList.QueryService(kDiskRequestsServiceName,
+                             reinterpret_cast<void**>(&_diskRequests));
 }
 
 uint32_t AbstractBuildBlock::CpuForEvent(const trace::EventValue& event) const

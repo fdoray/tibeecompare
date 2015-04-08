@@ -29,6 +29,7 @@
 // Blocks
 #include "build_blocks/BuildBlock.hpp"
 #include "critical_blocks/CriticalBlock.hpp"
+#include "disk_blocks/DiskBlock.hpp"
 #include "execution_blocks/PunchBlock.hpp"
 #include "execution_blocks/SpecialBlock.hpp"
 #include "stacks_blocks/ProfilerBlock.hpp"
@@ -159,6 +160,14 @@ bool TibeeBuild::run()
     {
         criticalBlock.reset(new critical_blocks::CriticalBlock);
         runner.AddBlock(criticalBlock.get(), nullptr);
+    }
+
+    // Disk block.
+    block::BlockInterface::UP diskBlock;
+    if (!_args.dumpStacks && !_args.stats && !_args.special)
+    {
+        diskBlock.reset(new disk_blocks::DiskBlock);
+        runner.AddBlock(diskBlock.get(), nullptr);
     }
 
     // Linux sched state block.

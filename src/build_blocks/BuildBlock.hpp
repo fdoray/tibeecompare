@@ -23,6 +23,7 @@
 #include "block/AbstractBlock.hpp"
 #include "critical/CriticalGraph.hpp"
 #include "db/Database.hpp"
+#include "disk/DiskRequests.hpp"
 #include "execution/ExecutionsBuilder.hpp"
 #include "notification/Path.hpp"
 #include "quark/StringQuarkDatabase.hpp"
@@ -60,6 +61,9 @@ private:
 
     // The critical graph.
     critical::CriticalGraph _criticalGraph;
+
+    // The disk requests.
+    disk::DiskRequests _diskRequests;
 
     // The state history.
     state::StateHistory _stateHistory;

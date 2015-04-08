@@ -44,11 +44,13 @@ public:
         const stacks::StacksBuilder& stacks,
         const critical::CriticalGraph& graph,
         const state::StateHistory& stateHistory,
+        const disk::DiskRequests& diskRequests,
         state::CurrentState* currentState,
         db::Database* db,
         Execution* execution)
         : stacks(stacks), graph(graph), stateHistory(stateHistory),
-          currentState(currentState), db(db), execution(execution)
+          diskRequests(diskRequests), currentState(currentState),
+          db(db), execution(execution)
     {
         state::AttributePathStr threadsPath { kStateLinux, kStateThreads };
         threadsPathKey = currentState->GetAttributeKeyStr(threadsPath);
@@ -100,8 +102,7 @@ public:
             else if (segment.type() == critical::kWaitBlocked ||
                      segment.type() == critical::kTimer ||
                      segment.type() == critical::kNetwork ||
-                     segment.type() == critical::kUserInput ||
-                     segment.type() == critical::kBlockDevice)
+                     segment.type() == critical::kUserInput)
             {
                 // Update the stack for this thread.
                 if (threads.back().stack == threads.back().cleanStack)
@@ -115,6 +116,48 @@ public:
                     threads.back().stack,
                     critical::GetStatusString(segment.type()));
                 execution->IncrementSample(stackId, segmentDuration);
+            }
+            else if(segment.type() == critical::kBlockDevice)
+            {
+                // Update the stack for this thread.
+                if (threads.back().stack == threads.back().cleanStack)
+                {
+                    threads.back().stack = ConcatenateStacks(
+                        threads.back().cleanStack,
+                        stacks.GetStack(segment.tid(), segment.startTs()));
+                }
+
+                auto stackId = PushOnStack(
+                    threads.back().stack,
+                    critical::GetStatusString(segment.type()));
+
+                // Find disk requests completed during this segment.
+                auto requests = diskRequests.GetRequests(segment.startTs(), segment.endTs());
+
+                double totalBytes = 0;
+                for (const auto& req : requests)
+                    totalBytes += req.size;
+
+                uint64_t totalDuration = 0;
+                for (const auto& req : requests)
+                {
+                    uint64_t length = (static_cast<double>(req.size) / totalBytes) * segmentDuration;
+                    totalDuration += length;
+                    if (totalDuration > segmentDuration) {
+                        length -= (totalDuration - segmentDuration);
+                        totalDuration = segmentDuration;
+                    }
+
+                    auto processName = currentState->CurrentNameForThread(req.tid);
+                    auto processStackId = PushOnStack(stackId, processName);
+
+                    execution->IncrementSample(processStackId, length);
+
+                    if (totalDuration >= segmentDuration)
+                        break;
+                }
+
+                execution->IncrementSample(stackId, segmentDuration - totalDuration);
             }
             else if (segment.type() == critical::kWaitCpu)
             {
@@ -315,6 +358,9 @@ private:
     // State history, to resolve preempted states.
     const state::StateHistory& stateHistory;
 
+    // Disk requests, to resolve block device states.
+    const disk::DiskRequests& diskRequests;
+
     // Current state, to generate keys to query the state history.
     state::CurrentState* currentState;
 
@@ -353,12 +399,14 @@ void ExtractStacks(
     const stacks::StacksBuilder& stacks,
     const critical::CriticalGraph& graph,
     const state::StateHistory& stateHistory,
+    const disk::DiskRequests& diskRequests,
     state::CurrentState* currentState,
     db::Database* db,
     Execution* execution)
 {
     StacksExtractor extractor(
-        stacks, graph, stateHistory, currentState, db, execution);
+        stacks, graph, stateHistory, diskRequests,
+        currentState, db, execution);
     extractor.ExtractStacks(criticalPath, stacks::kEmptyStackId);
 }
 
