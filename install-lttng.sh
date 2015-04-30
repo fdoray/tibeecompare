@@ -32,8 +32,8 @@ wget -O userspace-rcu.tar.gz https://github.com/urcu/userspace-rcu/archive/v0.8.
 wget -O lttng-ust.tar.gz https://github.com/lttng/lttng-ust/archive/v2.6.0.tar.gz
 wget -O babeltrace.tar.gz https://github.com/efficios/babeltrace/archive/v1.2.4.tar.gz
 wget -O lttng-tools.tar.gz https://github.com/lttng/lttng-tools/archive/v2.6.0.tar.gz
-wget -O lttng-modules.tar.gz https://github.com/fdoray/lttng-modules/archive/version2.6.0-addons.tar.gz
-wget -O libunwind.tar.gz https://github.com/fdoray/libunwind/archive/per_thread_cache.tar.gz
+wget -O lttng-modules.tar.gz https://github.com/fdoray/lttng-modules/archive/version2.6.0-addons-tp.tar.gz
+wget -O libunwind.tar.gz https://github.com/fdoray/libunwind/archive/cfa_ret_only.tar.gz
 wget -O lttng-profile.tar.gz https://github.com/fdoray/lttng-profile/archive/master.tar.gz
 wget -O lttng-profile-modules.tar.gz https://github.com/fdoray/lttng-profile-modules/archive/master.tar.gz
 
@@ -87,19 +87,17 @@ sudo ldconfig
 popd
 
 # install lttng-modules with addons
-pushd lttng-modules-version2.6.0-addons
+pushd lttng-modules-version2.6.0-addons-tp
 make -j4
 sudo make modules_install
 sudo mkdir -p /usr/local/bin/
 sudo install control-addons.sh /usr/local/bin/
 sudo sh -c 'echo "search extra updates ubuntu built-in" > /etc/depmod.d/ubuntu.conf'
 sudo depmod -a
-sudo mkdir -p /usr/local/bin/
-sudo install control-addons.sh /usr/local/bin/
 popd
 
 # install libunwind
-pushd libunwind-per_thread_cache
+pushd libunwind-cfa_ret_only
 ./autogen.sh
 ./configure --enable-block-signals=false
 make -j4
