@@ -81,6 +81,9 @@ void ProfilerBlock::AddObservers(
     AddKernelObserver(notificationCenter,
                       Token("exit_syscall"),
                       base::BindObject(&ProfilerBlock::OnSyscallExit, this));
+    AddKernelObserver(notificationCenter,
+                      Token("syscall_latency"),
+                      base::BindObject(&ProfilerBlock::OnSyscallLatency, this));
 }
 
 void ProfilerBlock::OnBaddr(const trace::EventValue& event)
@@ -144,6 +147,20 @@ void ProfilerBlock::OnSyscallEntry(const trace::EventValue& event)
 void ProfilerBlock::OnSyscallExit(const trace::EventValue& event)
 {
     thread_t tid = ThreadForEvent(event);
+    Stacks()->EndSytemCall(tid);
+}
+
+void ProfilerBlock::OnSyscallLatency(const trace::EventValue& event)
+{
+    thread_t tid = ThreadForEvent(event);
+
+    auto duration = event.getEventField("duration")->AsULong();
+
+    auto ts = State()->timestamp();
+
+    Stacks()->SetTimestamp(ts - duration);
+    Stacks()->StartSystemCall(tid, "syscall");
+    Stacks()->SetTimestamp(ts);
     Stacks()->EndSytemCall(tid);
 }
 

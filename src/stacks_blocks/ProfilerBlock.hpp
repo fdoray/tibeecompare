@@ -50,6 +50,8 @@ private:
     void OnSyscallEntry(const trace::EventValue& event);
     void OnSyscallExit(const trace::EventValue& event);
 
+    void OnSyscallLatency(const trace::EventValue& event);
+
     void ReadStack(const trace::EventValue& event, std::vector<std::string>* stack);
 
     // Dump stacks to std output.
